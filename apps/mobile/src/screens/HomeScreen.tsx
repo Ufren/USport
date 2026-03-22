@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,40 +6,40 @@ import {
   StyleSheet,
   RefreshControl,
 } from "react-native";
+import { getUserDisplayName } from "@usport/shared";
+
 import { useUserStore } from "../store/userStore";
 
-interface Activity {
+interface ActivityCard {
   id: number;
   title: string;
   time: string;
-  cover: string;
 }
 
-interface Venue {
+interface VenueCard {
   id: number;
   name: string;
   address: string;
-  image: string;
 }
 
 export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [venues, setVenues] = useState<Venue[]>([]);
+  const [activities, setActivities] = useState<ActivityCard[]>([]);
+  const [venues, setVenues] = useState<VenueCard[]>([]);
   const userInfo = useUserStore((state) => state.userInfo);
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, []);
 
   const loadData = async () => {
     setActivities([
-      { id: 1, title: "周末篮球赛", time: "2024-01-20 14:00", cover: "" },
-      { id: 2, title: "游泳公开课", time: "2024-01-21 10:00", cover: "" },
+      { id: 1, title: "周末篮球赛", time: "2024-01-20 14:00" },
+      { id: 2, title: "游泳公开课", time: "2024-01-21 10:00" },
     ]);
     setVenues([
-      { id: 1, name: "篮球馆A", address: "朝阳区建国路88号", image: "" },
-      { id: 2, name: "游泳馆B", address: "海淀区中关村大街100号", image: "" },
+      { id: 1, name: "篮球馆 A", address: "朝阳区建国路 88 号" },
+      { id: 2, name: "游泳馆 B", address: "海淀区中关村大街 100 号" },
     ]);
   };
 
@@ -58,7 +58,7 @@ export default function HomeScreen() {
     >
       <View style={styles.header}>
         <Text style={styles.greeting}>
-          你好, {userInfo?.nickname || userInfo?.username || "游客"}
+          你好，{getUserDisplayName(userInfo)}
         </Text>
       </View>
 

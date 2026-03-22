@@ -1,14 +1,16 @@
 import { request, showError, showSuccess } from "../utils/helpers";
 import type { ApiResponse } from "../types/api";
 
-export const api = {
-  request,
+interface ApiService {
+  healthCheck: () => Promise<ApiResponse<{ status: string }>>;
+  showError: (message: string) => void;
+  showSuccess: (message: string) => void;
+}
 
-  healthCheck(): Promise<ApiResponse<{ status: string }>> {
+export const api: ApiService = {
+  healthCheck() {
     return request.get<{ status: string }>("/health");
   },
-
   showError,
-
   showSuccess,
 };

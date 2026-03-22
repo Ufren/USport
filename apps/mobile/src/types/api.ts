@@ -1,5 +1,1 @@
-export interface ApiResponse<T = any> {
-  code: number;
-  message: string;
-  data: T;
-}
+export type { ApiResponse, QueryParams } from "@usport/shared";

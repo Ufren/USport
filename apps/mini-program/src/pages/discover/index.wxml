@@ -1,0 +1,120 @@
+<view class="container discover-page">
+  <view class="hero-panel">
+    <text class="hero-eyebrow">USport / 同城运动成局</text>
+    <text class="hero-title">{{cityName}}今晚，优先看真正能成局的局</text>
+    <text class="hero-subtitle">把高履约主办方、合适时段和稳定场馆放进同一个推荐面板。</text>
+
+    <view class="metric-list">
+      <view class="metric-card" wx:for="{{metrics}}" wx:key="id">
+        <text class="metric-value">{{item.value}}</text>
+        <text class="metric-label">{{item.label}}</text>
+        <text class="metric-hint">{{item.hint}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="featured-card" bindtap="onActivityTap" data-title="{{featuredActivity.title}}">
+    <view class="featured-top">
+      <text class="featured-status">报名中</text>
+      <text class="featured-sport">{{featuredActivity.sportLabel}}</text>
+    </view>
+    <text class="featured-title">{{featuredActivity.title}}</text>
+    <text class="featured-subtitle">{{featuredActivity.subtitle}}</text>
+    <text class="featured-meta">{{featuredActivity.startTimeLabel}}</text>
+    <text class="featured-meta">{{featuredActivity.district}} · {{featuredActivity.venueName}}</text>
+    <text class="featured-meta">{{featuredActivity.participantSummary}}</text>
+    <view class="featured-tag-list">
+      <text class="featured-tag" wx:for="{{featuredActivity.tags}}" wx:key="*this">{{item}}</text>
+    </view>
+    <view class="featured-footer">
+      <view class="featured-host">
+        <text class="featured-host-name">{{featuredActivity.hostName}}</text>
+        <text class="featured-host-badge">{{featuredActivity.hostBadge}}</text>
+      </view>
+      <view class="featured-cta">{{featuredActivity.actionLabel}}</view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">今晚优先</text>
+      <text class="section-subtitle">先筛时间和运动，再看真正能成局的局。</text>
+    </view>
+    <scroll-view class="filter-scroll" scroll-x="true" show-scrollbar="false">
+      <view class="filter-row">
+        <view
+          class="filter-chip {{activeFilterId === item.id ? 'filter-chip--active' : ''}}"
+          wx:for="{{filters}}"
+          wx:key="id"
+          bindtap="onFilterTap"
+          data-filter-id="{{item.id}}"
+        >
+          {{item.label}}
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">推荐活动</text>
+      <text class="section-subtitle">保留更清晰门槛、更真实时间地点和更稳定的履约表现。</text>
+    </view>
+    <view class="activity-list">
+      <view
+        class="activity-item"
+        wx:for="{{activities}}"
+        wx:key="id"
+        bindtap="onActivityTap"
+        data-title="{{item.title}}"
+      >
+        <view class="activity-item-top">
+          <view>
+            <text class="activity-title">{{item.title}}</text>
+            <text class="activity-subtitle">{{item.subtitle}}</text>
+          </view>
+          <text class="activity-status {{item.status === 'full' ? 'activity-status--warning' : ''}}">
+            {{item.status === 'full' ? '名额紧张' : '报名中'}}
+          </text>
+        </view>
+        <text class="activity-meta">{{item.startTimeLabel}}</text>
+        <text class="activity-meta">{{item.district}} · {{item.venueName}}</text>
+        <text class="activity-meta">{{item.feeLabel}} · {{item.participantSummary}}</text>
+        <view class="activity-footer">
+          <text class="activity-attendance">{{item.attendanceLabel}}</text>
+          <text class="activity-action">{{item.actionLabel}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">推荐场馆</text>
+      <text class="section-subtitle">不是只看距离，更看你今天这局适不适合在这里打。</text>
+    </view>
+    <scroll-view class="venue-scroll" scroll-x="true" show-scrollbar="false">
+      <view class="venue-row">
+        <view
+          class="venue-card"
+          wx:for="{{venues}}"
+          wx:key="id"
+          bindtap="onVenueTap"
+          data-name="{{item.name}}"
+        >
+          <view class="venue-cover">
+            <text class="venue-name">{{item.name}}</text>
+            <text class="venue-surface">{{item.surfaceLabel}}</text>
+          </view>
+          <view class="venue-body">
+            <text class="venue-meta">{{item.district}} · {{item.commuteLabel}}</text>
+            <text class="venue-vibe">{{item.vibe}}</text>
+            <view class="venue-tag-list">
+              <text class="venue-tag" wx:for="{{item.features}}" wx:key="*this">{{item}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</view>

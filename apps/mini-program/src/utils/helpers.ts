@@ -1,3 +1,5 @@
+﻿import type { QueryParams } from "@usport/shared";
+
 import { API_BASE_URL, REQUEST_TIMEOUT } from "./constants";
 import type { ApiResponse, RequestOptions } from "../types/api";
 
@@ -16,15 +18,25 @@ class Request {
       "Content-Type": "application/json",
     };
     if (token) {
-      header["Authorization"] = `Bearer ${token}`;
+      header.Authorization = `Bearer ${token}`;
     }
     return header;
   }
 
-  private buildUrl(url: string, query?: Record<string, string>): string {
-    if (!query) return url;
-    const params = new URLSearchParams(query);
-    return `${url}?${params.toString()}`;
+  private buildUrl(url: string, query?: QueryParams): string {
+    if (!query) {
+      return url;
+    }
+
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+
+    const queryString = params.toString();
+    return queryString ? `${url}?${queryString}` : url;
   }
 
   async request<T>(options: RequestOptions): Promise<ApiResponse<T>> {
@@ -33,10 +45,14 @@ class Request {
 
       const fullUrl = this.buildUrl(options.url, options.query);
 
-      wx.request({
+      wx.request<ApiResponse<T>>({
         url: `${this.baseURL}${fullUrl}`,
         method: options.method || "GET",
-        data: options.data,
+        data: options.data as
+          | string
+          | WechatMiniprogram.IAnyObject
+          | ArrayBuffer
+          | undefined,
         header: {
           ...this.getAuthHeader(),
           ...options.header,
@@ -46,16 +62,16 @@ class Request {
           wx.hideLoading();
           if (res.statusCode >= 200 && res.statusCode < 300) {
             resolve(res.data as ApiResponse<T>);
-          } else if (res.statusCode === 401) {
+            return;
+          }
+
+          if (res.statusCode === 401) {
             wx.navigateTo({ url: "/pages/login/login" });
             reject(new Error("Unauthorized"));
-          } else {
-            reject(
-              new Error(
-                (res.data as ApiResponse<any>)?.message || "Request failed",
-              ),
-            );
+            return;
           }
+
+          reject(new Error(res.data?.message || "Request failed"));
         },
         fail: (err) => {
           wx.hideLoading();
@@ -71,32 +87,32 @@ class Request {
 
   get<T>(
     url: string,
-    data?: any,
-    query?: Record<string, string>,
+    data?: unknown,
+    query?: QueryParams,
   ): Promise<ApiResponse<T>> {
     return this.request<T>({ url, method: "GET", data, query });
   }
 
   post<T>(
     url: string,
-    data?: any,
-    query?: Record<string, string>,
+    data?: unknown,
+    query?: QueryParams,
   ): Promise<ApiResponse<T>> {
     return this.request<T>({ url, method: "POST", data, query });
   }
 
   put<T>(
     url: string,
-    data?: any,
-    query?: Record<string, string>,
+    data?: unknown,
+    query?: QueryParams,
   ): Promise<ApiResponse<T>> {
     return this.request<T>({ url, method: "PUT", data, query });
   }
 
   delete<T>(
     url: string,
-    data?: any,
-    query?: Record<string, string>,
+    data?: unknown,
+    query?: QueryParams,
   ): Promise<ApiResponse<T>> {
     return this.request<T>({ url, method: "DELETE", data, query });
   }
@@ -130,13 +146,14 @@ export function formatTime(date: Date): string {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-export function debounce<T extends (...args: any[]) => any>(
-  func: T,
+export function debounce<TArgs extends unknown[]>(
+  func: (...args: TArgs) => void,
   wait: number,
-): (...args: Parameters<T>) => void {
-  let timeout: number | undefined;
-  return function (this: any, ...args: Parameters<T>) {
+): (...args: TArgs) => void {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+
+  return function (...args: TArgs) {
     clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), wait);
+    timeout = setTimeout(() => func(...args), wait);
   };
 }

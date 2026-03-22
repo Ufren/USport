@@ -1,14 +1,17 @@
-import React from "react";
+﻿import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import {
+  useNavigation,
+  type NavigationProp,
+  type ParamListBase,
+} from "@react-navigation/native";
+import { getUserDisplayName, getUserHandle } from "@usport/shared";
+
 import { useUserStore } from "../store/userStore";
 import { removeToken } from "../utils/storage";
 
-type Props = {
-  navigation: NativeStackNavigationProp<any>;
-};
-
-export default function UserScreen({ navigation }: Props) {
+export default function UserScreen() {
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const userInfo = useUserStore((state) => state.userInfo);
   const logout = useUserStore((state) => state.logout);
 
@@ -39,23 +42,19 @@ export default function UserScreen({ navigation }: Props) {
       <View style={styles.header}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>
-            {(userInfo?.nickname || userInfo?.username || "U")
-              .charAt(0)
-              .toUpperCase()}
+            {getUserDisplayName(userInfo, "U").charAt(0).toUpperCase()}
           </Text>
         </View>
         <View style={styles.userInfo}>
-          <Text style={styles.nickname}>
-            {userInfo?.nickname || userInfo?.username || "游客"}
-          </Text>
-          <Text style={styles.username}>@{userInfo?.username || "guest"}</Text>
+          <Text style={styles.nickname}>{getUserDisplayName(userInfo)}</Text>
+          <Text style={styles.username}>{getUserHandle(userInfo)}</Text>
         </View>
       </View>
 
       <View style={styles.menu}>
-        {menuItems.map((item, index) => (
+        {menuItems.map((item) => (
           <TouchableOpacity
-            key={index}
+            key={item.label}
             style={styles.menuItem}
             onPress={item.onPress}
           >

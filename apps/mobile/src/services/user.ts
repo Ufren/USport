@@ -3,7 +3,9 @@ import type { UserInfo, LoginResult } from "../types/user";
 
 export const userApi = {
   async wechatLogin(code: string): Promise<LoginResult> {
-    return httpClient.post<LoginResult>("/users/wechat_login", {}, { code });
+    return httpClient.post<LoginResult>("/users/wechat_login", undefined, {
+      params: { code },
+    });
   },
 
   async phoneLogin(code: string): Promise<LoginResult> {

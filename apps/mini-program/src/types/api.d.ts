@@ -1,26 +1,16 @@
-export interface ApiResponse<T = any> {
-  code: number;
-  message: string;
-  data: T;
-}
+﻿import type {
+  ApiResponse,
+  LoginResult,
+  QueryParams,
+  UserInfo,
+} from "@usport/shared";
+
+export type { ApiResponse, LoginResult, UserInfo };
 
 export interface RequestOptions {
   url: string;
   method?: "GET" | "POST" | "PUT" | "DELETE";
-  data?: any;
+  data?: unknown;
+  query?: QueryParams;
   header?: Record<string, string>;
-}
-
-export interface UserInfo {
-  id: number;
-  username: string;
-  nickname?: string;
-  avatar?: string;
-  email: string;
-  phone?: string;
-}
-
-export interface LoginResult {
-  token: string;
-  user: UserInfo;
 }

@@ -1,3 +1,5 @@
+import type { UserProfile } from "../types";
+
 export function formatDate(
   date: string | Date,
   format: string = "YYYY-MM-DD",
@@ -27,37 +29,46 @@ export function parseJSON<T>(json: string, defaultValue: T): T {
   }
 }
 
-export function toString(value: any): string {
-  if (value === null || value === undefined) return "";
+export function toString(value: unknown): string {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
   return String(value);
 }
 
-export function toNumber(value: any, defaultValue: number = 0): number {
+export function toNumber(value: unknown, defaultValue: number = 0): number {
   const num = Number(value);
-  return isNaN(num) ? defaultValue : num;
+  return Number.isNaN(num) ? defaultValue : num;
 }
 
-export function debounce<T extends (...args: any[]) => any>(
-  func: T,
+export function debounce<TArgs extends unknown[]>(
+  func: (...args: TArgs) => void,
   wait: number,
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
-  return (...args: Parameters<T>) => {
-    if (timeout) clearTimeout(timeout);
+): (...args: TArgs) => void {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+
+  return (...args: TArgs) => {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
     timeout = setTimeout(() => func(...args), wait);
   };
 }
 
-export function throttle<T extends (...args: any[]) => any>(
-  func: T,
+export function throttle<TArgs extends unknown[]>(
+  func: (...args: TArgs) => void,
   limit: number,
-): (...args: Parameters<T>) => void {
-  let inThrottle: boolean;
-  return (...args: Parameters<T>) => {
+): (...args: TArgs) => void {
+  let inThrottle = false;
+
+  return (...args: TArgs) => {
     if (!inThrottle) {
       func(...args);
       inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
+      setTimeout(() => {
+        inThrottle = false;
+      }, limit);
     }
   };
 }
@@ -68,4 +79,38 @@ export function generateUUID(): string {
     const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
+}
+
+export function getUserDisplayName(
+  user: Pick<UserProfile, "nickname" | "phone" | "openid"> | null | undefined,
+  fallback: string = "游客",
+): string {
+  return user?.nickname || user?.phone || user?.openid || fallback;
+}
+
+export function getUserHandle(
+  user: Pick<UserProfile, "phone" | "openid"> | null | undefined,
+  fallback: string = "guest",
+): string {
+  const value = user?.phone || user?.openid || fallback;
+  return value.startsWith("@") ? value : `@${value}`;
+}
+
+export function getErrorMessage(
+  error: unknown,
+  fallback: string = "操作失败",
+): string {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallback;
+}
+
+export function getUserInitial(
+  user: Pick<UserProfile, "nickname" | "phone" | "openid"> | null | undefined,
+  fallback: string = "U",
+): string {
+  const displayName = getUserDisplayName(user, fallback).trim();
+  return displayName.charAt(0).toUpperCase() || fallback;
 }

@@ -1,0 +1,37 @@
+<view class="container auth-page">
+  <view class="auth-hero">
+    <text class="auth-eyebrow">USport / 真实成局优先</text>
+    <text class="auth-title">先找到今晚真正能一起运动的人</text>
+    <text class="auth-subtitle">不是泛社交，也不是场馆黄页。我们优先把搭子、场地和时段拼成一局。</text>
+  </view>
+
+  <view class="auth-point-list">
+    <view class="auth-point-card" wx:for="{{valuePoints}}" wx:key="id">
+      <text class="auth-point-title">{{item.title}}</text>
+      <text class="auth-point-text">{{item.description}}</text>
+    </view>
+  </view>
+
+  <view class="auth-action-panel">
+    <button class="wechat-btn" bindtap="onWechatLogin" loading="{{loading}}" disabled="{{loading || !agreementAccepted}}">
+      微信一键登录
+    </button>
+
+    <button
+      class="phone-btn"
+      open-type="getPhoneNumber"
+      bindgetphonenumber="onGetPhoneNumber"
+      loading="{{loading}}"
+      disabled="{{loading || !agreementAccepted}}"
+    >
+      手机号登录
+    </button>
+
+    <view class="agreement-row" bindtap="onToggleAgreement">
+      <view class="agreement-checkbox {{agreementAccepted ? 'agreement-checkbox--checked' : ''}}">
+        <text wx:if="{{agreementAccepted}}" class="agreement-checkmark">✓</text>
+      </view>
+      <text class="agreement-text">我已阅读并同意《用户协议》与《隐私政策》</text>
+    </view>
+  </view>
+</view>

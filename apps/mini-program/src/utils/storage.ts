@@ -1,8 +1,13 @@
+﻿import type { UserInfo } from "@usport/shared";
+
 import { STORAGE_KEYS } from "./constants";
 
-export function getStorage<T = any>(key: string): T | null {
+export function getStorage<T = unknown>(key: string): T | null {
   const value = wx.getStorageSync(key);
-  if (!value) return null;
+  if (!value) {
+    return null;
+  }
+
   try {
     return JSON.parse(value) as T;
   } catch {
@@ -10,7 +15,7 @@ export function getStorage<T = any>(key: string): T | null {
   }
 }
 
-export function setStorage<T = any>(key: string, value: T): void {
+export function setStorage<T = unknown>(key: string, value: T): void {
   const stringValue = typeof value === "string" ? value : JSON.stringify(value);
   wx.setStorageSync(key, stringValue);
 }
@@ -35,11 +40,11 @@ export function removeToken(): void {
   removeStorage(STORAGE_KEYS.TOKEN);
 }
 
-export function getUserInfo(): any {
-  return getStorage(STORAGE_KEYS.USER_INFO);
+export function getUserInfo(): UserInfo | null {
+  return getStorage<UserInfo>(STORAGE_KEYS.USER_INFO);
 }
 
-export function setUserInfo(userInfo: any): void {
+export function setUserInfo(userInfo: UserInfo): void {
   setStorage(STORAGE_KEYS.USER_INFO, userInfo);
 }
 

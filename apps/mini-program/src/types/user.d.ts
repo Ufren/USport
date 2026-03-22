@@ -1,3 +1,5 @@
+﻿import type { UserInfo } from "@usport/shared";
+
 export interface UserState {
   userInfo: UserInfo | null;
   token: string | null;
@@ -5,11 +7,4 @@ export interface UserState {
   loading: boolean;
 }
 
-export interface UserInfo {
-  id: number;
-  username: string;
-  nickname?: string;
-  avatar?: string;
-  email: string;
-  phone?: string;
-}
+export type { UserInfo };

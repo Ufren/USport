@@ -1,49 +1,79 @@
-type SetStateFunc<S> = (prevState: S) => Partial<S>;
+﻿import type { UserInfo } from "@usport/shared";
 
-class Store<S extends Record<string, any>> {
-  private state: S;
-  private subscribers: Set<(state: S) => void> = new Set();
-
-  constructor(initialState: S) {
-    this.state = initialState;
-  }
-
-  getState(): S {
-    return this.state;
-  }
-
-  setState(updater: Partial<S> | SetStateFunc<S>): void {
-    const prevState = this.state;
-    const nextPartialState =
-      typeof updater === "function" ? updater(prevState) : updater;
-    this.state = { ...prevState, ...nextPartialState };
-    this.notify();
-  }
-
-  subscribe(listener: (state: S) => void): () => void {
-    this.subscribers.add(listener);
-    return () => this.subscribers.delete(listener);
-  }
-
-  private notify(): void {
-    this.subscribers.forEach((listener) => listener(this.state));
-  }
+interface SessionState {
+  token: string | null;
+  userInfo: UserInfo | null;
 }
 
-export { Store };
+interface StoreState {
+  session: SessionState;
+}
 
 interface StoreInstance {
-  dispatch: (action: string, payload?: any) => void;
+  dispatch: (action: string, payload?: unknown) => void;
+  getState: () => StoreState;
+  subscribe: (listener: (state: StoreState) => void) => () => void;
 }
 
+let state: StoreState = {
+  session: {
+    token: null,
+    userInfo: null,
+  },
+};
+
+const subscribers = new Set<(nextState: StoreState) => void>();
 let storeInstance: StoreInstance | null = null;
 
+function notify(): void {
+  subscribers.forEach((listener) => listener(state));
+}
+
+function setState(nextState: Partial<StoreState>): void {
+  state = {
+    ...state,
+    ...nextState,
+  };
+  notify();
+}
+
+function dispatch(action: string, payload?: unknown): void {
+  switch (action) {
+    case "session/hydrate": {
+      const session = payload as Partial<SessionState> | undefined;
+      setState({
+        session: {
+          token: session?.token ?? null,
+          userInfo: session?.userInfo ?? null,
+        },
+      });
+      break;
+    }
+    case "session/clear": {
+      setState({
+        session: {
+          token: null,
+          userInfo: null,
+        },
+      });
+      break;
+    }
+    default:
+      break;
+  }
+}
+
 export function initStore(): StoreInstance {
-  if (storeInstance) return storeInstance;
+  if (storeInstance) {
+    return storeInstance;
+  }
 
   storeInstance = {
-    dispatch(action: string, payload?: any) {
-      console.log("dispatch:", action, payload);
+    dispatch,
+    getState: () => state,
+    subscribe(listener) {
+      subscribers.add(listener);
+      return () => subscribers.delete(listener);
     },
   };
 

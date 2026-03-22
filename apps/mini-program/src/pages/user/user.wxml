@@ -1,9 +1,9 @@
-<view class="container">
+﻿<view class="container">
   <view class="user-header">
     <image class="avatar" src="{{userInfo.avatar || '/assets/images/default-avatar.png'}}" mode="aspectFill" />
     <view class="user-info">
-      <text class="nickname">{{userInfo.nickname || userInfo.username}}</text>
-      <text class="username">@{{userInfo.username}}</text>
+      <text class="nickname">{{userInfo.nickname || userInfo.phone || userInfo.openid || '游客'}}</text>
+      <text class="username">@{{userInfo.phone || userInfo.openid || 'guest'}}</text>
     </view>
     <button class="edit-btn" size="mini" bindtap="onEditProfile">编辑</button>
   </view>

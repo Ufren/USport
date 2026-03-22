@@ -4,17 +4,14 @@ import axios, {
   InternalAxiosRequestConfig,
   AxiosResponse,
 } from "axios";
-import {
-  API_BASE_URL,
-  REQUEST_TIMEOUT,
-  STORAGE_KEYS,
-} from "../utils/constants";
+import type { ApiResponse, QueryParams } from "@usport/shared";
 
-interface ApiResponse<T = any> {
-  code: number;
-  message: string;
-  data: T;
-}
+import { API_BASE_URL, REQUEST_TIMEOUT } from "../utils/constants";
+import { getToken } from "./storage";
+
+type RequestConfig = {
+  params?: QueryParams;
+};
 
 class HttpClient {
   private client: AxiosInstance;
@@ -29,8 +26,8 @@ class HttpClient {
     });
 
     this.client.interceptors.request.use(
-      (config: InternalAxiosRequestConfig) => {
-        const token = this.getToken();
+      async (config: InternalAxiosRequestConfig) => {
+        const token = await getToken();
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -40,30 +37,21 @@ class HttpClient {
     );
 
     this.client.interceptors.response.use(
-      (response: AxiosResponse<ApiResponse>) => {
+      (response: AxiosResponse<ApiResponse<unknown>>) => {
         const { data } = response;
         if (data.code !== 0) {
           return Promise.reject(new Error(data.message || "Request failed"));
         }
         return response;
       },
-      (error: AxiosError) => {
-        if (error.response?.status === 401) {
-          console.log("Unauthorized, redirect to login");
-        }
-        return Promise.reject(error);
-      },
+      (error: AxiosError) => Promise.reject(error),
     );
-  }
-
-  private getToken(): string | null {
-    return null;
   }
 
   async get<T>(
     url: string,
-    params?: any,
-    config?: { params?: Record<string, string> },
+    params?: QueryParams,
+    config?: RequestConfig,
   ): Promise<T> {
     const response = await this.client.get<ApiResponse<T>>(url, {
       params,
@@ -74,19 +62,19 @@ class HttpClient {
 
   async post<T>(
     url: string,
-    data?: any,
-    config?: { params?: Record<string, string> },
+    data?: unknown,
+    config?: RequestConfig,
   ): Promise<T> {
     const response = await this.client.post<ApiResponse<T>>(url, data, config);
     return response.data.data;
   }
 
-  async put<T>(url: string, data?: any): Promise<T> {
+  async put<T>(url: string, data?: unknown): Promise<T> {
     const response = await this.client.put<ApiResponse<T>>(url, data);
     return response.data.data;
   }
 
-  async delete<T>(url: string, params?: any): Promise<T> {
+  async delete<T>(url: string, params?: QueryParams): Promise<T> {
     const response = await this.client.delete<ApiResponse<T>>(url, { params });
     return response.data.data;
   }

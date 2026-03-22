@@ -1,27 +1,24 @@
-import { initStore } from "./store";
+﻿import { initStore } from "./store";
+import { getToken, getUserInfo } from "./utils/storage";
 
 App<IAppOption>({
   globalData: {
     userInfo: null,
+    token: null,
   },
   store: initStore(),
   onLaunch() {
     this.checkLoginStatus();
   },
   checkLoginStatus() {
-    const token = wx.getStorageSync("token");
-    if (token) {
-      this.store.dispatch("user/getUserInfo");
+    const token = getToken();
+    if (!token) {
+      return;
     }
+
+    const userInfo = getUserInfo();
+    this.globalData.token = token;
+    this.globalData.userInfo = userInfo;
+    this.store.dispatch("session/hydrate", { token, userInfo });
   },
 });
-
-wx.utils = {
-  getStorage: (key: string) => wx.getStorageSync(key),
-  setStorage: (key: string, value: any) => wx.setStorageSync(key, value),
-  removeStorage: (key: string) => wx.removeStorageSync(key),
-};
-
-wx.api = {
-  baseURL: "http://localhost:8080/api/v1",
-};

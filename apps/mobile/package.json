@@ -7,9 +7,11 @@
     "dev": "react-native start",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
+    "build": "pnpm run typecheck",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write \"**/*.{ts,tsx,json}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "echo No automated tests configured yet"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.21.0",

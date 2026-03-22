@@ -4,10 +4,12 @@
   "private": true,
   "description": "USport WeChat Mini Program",
   "scripts": {
-    "dev": "miniprogram dev",
-    "build": "miniprogram build",
+    "dev": "tsc --watch --noEmit --preserveWatchOutput",
+    "build": "pnpm run typecheck",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
-    "format": "prettier --write \"**/*.{ts,tsx,js,json}\""
+    "format": "prettier --write \"**/*.{ts,tsx,js,json}\"",
+    "test": "echo No automated tests configured yet"
   },
   "dependencies": {
     "@usport/shared": "workspace:*"

@@ -1,4 +1,4 @@
-Page<IPageOption>({
+﻿Page({
   data: {
     activities: [
       {
@@ -17,25 +17,25 @@ Page<IPageOption>({
     venues: [
       {
         id: 1,
-        name: "篮球馆A",
-        address: "朝阳区建国路88号",
+        name: "篮球馆 A",
+        address: "朝阳区建国路 88 号",
         image: "/assets/images/venue1.png",
       },
       {
         id: 2,
-        name: "游泳馆B",
-        address: "海淀区中关村大街100号",
+        name: "游泳馆 B",
+        address: "海淀区中关村大街 100 号",
         image: "/assets/images/venue2.png",
       },
       {
         id: 3,
-        name: "足球场C",
+        name: "足球场 C",
         address: "海淀区五道口",
         image: "/assets/images/venue3.png",
       },
       {
         id: 4,
-        name: "羽毛球馆D",
+        name: "羽毛球馆 D",
         address: "朝阳区望京",
         image: "/assets/images/venue4.png",
       },
@@ -46,12 +46,8 @@ Page<IPageOption>({
     this.loadData();
   },
 
-  onShow() {
-    console.log("index page show");
-  },
-
   loadData() {
-    console.log("load index data");
+    return undefined;
   },
 
   onPullDownRefresh() {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,14 +7,15 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { getErrorMessage, getUserDisplayName } from "@usport/shared";
+
+import type { RootStackParamList } from "../../App";
 import { userApi } from "../services/user";
 import { setToken as setStorageToken } from "../utils/storage";
 import { useUserStore } from "../store/userStore";
 
-type Props = {
-  navigation: NativeStackNavigationProp<any>;
-};
+type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 export default function LoginScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
@@ -30,11 +31,11 @@ export default function LoginScreen({ navigation }: Props) {
       setUserInfo(result.user);
       Alert.alert(
         result.is_new_user ? "注册成功" : "登录成功",
-        `欢迎 ${result.user.nickname || "用户"}`,
+        `欢迎 ${getUserDisplayName(result.user, "用户")}`,
       );
       navigation.goBack();
-    } catch (error: any) {
-      Alert.alert("登录失败", error.message || "请重试");
+    } catch (error: unknown) {
+      Alert.alert("登录失败", getErrorMessage(error, "请重试"));
     } finally {
       setLoading(false);
     }
@@ -49,11 +50,11 @@ export default function LoginScreen({ navigation }: Props) {
       setUserInfo(result.user);
       Alert.alert(
         result.is_new_user ? "注册成功" : "登录成功",
-        `欢迎 ${result.user.nickname || "用户"}`,
+        `欢迎 ${getUserDisplayName(result.user, "用户")}`,
       );
       navigation.goBack();
-    } catch (error: any) {
-      Alert.alert("登录失败", error.message || "请重试");
+    } catch (error: unknown) {
+      Alert.alert("登录失败", getErrorMessage(error, "请重试"));
     } finally {
       setLoading(false);
     }
@@ -74,7 +75,7 @@ export default function LoginScreen({ navigation }: Props) {
             <ActivityIndicator color="#fff" />
           ) : (
             <>
-              <Text style={styles.buttonIcon}>💬</Text>
+              <Text style={styles.buttonIcon}>微</Text>
               <Text style={styles.wechatButtonText}>微信登录</Text>
             </>
           )}
@@ -89,7 +90,7 @@ export default function LoginScreen({ navigation }: Props) {
             <ActivityIndicator color="#1890ff" />
           ) : (
             <>
-              <Text style={styles.buttonIcon}>📱</Text>
+              <Text style={styles.buttonIcon}>号</Text>
               <Text style={styles.phoneButtonText}>手机号登录</Text>
             </>
           )}

@@ -1,0 +1,120 @@
+.auth-page {
+  gap: 28rpx;
+  padding: 36rpx 28rpx 48rpx;
+}
+
+.auth-hero {
+  display: flex;
+  gap: 20rpx;
+}
+
+.auth-eyebrow {
+  color: #156b52;
+  font-size: 22rpx;
+  font-weight: 700;
+  letter-spacing: 1rpx;
+}
+
+.auth-title {
+  color: #131714;
+  font-size: 56rpx;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.auth-subtitle {
+  color: #2d3631;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
+.auth-point-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.auth-point-card {
+  display: flex;
+  gap: 8rpx;
+  padding: 28rpx;
+  background: #ffffff;
+  border: 1rpx solid #dce2dd;
+  border-radius: 28rpx;
+}
+
+.auth-point-title {
+  color: #131714;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.auth-point-text {
+  color: #66726c;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.auth-action-panel {
+  display: flex;
+  margin-top: auto;
+  gap: 16rpx;
+}
+
+.wechat-btn,
+.phone-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 96rpx;
+  border-radius: 999rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.wechat-btn {
+  background: #156b52;
+  color: #ffffff;
+}
+
+.phone-btn {
+  background: #ffffff;
+  color: #131714;
+  border: 1rpx solid #b8c1bb;
+}
+
+.agreement-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding-top: 8rpx;
+}
+
+.agreement-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42rpx;
+  height: 42rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid #b8c1bb;
+  background: #ffffff;
+}
+
+.agreement-checkbox--checked {
+  background: #156b52;
+  border-color: #156b52;
+}
+
+.agreement-checkmark {
+  color: #ffffff;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.agreement-text {
+  flex: 1;
+  color: #2d3631;
+  font-size: 22rpx;
+  line-height: 1.5;
+}

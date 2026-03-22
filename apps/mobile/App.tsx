@@ -1,13 +1,27 @@
 import React from "react";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View,
+  type ViewStyle,
+} from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Text, View } from "react-native";
+import {
+  usportColors,
+  usportRadius,
+  usportSpacing,
+  usportTypography,
+} from "@usport/shared";
 
-import HomeScreen from "./src/screens/HomeScreen";
-import UserScreen from "./src/screens/UserScreen";
-import LoginScreen from "./src/screens/LoginScreen";
+import MessagesScreen from "./src/screens/MessagesScreen";
+import DiscoverScreen from "./src/screens/DiscoverScreen";
+import LoginEntryScreen from "./src/screens/LoginEntryScreen";
+import ProfileScreen from "./src/screens/ProfileScreen";
+import { useBootstrapSession } from "./src/hooks/useBootstrapSession";
 
 export type RootStackParamList = {
   Main: undefined;
@@ -16,17 +30,23 @@ export type RootStackParamList = {
 
 export type MainTabParamList = {
   Home: undefined;
+  Messages: undefined;
   User: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-function TabIcon({ name, focused }: { name: string; focused: boolean }) {
+function TabLabel({ label, focused }: { label: string; focused: boolean }) {
+  const indicatorStyle: ViewStyle = focused
+    ? styles.tabIndicatorActive
+    : styles.tabIndicator;
+
   return (
-    <View style={{ alignItems: "center" }}>
-      <Text style={{ color: focused ? "#1890ff" : "#999", fontSize: 12 }}>
-        {name}
+    <View style={styles.tabLabelWrap}>
+      <View style={indicatorStyle} />
+      <Text style={[styles.tabLabel, focused && styles.tabLabelActive]}>
+        {label}
       </Text>
     </View>
   );
@@ -37,26 +57,34 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { height: 60, paddingBottom: 8 },
+        tabBarShowLabel: false,
+        tabBarStyle: styles.tabBar,
       }}
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={DiscoverScreen}
         options={{
-          tabBarLabel: "首页",
           tabBarIcon: ({ focused }) => (
-            <TabIcon name="首页" focused={focused} />
+            <TabLabel label="发现" focused={focused} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Messages"
+        component={MessagesScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabLabel label="消息" focused={focused} />
           ),
         }}
       />
       <Tab.Screen
         name="User"
-        component={UserScreen}
+        component={ProfileScreen}
         options={{
-          tabBarLabel: "我的",
           tabBarIcon: ({ focused }) => (
-            <TabIcon name="我的" focused={focused} />
+            <TabLabel label="我的" focused={focused} />
           ),
         }}
       />
@@ -64,17 +92,93 @@ function MainTabs() {
   );
 }
 
+function BootScreen() {
+  return (
+    <View style={styles.bootContainer}>
+      <Text style={styles.bootBrand}>USport</Text>
+      <Text style={styles.bootText}>正在恢复你的运动局工作区...</Text>
+      <ActivityIndicator color={usportColors.brandPrimary} />
+    </View>
+  );
+}
+
+function AppNavigator() {
+  const bootstrapped = useBootstrapSession();
+
+  if (!bootstrapped) {
+    return <BootScreen />;
+  }
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Main" component={MainTabs} />
+        <Stack.Screen name="Login" component={LoginEntryScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
 function App(): React.JSX.Element {
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Main" component={MainTabs} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <AppNavigator />
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    height: 76,
+    paddingTop: usportSpacing.sm,
+    paddingBottom: usportSpacing.lg,
+    backgroundColor: usportColors.cardBackground,
+    borderTopColor: usportColors.border,
+  },
+  tabLabelWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: usportSpacing.sm,
+    minWidth: 72,
+  },
+  tabIndicator: {
+    width: 18,
+    height: 4,
+    borderRadius: usportRadius.pill,
+    backgroundColor: "transparent",
+  },
+  tabIndicatorActive: {
+    width: 18,
+    height: 4,
+    borderRadius: usportRadius.pill,
+    backgroundColor: usportColors.brandPrimary,
+  },
+  tabLabel: {
+    color: usportColors.textTertiary,
+    fontSize: usportTypography.caption,
+    fontWeight: "600",
+  },
+  tabLabelActive: {
+    color: usportColors.textPrimary,
+  },
+  bootContainer: {
+    flex: 1,
+    backgroundColor: usportColors.pageBackground,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: usportSpacing.lg,
+    padding: usportSpacing["3xl"],
+  },
+  bootBrand: {
+    color: usportColors.brandPrimary,
+    fontSize: usportTypography.hero,
+    fontWeight: "800",
+    letterSpacing: 0.6,
+  },
+  bootText: {
+    color: usportColors.textSecondary,
+    fontSize: usportTypography.body,
+  },
+});
 
 export default App;

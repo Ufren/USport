@@ -1,25 +1,32 @@
 {
-  "pages": ["pages/index/index", "pages/user/user", "pages/login/login"],
+  "pages": [
+    "pages/discover/index",
+    "pages/profile/index",
+    "pages/auth/index",
+    "pages/index/index",
+    "pages/user/user",
+    "pages/login/login"
+  ],
   "subpackages": [],
   "window": {
     "navigationBarTitleText": "USport",
-    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarBackgroundColor": "#f4f7f2",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#f5f5f5",
+    "backgroundColor": "#f4f7f2",
     "backgroundTextStyle": "light"
   },
   "tabBar": {
-    "color": "#999999",
-    "selectedColor": "#1890ff",
+    "color": "#66726c",
+    "selectedColor": "#156b52",
     "backgroundColor": "#ffffff",
     "borderStyle": "black",
     "list": [
       {
-        "pagePath": "pages/index/index",
-        "text": "首页"
+        "pagePath": "pages/discover/index",
+        "text": "发现"
       },
       {
-        "pagePath": "pages/user/user",
+        "pagePath": "pages/profile/index",
         "text": "我的"
       }
     ]
