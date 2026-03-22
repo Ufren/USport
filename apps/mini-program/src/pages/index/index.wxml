@@ -1,0 +1,29 @@
+<view class="container">
+  <view class="banner">
+    <image class="banner-image" src="/assets/images/banner.png" mode="aspectFill" />
+  </view>
+
+  <view class="section">
+    <view class="section-title">热门活动</view>
+    <view class="activity-list">
+      <view class="activity-item" wx:for="{{activities}}" wx:key="id">
+        <image class="activity-cover" src="{{item.cover}}" mode="aspectFill" />
+        <view class="activity-info">
+          <text class="activity-title">{{item.title}}</text>
+          <text class="activity-time">{{item.time}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">推荐场馆</view>
+    <view class="venue-list">
+      <view class="venue-item" wx:for="{{venues}}" wx:key="id">
+        <image class="venue-image" src="{{item.image}}" mode="aspectFill" />
+        <view class="venue-name">{{item.name}}</view>
+        <view class="venue-address">{{item.address}}</view>
+      </view>
+    </view>
+  </view>
+</view>

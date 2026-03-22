@@ -1,0 +1,48 @@
+app.js
+app.json
+app.wxss
+src/
+  pages/
+    index/
+      index.ts
+      index.wxml
+      index.wxss
+      index.json
+    user/
+      user.ts
+      user.wxml
+      user.wxss
+      user.json
+    login/
+      login.ts
+      login.wxml
+      login.wxss
+      login.json
+  components/
+    button/
+      button.ts
+      button.wxml
+      button.wxss
+      button.json
+    header/
+      header.ts
+      header.wxml
+      header.wxss
+      header.json
+  services/
+    api.ts
+    user.ts
+    request.ts
+  utils/
+    constants.ts
+    helpers.ts
+    storage.ts
+  types/
+    user.ts
+    api.ts
+  store/
+    index.ts
+    user.ts
+  app.ts
+  app.wxml
+  app.wxss

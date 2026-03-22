@@ -1,0 +1,32 @@
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+db:
+  host: "localhost"
+  port: 3306
+  user: "root"
+  password: "password"
+  name: "usport"
+  max_open_conns: 100
+  max_idle_conns: 10
+  conn_max_life: 3600
+
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  db: 0
+  pool_size: 10
+
+jwt:
+  secret: "your-secret-key-change-in-production"
+  expire: 86400
+
+wechat:
+  appid: ""
+  secret: ""
+
+log:
+  level: "debug"
+  encoding: "json"

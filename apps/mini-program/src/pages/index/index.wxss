@@ -1,0 +1,94 @@
+.container {
+  padding: 0;
+  background-color: #f5f5f5;
+}
+
+.banner {
+  width: 100%;
+  height: 350rpx;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+}
+
+.section {
+  padding: 30rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.activity-item {
+  display: flex;
+  background-color: #fff;
+  border-radius: 12rpx;
+  overflow: hidden;
+  padding: 20rpx;
+}
+
+.activity-cover {
+  width: 200rpx;
+  height: 150rpx;
+  border-radius: 8rpx;
+}
+
+.activity-info {
+  flex: 1;
+  margin-left: 20rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.activity-title {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.activity-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.venue-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.venue-item {
+  width: calc(50% - 10rpx);
+  background-color: #fff;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+.venue-image {
+  width: 100%;
+  height: 200rpx;
+}
+
+.venue-name {
+  font-size: 28rpx;
+  color: #333;
+  padding: 16rpx 16rpx 8rpx;
+}
+
+.venue-address {
+  font-size: 24rpx;
+  color: #999;
+  padding: 0 16rpx 16rpx;
+}

@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.next/
+output/
+*.exe
+
+# Turbo
+.turbo/
+.turbostats.json
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+
+# Go
+services/*/vendor/
+services/*/*.exe
+
+#微信小程序
+apps/mini-program/dist/
+
+# React Native
+apps/mobile/android/
+apps/mobile/ios/
+
+# Misc
+*.tgz
+.cache/
