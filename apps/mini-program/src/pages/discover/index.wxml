@@ -1,4 +1,4 @@
-<view class="container discover-page">
+﻿<view class="container discover-page">
   <view class="hero-panel">
     <text class="hero-eyebrow">USport / 同城运动成局</text>
     <text class="hero-title">{{cityName}}今晚，优先看真正能成局的局</text>
@@ -13,7 +13,7 @@
     </view>
   </view>
 
-  <view class="featured-card" bindtap="onActivityTap" data-title="{{featuredActivity.title}}">
+  <view class="featured-card" bindtap="onActivityTap" data-id="{{featuredActivity.id}}">
     <view class="featured-top">
       <text class="featured-status">报名中</text>
       <text class="featured-sport">{{featuredActivity.sportLabel}}</text>
@@ -66,7 +66,7 @@
         wx:for="{{activities}}"
         wx:key="id"
         bindtap="onActivityTap"
-        data-title="{{item.title}}"
+        data-id="{{item.id}}"
       >
         <view class="activity-item-top">
           <view>
@@ -91,7 +91,7 @@
   <view class="section">
     <view class="section-header">
       <text class="section-title">推荐场馆</text>
-      <text class="section-subtitle">不是只看距离，更看你今天这局适不适合在这里打。</text>
+      <text class="section-subtitle">不只是看距离，更看你今天这场局适不适合在这里打。</text>
     </view>
     <scroll-view class="venue-scroll" scroll-x="true" show-scrollbar="false">
       <view class="venue-row">

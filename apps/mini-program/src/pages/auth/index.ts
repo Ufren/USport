@@ -1,3 +1,5 @@
+﻿import { loginValuePoints } from "@usport/shared";
+
 import { userApi } from "../../services/user";
 import { setToken, setUserInfo } from "../../utils/storage";
 import { showError, showSuccess } from "../../utils/helpers";
@@ -6,23 +8,7 @@ Page({
   data: {
     loading: false,
     agreementAccepted: false,
-    valuePoints: [
-      {
-        id: "match",
-        title: "先找能成局的人",
-        description: "优先推荐今晚和周末真正有履约概率的运动局。",
-      },
-      {
-        id: "venue",
-        title: "场馆和搭子一起考虑",
-        description: "不是泛社交，而是围绕真实运动场景快速成局。",
-      },
-      {
-        id: "credit",
-        title: "履约和信用可见",
-        description: "高到场率和复约率会持续影响你的推荐排序。",
-      },
-    ],
+    valuePoints: loginValuePoints,
   },
 
   onToggleAgreement() {
@@ -67,7 +53,7 @@ Page({
 
         setTimeout(() => {
           wx.switchTab({ url: "/pages/discover/index" });
-        }, 1500);
+        }, 800);
       } else {
         showError(res.message || "登录失败");
       }
@@ -104,7 +90,7 @@ Page({
 
         setTimeout(() => {
           wx.switchTab({ url: "/pages/discover/index" });
-        }, 1500);
+        }, 800);
       } else {
         showError(res.message || "登录失败");
       }

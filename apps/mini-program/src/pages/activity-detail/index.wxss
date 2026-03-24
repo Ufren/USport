@@ -1,0 +1,260 @@
+.detail-page {
+  gap: 24rpx;
+  padding: 0 24rpx 220rpx;
+}
+
+.detail-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+  margin: 24rpx 0 0;
+  padding: 32rpx 28rpx 36rpx;
+  border-radius: 32rpx;
+  background: linear-gradient(160deg, #156b52 0%, #0f4b3c 100%);
+  box-shadow: 0 24rpx 48rpx rgba(19, 23, 20, 0.12);
+}
+
+.hero-top,
+.info-row,
+.rule-item,
+.host-row,
+.bottom-actions {
+  display: flex;
+}
+
+.hero-top,
+.info-row,
+.rule-item {
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.hero-eyebrow,
+.hero-cover-label {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.hero-title {
+  color: #ffffff;
+  font-size: 48rpx;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.hero-subtitle,
+.risk-hint {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+
+.risk-hint {
+  padding: 18rpx 20rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.status-pill {
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.status-pill--success {
+  background: rgba(182, 243, 106, 0.2);
+  color: #d8ffac;
+}
+
+.status-pill--warning {
+  background: rgba(255, 233, 173, 0.18);
+  color: #ffe8a3;
+}
+
+.status-pill--neutral,
+.status-pill--danger {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.content-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.info-card,
+.host-card,
+.description-card,
+.notice-card,
+.empty-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+  padding: 28rpx;
+  border: 1rpx solid #dce2dd;
+  border-radius: 28rpx;
+  background: #ffffff;
+}
+
+.section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.section-title,
+.empty-title {
+  color: #131714;
+  font-size: 34rpx;
+  font-weight: 800;
+}
+
+.section-subtitle,
+.info-label,
+.host-meta,
+.description-text,
+.notice-text,
+.bottom-helper,
+.empty-text {
+  color: #66726c;
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
+.info-list,
+.rule-list,
+.notice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.info-label,
+.rule-label {
+  flex: 0 0 160rpx;
+}
+
+.info-value,
+.rule-value {
+  flex: 1;
+  color: #131714;
+  font-size: 24rpx;
+  line-height: 1.6;
+  text-align: right;
+}
+
+.host-row {
+  align-items: center;
+  gap: 18rpx;
+}
+
+.host-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 48rpx;
+  background: #156b52;
+  color: #ffffff;
+  font-size: 34rpx;
+  font-weight: 800;
+}
+
+.host-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.host-name {
+  color: #131714;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.host-badge {
+  color: #156b52;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.tag-chip {
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  background: #edf3ea;
+  color: #156b52;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.notice-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14rpx;
+}
+
+.notice-dot {
+  width: 12rpx;
+  height: 12rpx;
+  margin-top: 12rpx;
+  border-radius: 999rpx;
+  background: #156b52;
+}
+
+.bottom-bar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  padding: 24rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  background: rgba(244, 247, 242, 0.96);
+  backdrop-filter: blur(12rpx);
+  border-top: 1rpx solid rgba(184, 193, 187, 0.6);
+}
+
+.bottom-actions {
+  gap: 16rpx;
+}
+
+.primary-btn,
+.secondary-btn {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 92rpx;
+  border-radius: 999rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.primary-btn {
+  background: #156b52;
+  color: #ffffff;
+}
+
+.primary-btn[disabled] {
+  background: #b8c1bb;
+  color: #ffffff;
+}
+
+.secondary-btn {
+  background: #ffffff;
+  border: 1rpx solid #dce2dd;
+  color: #131714;
+}

@@ -1,6 +1,13 @@
 ﻿import type { UserInfo } from "@usport/shared";
 
 import { STORAGE_KEYS } from "./constants";
+import type {
+  ActivitySignupStatus as SharedActivitySignupStatus,
+  ExperienceActivityDetail as SharedExperienceActivityDetail,
+} from "@usport/shared";
+
+type ActivitySignupStatus = SharedActivitySignupStatus;
+type ExperienceActivityDetail = SharedExperienceActivityDetail;
 
 export function getStorage<T = unknown>(key: string): T | null {
   const value = wx.getStorageSync(key);
@@ -50,4 +57,42 @@ export function setUserInfo(userInfo: UserInfo): void {
 
 export function removeUserInfo(): void {
   removeStorage(STORAGE_KEYS.USER_INFO);
+}
+
+type ActivitySignupStore = Record<string, ActivitySignupStatus>;
+
+export function getActivitySignupMap(): ActivitySignupStore {
+  return getStorage<ActivitySignupStore>(STORAGE_KEYS.ACTIVITY_SIGNUPS) ?? {};
+}
+
+export function getActivitySignupStatus(
+  activityId: string,
+): ActivitySignupStatus {
+  return getActivitySignupMap()[activityId] ?? "none";
+}
+
+export function setActivitySignupStatus(
+  activityId: string,
+  status: ActivitySignupStatus,
+): void {
+  const nextSignupMap = {
+    ...getActivitySignupMap(),
+    [activityId]: status,
+  };
+
+  setStorage(STORAGE_KEYS.ACTIVITY_SIGNUPS, nextSignupMap);
+}
+
+export function getLatestCreatedActivity(): ExperienceActivityDetail | null {
+  return (
+    getStorage<ExperienceActivityDetail>(
+      STORAGE_KEYS.LATEST_CREATED_ACTIVITY,
+    ) ?? null
+  );
+}
+
+export function setLatestCreatedActivity(
+  activity: ExperienceActivityDetail,
+): void {
+  setStorage(STORAGE_KEYS.LATEST_CREATED_ACTIVITY, activity);
 }

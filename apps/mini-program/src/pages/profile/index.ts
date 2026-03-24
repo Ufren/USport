@@ -1,8 +1,8 @@
-import type { UserInfo } from "@usport/shared";
+﻿import type { UserInfo } from "@usport/shared";
 
 import { getUserInfo, removeToken, removeUserInfo } from "../../utils/storage";
 import { showSuccess } from "../../utils/helpers";
-import { buildProfilePageState } from "./presenter";
+import { buildProfilePageState } from "./presenter.clean";
 
 Page({
   data: {
@@ -55,8 +55,15 @@ Page({
       return;
     }
 
+    const menuType = String(e.currentTarget.dataset.type ?? "");
+
+    if (menuType === "activities") {
+      wx.navigateTo({ url: "/pages/create-activity/index" });
+      return;
+    }
+
     wx.showToast({
-      title: `${e.currentTarget.dataset.type ?? "功能"}开发中`,
+      title: "该能力正在完善中",
       icon: "none",
     });
   },
@@ -81,7 +88,7 @@ Page({
           });
           setTimeout(() => {
             wx.navigateTo({ url: "/pages/auth/index" });
-          }, 1500);
+          }, 800);
         }
       },
     });

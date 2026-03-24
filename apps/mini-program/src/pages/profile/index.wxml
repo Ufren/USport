@@ -1,4 +1,4 @@
-<view class="container profile-page">
+﻿<view class="container profile-page">
   <view class="profile-card">
     <view class="profile-avatar">{{avatarInitial}}</view>
     <view class="profile-body">
@@ -15,19 +15,19 @@
     <view class="profile-metric-card">
       <text class="profile-metric-value">{{completionRate}}</text>
       <text class="profile-metric-label">资料完整度</text>
-      <text class="profile-metric-hint">补全主运动和时段更容易被匹配</text>
+      <text class="profile-metric-hint">补全主运动和时段，更容易被精准匹配。</text>
     </view>
     <view class="profile-metric-card">
       <text class="profile-metric-value">{{creditScore}}</text>
       <text class="profile-metric-label">信用分</text>
-      <text class="profile-metric-hint">稳定履约和低取消率会持续提高曝光</text>
+      <text class="profile-metric-hint">稳定履约和低取消率会持续提高曝光。</text>
     </view>
   </view>
 
   <view class="menu-section">
     <view class="section-header">
       <text class="section-title">账户工作区</text>
-      <text class="section-subtitle">把活动、邀约、信用和会员放到一个稳定入口里。</text>
+      <text class="section-subtitle">把活动、邀约、信用和会员放到同一个稳定入口里。</text>
     </view>
 
     <view
@@ -35,7 +35,7 @@
       wx:for="{{menuItems}}"
       wx:key="id"
       bindtap="onMenuClick"
-      data-type="{{item.title}}"
+      data-type="{{item.id}}"
     >
       <view class="menu-copy">
         <view class="menu-title-row">
@@ -44,7 +44,7 @@
         </view>
         <text class="menu-description">{{item.description}}</text>
       </view>
-      <text class="menu-arrow">›</text>
+      <text class="menu-arrow">→</text>
     </view>
   </view>
 

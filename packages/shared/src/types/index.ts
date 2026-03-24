@@ -99,6 +99,49 @@ export interface ExperienceActivity {
   actionLabel: string;
 }
 
+export type ActivitySignupStatus = "none" | "registered" | "waitlisted";
+
+export interface ActivityStatusTone {
+  label: string;
+  tone: "success" | "warning" | "neutral" | "danger";
+}
+
+export interface ExperienceActivityHost {
+  name: string;
+  badge: string;
+  attendanceLabel: string;
+  recentSessionsLabel: string;
+}
+
+export interface ExperienceActivityDetail {
+  id: string;
+  sourceActivityId?: number;
+  title: string;
+  sportCode: string;
+  sportLabel: string;
+  status: ActivityStatus;
+  statusTone: ActivityStatusTone;
+  riskHint?: string;
+  coverLabel: string;
+  subtitle: string;
+  startTimeLabel: string;
+  endTimeLabel: string;
+  signupDeadlineLabel: string;
+  district: string;
+  venueName: string;
+  addressHint: string;
+  participantSummary: string;
+  feeLabel: string;
+  host: ExperienceActivityHost;
+  description: string;
+  suitableCrowd: string[];
+  skillLevelLabel: string;
+  genderRuleLabel: string;
+  notices: string[];
+  allowWaitlist: boolean;
+  shareSummary: string;
+}
+
 export interface VenueSpotlight {
   id: number;
   name: string;
@@ -135,4 +178,28 @@ export interface ProfileMenuItem {
   title: string;
   description: string;
   badge?: string;
+}
+
+export interface CreateActivityOption {
+  value: string;
+  label: string;
+  description: string;
+}
+
+export interface CreateActivityFormDraft {
+  sportCode: string;
+  title: string;
+  description: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  deadlineTime: string;
+  district: string;
+  venueName: string;
+  capacity: number;
+  waitlistCapacity: number;
+  feeType: "free" | "aa" | "fixed_price";
+  feeAmount: string;
+  joinRule: "direct" | "approval_required";
+  visibility: "public" | "invite_only";
 }

@@ -1,0 +1,239 @@
+<view class="container create-page">
+  <view class="create-hero">
+    <text class="hero-eyebrow">USport / 发起活动</text>
+    <text class="hero-title">先把一场能成局的活动写清楚</text>
+    <text class="hero-subtitle">
+      不是把字段填满，而是让用户一眼看懂这场局是否适合自己、是否值得马上报名。
+    </text>
+  </view>
+
+  <view class="preview-card">
+    <text class="preview-label">实时预览</text>
+    <text class="preview-title">{{previewTitle}}</text>
+    <text class="preview-meta">{{previewMeta}}</text>
+    <text class="preview-meta">{{previewFee}}</text>
+    <text wx:if="{{riskHint}}" class="preview-risk">{{riskHint}}</text>
+  </view>
+
+  <view class="form-section">
+    <view class="section-header">
+      <text class="section-title">活动定位</text>
+      <text class="section-subtitle">运动品类和标题决定了第一眼是否会有人点开。</text>
+    </view>
+
+    <view class="chip-list">
+      <view
+        class="option-chip {{draft.sportCode === item.value ? 'option-chip--active' : ''}}"
+        wx:for="{{sportOptions}}"
+        wx:key="value"
+        bindtap="onOptionSelect"
+        data-field="sportCode"
+        data-value="{{item.value}}"
+      >
+        <text class="option-title">{{item.label}}</text>
+        <text class="option-description">{{item.description}}</text>
+      </view>
+    </view>
+
+    <view class="field-card">
+      <text class="field-label">活动标题</text>
+      <input
+        class="text-input"
+        placeholder="例如：今晚浦东 8 人羽毛球友好局"
+        maxlength="24"
+        value="{{draft.title}}"
+        bindinput="onFieldInput"
+        data-field="title"
+      />
+      <text wx:if="{{fieldErrors.title}}" class="field-error">{{fieldErrors.title}}</text>
+    </view>
+
+    <view class="field-card">
+      <text class="field-label">活动描述</text>
+      <textarea
+        class="text-area"
+        placeholder="说清楚强度、轮转方式、是否欢迎单人报名，以及现场有什么特别安排。"
+        maxlength="300"
+        value="{{draft.description}}"
+        bindinput="onFieldInput"
+        data-field="description"
+      />
+      <text wx:if="{{fieldErrors.description}}" class="field-error">{{fieldErrors.description}}</text>
+    </view>
+  </view>
+
+  <view class="form-section">
+    <view class="section-header">
+      <text class="section-title">时间与地点</text>
+      <text class="section-subtitle">清楚的时空信息，是降低取消率的第一步。</text>
+    </view>
+
+    <view class="field-card">
+      <text class="field-label">活动日期</text>
+      <picker mode="date" value="{{draft.date}}" bindchange="onDateChange">
+        <view class="picker-field">{{draft.date}}</view>
+      </picker>
+      <text wx:if="{{fieldErrors.date}}" class="field-error">{{fieldErrors.date}}</text>
+    </view>
+
+    <view class="time-grid">
+      <view class="field-card field-card--half">
+        <text class="field-label">开始时间</text>
+        <picker
+          mode="time"
+          value="{{draft.startTime}}"
+          bindchange="onTimeChange"
+          data-field="startTime"
+        >
+          <view class="picker-field">{{draft.startTime}}</view>
+        </picker>
+        <text wx:if="{{fieldErrors.startTime}}" class="field-error">{{fieldErrors.startTime}}</text>
+      </view>
+
+      <view class="field-card field-card--half">
+        <text class="field-label">结束时间</text>
+        <picker
+          mode="time"
+          value="{{draft.endTime}}"
+          bindchange="onTimeChange"
+          data-field="endTime"
+        >
+          <view class="picker-field">{{draft.endTime}}</view>
+        </picker>
+        <text wx:if="{{fieldErrors.endTime}}" class="field-error">{{fieldErrors.endTime}}</text>
+      </view>
+    </view>
+
+    <view class="field-card">
+      <text class="field-label">报名截止</text>
+      <picker
+        mode="time"
+        value="{{draft.deadlineTime}}"
+        bindchange="onTimeChange"
+        data-field="deadlineTime"
+      >
+        <view class="picker-field">{{draft.deadlineTime}}</view>
+      </picker>
+      <text wx:if="{{fieldErrors.deadlineTime}}" class="field-error">{{fieldErrors.deadlineTime}}</text>
+    </view>
+
+    <view class="chip-list">
+      <view
+        class="mini-chip {{draft.district === item.value ? 'mini-chip--active' : ''}}"
+        wx:for="{{districtOptions}}"
+        wx:key="value"
+        bindtap="onOptionSelect"
+        data-field="district"
+        data-value="{{item.value}}"
+      >
+        {{item.label}}
+      </view>
+    </view>
+
+    <view class="field-card">
+      <text class="field-label">场馆 / 集合点</text>
+      <input
+        class="text-input"
+        placeholder="例如：源深体育馆 3 号场"
+        maxlength="40"
+        value="{{draft.venueName}}"
+        bindinput="onFieldInput"
+        data-field="venueName"
+      />
+      <text wx:if="{{fieldErrors.venueName}}" class="field-error">{{fieldErrors.venueName}}</text>
+    </view>
+  </view>
+
+  <view class="form-section">
+    <view class="section-header">
+      <text class="section-title">人数与费用</text>
+      <text class="section-subtitle">人数越多、费用越高，就越需要讲清楚规则。</text>
+    </view>
+
+    <view class="stepper-card">
+      <view class="stepper-row">
+        <text class="field-label">人数上限</text>
+        <view class="stepper">
+          <view class="stepper-btn" bindtap="onStepperTap" data-field="capacity" data-delta="-1">-</view>
+          <text class="stepper-value">{{draft.capacity}}</text>
+          <view class="stepper-btn" bindtap="onStepperTap" data-field="capacity" data-delta="1">+</view>
+        </view>
+      </view>
+
+      <view class="stepper-row">
+        <text class="field-label">候补人数</text>
+        <view class="stepper">
+          <view class="stepper-btn" bindtap="onStepperTap" data-field="waitlistCapacity" data-delta="-1">-</view>
+          <text class="stepper-value">{{draft.waitlistCapacity}}</text>
+          <view class="stepper-btn" bindtap="onStepperTap" data-field="waitlistCapacity" data-delta="1">+</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="chip-list">
+      <view
+        class="option-chip {{draft.feeType === item.value ? 'option-chip--active' : ''}}"
+        wx:for="{{feeOptions}}"
+        wx:key="value"
+        bindtap="onOptionSelect"
+        data-field="feeType"
+        data-value="{{item.value}}"
+      >
+        <text class="option-title">{{item.label}}</text>
+        <text class="option-description">{{item.description}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{feeAmountVisible}}" class="field-card">
+      <text class="field-label">固定费用</text>
+      <input
+        class="text-input"
+        type="number"
+        placeholder="请输入金额"
+        value="{{draft.feeAmount}}"
+        bindinput="onFieldInput"
+        data-field="feeAmount"
+      />
+      <text wx:if="{{fieldErrors.feeAmount}}" class="field-error">{{fieldErrors.feeAmount}}</text>
+    </view>
+  </view>
+
+  <view class="form-section form-section--compact">
+    <view class="section-header">
+      <text class="section-title">报名规则</text>
+      <text class="section-subtitle">这些规则会直接影响转化和筛选效率。</text>
+    </view>
+
+    <view class="chip-list">
+      <view
+        class="mini-chip {{draft.joinRule === item.value ? 'mini-chip--active' : ''}}"
+        wx:for="{{joinRuleOptions}}"
+        wx:key="value"
+        bindtap="onOptionSelect"
+        data-field="joinRule"
+        data-value="{{item.value}}"
+      >
+        {{item.label}}
+      </view>
+    </view>
+
+    <view class="chip-list">
+      <view
+        class="mini-chip {{draft.visibility === item.value ? 'mini-chip--active' : ''}}"
+        wx:for="{{visibilityOptions}}"
+        wx:key="value"
+        bindtap="onOptionSelect"
+        data-field="visibility"
+        data-value="{{item.value}}"
+      >
+        {{item.label}}
+      </view>
+    </view>
+  </view>
+
+  <view class="submit-bar">
+    <button class="submit-btn" bindtap="onSubmit" loading="{{submitting}}" disabled="{{submitting}}">
+      {{submitting ? '正在发布...' : '发布活动'}}
+    </button>
+  </view>
+</view>

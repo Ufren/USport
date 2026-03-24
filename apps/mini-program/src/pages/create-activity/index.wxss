@@ -1,0 +1,232 @@
+.create-page {
+  gap: 24rpx;
+  padding: 24rpx 24rpx 140rpx;
+}
+
+.create-hero,
+.preview-card,
+.form-section,
+.field-card,
+.stepper-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.create-hero {
+  padding: 12rpx 0;
+}
+
+.hero-eyebrow {
+  color: #156b52;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.hero-title {
+  color: #131714;
+  font-size: 52rpx;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.hero-subtitle,
+.section-subtitle,
+.option-description,
+.preview-meta,
+.preview-risk,
+.field-error {
+  color: #66726c;
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
+.preview-card,
+.form-section {
+  padding: 28rpx;
+  border-radius: 28rpx;
+  border: 1rpx solid #dce2dd;
+  background: #ffffff;
+}
+
+.preview-card {
+  background: linear-gradient(180deg, #edf3ea 0%, #ffffff 100%);
+}
+
+.preview-label {
+  color: #156b52;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.preview-title,
+.section-title,
+.field-label {
+  color: #131714;
+}
+
+.preview-title,
+.section-title {
+  font-size: 34rpx;
+  font-weight: 800;
+}
+
+.field-label {
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.preview-risk,
+.field-error {
+  color: #d64545;
+}
+
+.section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+}
+
+.option-chip,
+.mini-chip,
+.field-card,
+.stepper-card {
+  border: 1rpx solid #dce2dd;
+  border-radius: 24rpx;
+}
+
+.option-chip {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8rpx;
+  min-width: 280rpx;
+  padding: 22rpx;
+  background: #f9fbf8;
+}
+
+.option-chip--active {
+  border-color: #156b52;
+  background: #edf3ea;
+}
+
+.option-title {
+  color: #131714;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.mini-chip {
+  padding: 16rpx 22rpx;
+  background: #ffffff;
+  color: #2d3631;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.mini-chip--active {
+  border-color: #156b52;
+  background: #156b52;
+  color: #ffffff;
+}
+
+.field-card,
+.stepper-card {
+  padding: 22rpx;
+  background: #ffffff;
+}
+
+.text-input,
+.text-area,
+.picker-field {
+  width: 100%;
+  color: #131714;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
+.text-input,
+.picker-field {
+  min-height: 48rpx;
+}
+
+.text-area {
+  min-height: 200rpx;
+}
+
+.time-grid {
+  display: flex;
+  gap: 16rpx;
+}
+
+.field-card--half {
+  flex: 1;
+}
+
+.stepper-row,
+.stepper {
+  display: flex;
+  align-items: center;
+}
+
+.stepper-row {
+  justify-content: space-between;
+}
+
+.stepper {
+  gap: 16rpx;
+}
+
+.stepper-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 999rpx;
+  background: #edf3ea;
+  color: #156b52;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.stepper-value {
+  min-width: 48rpx;
+  color: #131714;
+  font-size: 30rpx;
+  font-weight: 700;
+  text-align: center;
+}
+
+.form-section--compact {
+  gap: 20rpx;
+}
+
+.submit-bar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: rgba(244, 247, 242, 0.96);
+  border-top: 1rpx solid rgba(184, 193, 187, 0.6);
+  backdrop-filter: blur(12rpx);
+}
+
+.submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 96rpx;
+  border-radius: 999rpx;
+  background: #156b52;
+  color: #ffffff;
+  font-size: 30rpx;
+  font-weight: 700;
+}

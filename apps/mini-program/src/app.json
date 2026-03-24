@@ -1,8 +1,10 @@
-{
+﻿{
   "pages": [
     "pages/discover/index",
     "pages/profile/index",
     "pages/auth/index",
+    "pages/activity-detail/index",
+    "pages/create-activity/index",
     "pages/index/index",
     "pages/user/user",
     "pages/login/login"

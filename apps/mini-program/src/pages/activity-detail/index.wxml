@@ -1,0 +1,106 @@
+<view class="container detail-page">
+  <view class="detail-hero">
+    <view class="hero-top">
+      <text class="hero-eyebrow">USport / 成局详情</text>
+      <text class="status-pill {{statusClassName}}">{{statusLabel}}</text>
+    </view>
+    <text class="hero-cover-label">{{coverLabel}}</text>
+    <text class="hero-title">{{title}}</text>
+    <text class="hero-subtitle">{{subtitle}}</text>
+    <text wx:if="{{riskHint}}" class="risk-hint">{{riskHint}}</text>
+  </view>
+
+  <view wx:if="{{!isEmpty}}" class="content-stack">
+    <view class="info-card">
+      <view class="section-header">
+        <text class="section-title">关键安排</text>
+        <text class="section-subtitle">先确认时间、地点、人数和费用，再决定是否加入。</text>
+      </view>
+
+      <view class="info-list">
+        <view class="info-row" wx:for="{{infoItems}}" wx:key="id">
+          <text class="info-label">{{item.label}}</text>
+          <text class="info-value">{{item.value}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="host-card">
+      <view class="section-header">
+        <text class="section-title">主办方</text>
+        <text class="section-subtitle">更稳定的主办方，意味着更高的成局概率。</text>
+      </view>
+
+      <view class="host-row">
+        <view class="host-avatar">{{hostInitial}}</view>
+        <view class="host-copy">
+          <text class="host-name">{{hostName}}</text>
+          <text class="host-badge">{{hostBadge}}</text>
+          <text class="host-meta">{{hostAttendanceLabel}}</text>
+          <text class="host-meta">{{hostRecentSessionsLabel}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="description-card">
+      <view class="section-header">
+        <text class="section-title">适合谁来</text>
+        <text class="section-subtitle">看清门槛和氛围，避免报了又取消。</text>
+      </view>
+
+      <view class="tag-list">
+        <text class="tag-chip" wx:for="{{suitableCrowd}}" wx:key="*this">{{item}}</text>
+      </view>
+
+      <view class="rule-list">
+        <view class="rule-item">
+          <text class="rule-label">技能门槛</text>
+          <text class="rule-value">{{skillLevelLabel}}</text>
+        </view>
+        <view class="rule-item">
+          <text class="rule-label">性别规则</text>
+          <text class="rule-value">{{genderRuleLabel}}</text>
+        </view>
+      </view>
+
+      <text class="description-text">{{description}}</text>
+    </view>
+
+    <view class="notice-card">
+      <view class="section-header">
+        <text class="section-title">报名须知</text>
+        <text class="section-subtitle">提前知道边界，现场体验会更顺畅。</text>
+      </view>
+
+      <view class="notice-list">
+        <view class="notice-item" wx:for="{{notices}}" wx:key="*this">
+          <text class="notice-dot"></text>
+          <text class="notice-text">{{item}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="empty-card">
+    <text class="empty-title">{{title}}</text>
+    <text class="empty-text">{{subtitle}}</text>
+  </view>
+
+  <view class="bottom-bar">
+    <view class="bottom-copy">
+      <text class="bottom-helper">{{actionState.helperText}}</text>
+    </view>
+    <view class="bottom-actions">
+      <button class="secondary-btn" bindtap="onSecondaryAction">
+        {{actionState.secondaryLabel}}
+      </button>
+      <button
+        class="primary-btn"
+        bindtap="onPrimaryAction"
+        disabled="{{actionState.primaryDisabled}}"
+      >
+        {{actionState.primaryLabel}}
+      </button>
+    </view>
+  </view>
+</view>

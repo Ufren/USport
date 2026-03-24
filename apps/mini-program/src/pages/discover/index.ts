@@ -1,4 +1,4 @@
-import { buildDiscoverPageState } from "./presenter";
+﻿import { buildDiscoverPageState } from "./presenter.clean";
 
 Page({
   data: buildDiscoverPageState(),
@@ -25,16 +25,19 @@ Page({
     >,
   ) {
     const filterId = String(e.currentTarget.dataset.filterId ?? "all");
-    // 首页筛选只影响推荐列表，不动 Hero，保证首页始终有一个稳定主视觉。
     this.setData(buildDiscoverPageState(filterId));
   },
 
   onActivityTap(
-    e: WechatMiniprogram.CustomEvent<Record<string, never>, { title?: string }>,
+    e: WechatMiniprogram.CustomEvent<
+      Record<string, never>,
+      { id?: string | number }
+    >,
   ) {
-    wx.showToast({
-      title: `${e.currentTarget.dataset.title ?? "活动"}详情开发中`,
-      icon: "none",
+    wx.navigateTo({
+      url: `/pages/activity-detail/index?id=${String(
+        e.currentTarget.dataset.id ?? "1001",
+      )}`,
     });
   },
 
@@ -45,5 +48,9 @@ Page({
       title: `${e.currentTarget.dataset.name ?? "场馆"}详情开发中`,
       icon: "none",
     });
+  },
+
+  onCreateTap() {
+    wx.navigateTo({ url: "/pages/create-activity/index" });
   },
 });

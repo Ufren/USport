@@ -4,6 +4,8 @@ export const STORAGE_KEYS = {
   TOKEN: "token",
   USER_INFO: "user_info",
   SETTINGS: "settings",
+  ACTIVITY_SIGNUPS: "activity_signups",
+  LATEST_CREATED_ACTIVITY: "latest_created_activity",
 } as const;
 
 export const REQUEST_TIMEOUT = 10000;

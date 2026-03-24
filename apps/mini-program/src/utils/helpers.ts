@@ -66,7 +66,7 @@ class Request {
           }
 
           if (res.statusCode === 401) {
-            wx.navigateTo({ url: "/pages/login/login" });
+            wx.navigateTo({ url: "/pages/auth/index" });
             reject(new Error("Unauthorized"));
             return;
           }
