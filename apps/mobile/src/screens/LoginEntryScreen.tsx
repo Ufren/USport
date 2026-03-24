@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -43,7 +43,7 @@ export default function LoginEntryScreen({ navigation }: Props) {
           ? await userApi.wechatLogin("mock-code-for-rn")
           : await userApi.phoneLogin("mock-phone-code");
 
-      // 登录成功后同时同步本地缓存和内存状态，避免页面间状态不一致。
+      // 登录成功后同时同步本地缓存和内存状态，避免页面之间状态不一致。
       await persistSession(result.token, result.user);
       hydrateSession({ token: result.token, userInfo: result.user });
       navigation.goBack();

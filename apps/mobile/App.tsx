@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -17,6 +17,9 @@ import {
   usportTypography,
 } from "@usport/shared";
 
+import ActivityDetailScreen from "./src/screens/ActivityDetailScreen";
+import CreateActivityScreen from "./src/screens/CreateActivityScreen";
+import MyActivitiesScreen from "./src/screens/MyActivitiesScreen";
 import MessagesScreen from "./src/screens/MessagesScreen";
 import DiscoverScreen from "./src/screens/DiscoverScreen";
 import LoginEntryScreen from "./src/screens/LoginEntryScreen";
@@ -26,6 +29,9 @@ import { useBootstrapSession } from "./src/hooks/useBootstrapSession";
 export type RootStackParamList = {
   Main: undefined;
   Login: undefined;
+  ActivityDetail: { id: string };
+  CreateActivity: undefined;
+  MyActivities: undefined;
 };
 
 export type MainTabParamList = {
@@ -114,6 +120,9 @@ function AppNavigator() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Main" component={MainTabs} />
         <Stack.Screen name="Login" component={LoginEntryScreen} />
+        <Stack.Screen name="ActivityDetail" component={ActivityDetailScreen} />
+        <Stack.Screen name="CreateActivity" component={CreateActivityScreen} />
+        <Stack.Screen name="MyActivities" component={MyActivitiesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

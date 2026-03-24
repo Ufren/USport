@@ -40,6 +40,8 @@ coverage/
 # Go
 services/*/vendor/
 services/*/*.exe
+services/*/bin/
+services/*/release/
 
 #微信小程序
 apps/mini-program/dist/
@@ -51,3 +53,5 @@ apps/mobile/ios/
 # Misc
 *.tgz
 .cache/
+.gocache/
+services/api/**/*.go.[0-9]*

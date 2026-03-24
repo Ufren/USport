@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -55,20 +56,60 @@ type LogConfig struct {
 }
 
 func Load() *Config {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
-	viper.AddConfigPath("./config")
-	viper.AddConfigPath("../config")
+	configurator := viper.New()
+	configurator.SetConfigName("config")
+	configurator.SetConfigType("yaml")
+	configurator.AddConfigPath(".")
+	configurator.AddConfigPath("./config")
+	configurator.AddConfigPath("../config")
+	configurator.SetEnvPrefix("USPORT")
+	configurator.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	configurator.AutomaticEnv()
+	setDefaults(configurator)
 
-	if err := viper.ReadInConfig(); err != nil {
+	if customConfigPath := configurator.GetString("config"); customConfigPath != "" {
+		configurator.SetConfigFile(customConfigPath)
+	}
+
+	if err := configurator.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("failed to read config file: %w", err))
 	}
 
 	var cfg Config
-	if err := viper.Unmarshal(&cfg); err != nil {
+	if err := configurator.Unmarshal(&cfg); err != nil {
 		panic(fmt.Errorf("failed to unmarshal config: %w", err))
 	}
+	validate(cfg)
 
 	return &cfg
+}
+
+func setDefaults(configurator *viper.Viper) {
+	configurator.SetDefault("server.host", "0.0.0.0")
+	configurator.SetDefault("server.port", 8080)
+	configurator.SetDefault("db.host", "127.0.0.1")
+	configurator.SetDefault("db.port", 3306)
+	configurator.SetDefault("db.max_open_conns", 100)
+	configurator.SetDefault("db.max_idle_conns", 10)
+	configurator.SetDefault("db.conn_max_life", 3600)
+	configurator.SetDefault("redis.host", "127.0.0.1")
+	configurator.SetDefault("redis.port", 6379)
+	configurator.SetDefault("redis.db", 0)
+	configurator.SetDefault("redis.pool_size", 10)
+	configurator.SetDefault("jwt.expire", 86400)
+	configurator.SetDefault("log.level", "info")
+	configurator.SetDefault("log.encoding", "json")
+}
+
+func validate(cfg Config) {
+	switch {
+	case cfg.DB.Name == "":
+		panic("db.name is required")
+	case cfg.DB.User == "":
+		panic("db.user is required")
+	case cfg.JWT.Secret == "":
+		panic("jwt.secret is required")
+	case cfg.Server.Port <= 0:
+		panic("server.port must be positive")
+	}
 }

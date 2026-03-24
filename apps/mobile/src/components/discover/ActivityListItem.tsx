@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
   usportColors,
@@ -12,11 +12,12 @@ import { StatusPill } from "../common/StatusPill";
 
 type Props = {
   activity: ExperienceActivity;
+  onPress?: () => void;
 };
 
-export function ActivityListItem({ activity }: Props) {
+export function ActivityListItem({ activity, onPress }: Props) {
   return (
-    <Pressable style={styles.container}>
+    <Pressable style={styles.container} onPress={onPress}>
       <View style={styles.header}>
         <View style={styles.titleGroup}>
           <Text style={styles.title}>{activity.title}</Text>

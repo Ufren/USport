@@ -1,4 +1,4 @@
-import type { ActivityStatus } from "../types";
+﻿import type { ActivityStatus } from "../types";
 
 export const usportColors = {
   brandPrimary: "#156B52",
@@ -95,6 +95,6 @@ const activityStatusMeta: Record<
 };
 
 export function getActivityStatusMeta(status: ActivityStatus) {
-  // 统一活动状态在多端的视觉映射，避免端内各写一套颜色与文案。
+  // 统一活动状态在多端的视觉映射，避免各端分别维护颜色和文案。
   return activityStatusMeta[status];
 }

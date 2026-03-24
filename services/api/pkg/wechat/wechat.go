@@ -1,6 +1,7 @@
 package wechat
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -86,7 +87,7 @@ func (s *WechatService) GetPhoneNumber(accessToken, code string) (*PhoneNumberRe
 	reqBody := map[string]string{"code": code}
 	jsonBody, _ := json.Marshal(reqBody)
 
-	req, err := http.NewRequest("POST", url, string(jsonBody))
+	req, err := http.NewRequest("POST", url, bytes.NewReader(jsonBody))
 	if err != nil {
 		return nil, fmt.Errorf("创建请求失败: %w", err)
 	}

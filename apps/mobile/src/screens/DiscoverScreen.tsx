@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+﻿import React, { startTransition, useEffect, useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -7,10 +8,12 @@ import {
   Text,
   View,
 } from "react-native";
+import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import {
   discoverFilters,
   discoverMetrics,
   featuredActivity,
+  getErrorMessage,
   getUserDisplayName,
   recommendedActivities,
   usportColors,
@@ -18,44 +21,75 @@ import {
   usportSpacing,
   usportTypography,
   venueSpotlights,
+  type ExperienceActivity,
 } from "@usport/shared";
 
+import type { RootStackParamList } from "../../App";
 import { ActivityListItem } from "../components/discover/ActivityListItem";
 import { ActivitySpotlightCard } from "../components/discover/ActivitySpotlightCard";
 import { VenueSpotlightCard } from "../components/discover/VenueSpotlightCard";
 import { SectionHeader } from "../components/common/SectionHeader";
+import { activityApi } from "../services/activity";
 import { useUserStore } from "../store/userStore";
 
-function filterActivities(filterId: string) {
+function filterActivities(items: ExperienceActivity[], filterId: string) {
   if (filterId === "all") {
-    return recommendedActivities;
+    return items;
   }
 
   if (filterId === "weekend") {
-    return recommendedActivities.filter((activity) =>
-      activity.startTimeLabel.includes("周"),
-    );
+    return items.filter((activity) => activity.startTimeLabel.includes("周"));
   }
 
-  return recommendedActivities.filter(
-    (activity) => activity.sportCode === filterId,
-  );
+  return items.filter((activity) => activity.sportCode === filterId);
 }
 
 export default function DiscoverScreen() {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const userInfo = useUserStore((state) => state.userInfo);
   const [activeFilterId, setActiveFilterId] = useState("all");
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [activities, setActivities] = useState<ExperienceActivity[]>(
+    recommendedActivities,
+  );
 
-  const visibleActivities = filterActivities(activeFilterId);
+  const visibleActivities = useMemo(
+    () => filterActivities(activities, activeFilterId),
+    [activities, activeFilterId],
+  );
   const greeting = userInfo
     ? `${getUserDisplayName(userInfo)}，今晚适合来一局`
-    : "今晚在你附近，优先找能成局的运动局";
+    : "今晚在你附近，优先找真正能成局的运动活动";
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 600);
+  const loadActivities = async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+
+    try {
+      const remoteActivities = await activityApi.list();
+      if (remoteActivities.length > 0) {
+        setActivities(remoteActivities);
+      }
+    } catch (error: unknown) {
+      if (!isRefresh) {
+        setActivities(recommendedActivities);
+      }
+      if (isRefresh) {
+        console.warn(getErrorMessage(error, "活动列表刷新失败"));
+      }
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   };
+
+  useEffect(() => {
+    void loadActivities();
+  }, []);
 
   return (
     <ScrollView
@@ -64,7 +98,7 @@ export default function DiscoverScreen() {
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
-          onRefresh={handleRefresh}
+          onRefresh={() => void loadActivities(true)}
           tintColor={usportColors.brandPrimary}
         />
       }
@@ -73,7 +107,7 @@ export default function DiscoverScreen() {
         <Text style={styles.eyebrow}>USport / 同城运动成局</Text>
         <Text style={styles.heroTitle}>{greeting}</Text>
         <Text style={styles.heroSubtitle}>
-          把高履约主办方、稳定场馆和合适时段放进一个更容易成局的工作区。
+          把高履约主办方、稳定场馆和合适时间放进一个更容易成局的工作区。
         </Text>
 
         <View style={styles.metricRow}>
@@ -106,7 +140,11 @@ export default function DiscoverScreen() {
                     styles.filterChip,
                     isActive && styles.filterChipActive,
                   ]}
-                  onPress={() => setActiveFilterId(filter.id)}
+                  onPress={() => {
+                    startTransition(() => {
+                      setActiveFilterId(filter.id);
+                    });
+                  }}
                 >
                   <Text
                     style={[
@@ -128,17 +166,32 @@ export default function DiscoverScreen() {
           title="推荐活动"
           subtitle="保留更高履约率、更清晰门槛和更真实的时间地点信息。"
         />
-        <View style={styles.listGroup}>
-          {visibleActivities.map((activity) => (
-            <ActivityListItem key={activity.id} activity={activity} />
-          ))}
-        </View>
+        {loading ? (
+          <View style={styles.loadingCard}>
+            <ActivityIndicator color={usportColors.brandPrimary} />
+            <Text style={styles.loadingText}>正在同步活动列表...</Text>
+          </View>
+        ) : (
+          <View style={styles.listGroup}>
+            {visibleActivities.map((activity) => (
+              <ActivityListItem
+                key={activity.id}
+                activity={activity}
+                onPress={() =>
+                  navigation.navigate("ActivityDetail", {
+                    id: String(activity.id),
+                  })
+                }
+              />
+            ))}
+          </View>
+        )}
       </View>
 
       <View style={styles.section}>
         <SectionHeader
           title="推荐场馆"
-          subtitle="不是只看距离，更看适不适合你今天要打的这一局。"
+          subtitle="不是只看距离，更看是否适合你今天要打的这一局。"
         />
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={styles.venueRow}>
@@ -242,6 +295,20 @@ const styles = StyleSheet.create({
   section: {
     paddingHorizontal: usportSpacing.xl,
     gap: usportSpacing.lg,
+  },
+  loadingCard: {
+    backgroundColor: usportColors.cardBackground,
+    borderRadius: usportRadius.md,
+    borderWidth: 1,
+    borderColor: usportColors.border,
+    padding: usportSpacing.xl,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: usportSpacing.md,
+  },
+  loadingText: {
+    color: usportColors.textSecondary,
+    fontSize: usportTypography.bodySm,
   },
   listGroup: {
     gap: usportSpacing.md,

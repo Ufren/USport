@@ -203,3 +203,12 @@ export interface CreateActivityFormDraft {
   joinRule: "direct" | "approval_required";
   visibility: "public" | "invite_only";
 }
+
+export type MyActivityRole = "host" | "participant";
+
+export interface MyActivityItem extends ExperienceActivity {
+  role: MyActivityRole;
+  registrationStatus?: "registered" | "waitlisted";
+  canCancel: boolean;
+  canManage: boolean;
+}

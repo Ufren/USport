@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   Alert,
   Pressable,
@@ -53,7 +53,7 @@ export default function ProfileScreen() {
       <View style={styles.guestContainer}>
         <Text style={styles.guestBrand}>USport</Text>
         <Text style={styles.guestTitle}>
-          登录后，运动履约和搭子关系才会开始沉淀。
+          登录后，运动局和搭子关系才会真正沉淀下来。
         </Text>
         <Text style={styles.guestText}>
           你可以先浏览发现页；登录后，我们会记录到场、复约、消息和信用表现。
@@ -96,7 +96,7 @@ export default function ProfileScreen() {
       <View style={styles.section}>
         <SectionHeader
           title="账户工作区"
-          subtitle="把活动、邀约、信用和会员都放在一个稳定的入口里。"
+          subtitle="把活动、邀约、信用和会员都放在一个稳定入口里。"
         />
         <View style={styles.menuGroup}>
           {profileMenuItems.map((item) => (
@@ -104,15 +104,27 @@ export default function ProfileScreen() {
               key={item.id}
               item={item}
               onPress={() => {
+                if (item.id === "activities") {
+                  navigation.navigate("MyActivities");
+                  return;
+                }
+
                 Alert.alert(
                   "开发中",
-                  `${item.title} 将在下一阶段接入真实流程。`,
+                  `${item.title} 会在下一阶段接入真实流程。`,
                 );
               }}
             />
           ))}
         </View>
       </View>
+
+      <Pressable
+        style={styles.primaryButton}
+        onPress={() => navigation.navigate("CreateActivity")}
+      >
+        <Text style={styles.primaryButtonText}>发起新活动</Text>
+      </Pressable>
 
       <Pressable style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>退出登录</Text>
@@ -203,6 +215,18 @@ const styles = StyleSheet.create({
   },
   menuGroup: {
     gap: usportSpacing.md,
+  },
+  primaryButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 52,
+    borderRadius: usportRadius.pill,
+    backgroundColor: usportColors.brandPrimary,
+  },
+  primaryButtonText: {
+    color: usportColors.textInverse,
+    fontSize: usportTypography.body,
+    fontWeight: "700",
   },
   logoutButton: {
     alignItems: "center",

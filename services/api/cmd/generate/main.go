@@ -1,3 +1,5 @@
+//go:build tools
+
 package main
 
 import (
@@ -71,11 +73,11 @@ func main() {
 	}
 
 	g := gen.NewGenerator(gen.Config{
-		OutPath:      "./dal",
-		ModelPkgPath: "model",
-		WithUnitTest: false,
+		OutPath:       "./dal",
+		ModelPkgPath:  "model",
+		WithUnitTest:  false,
 		FieldSignable: true,
-		JSONTagName:  "json",
+		JSONTagName:   "json",
 	})
 
 	g.UseDB(db)
@@ -95,7 +97,7 @@ func main() {
 				}
 			}
 			model = g.GenerateModelAs(tc.TableName, gen.ModelOpt{
-				Name:  tc.ModelName,
+				Name:     tc.ModelName,
 				FieldNew: extraFieldDefs,
 			})
 		}

@@ -24,3 +24,7 @@ func Error(c *gin.Context, code int, message string, err error) {
 		Message: message,
 	})
 }
+
+func Unauthorized(c *gin.Context, message string) {
+	Error(c, 401, message, nil)
+}

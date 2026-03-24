@@ -1,0 +1,16 @@
+[Unit]
+Description=USport API Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/usport-api
+EnvironmentFile=-/opt/usport-api/.env
+ExecStart=/opt/usport-api/usport-api
+Restart=always
+RestartSec=5
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

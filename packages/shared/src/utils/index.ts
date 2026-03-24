@@ -1,4 +1,4 @@
-import type { UserProfile } from "../types";
+﻿import type { UserProfile } from "../types";
 
 export function formatDate(
   date: string | Date,

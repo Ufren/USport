@@ -9,18 +9,19 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/usport/usport-api/dal/query"
+	"github.com/usport/usport-api/dal/model"
 	"github.com/usport/usport-api/internal/config"
 	"github.com/usport/usport-api/internal/handler"
-	"github.com/usport/usport-api/internal/middleware"
+	"github.com/usport/usport-api/internal/repository"
+	appserver "github.com/usport/usport-api/internal/server"
 	"github.com/usport/usport-api/internal/service"
+	"github.com/usport/usport-api/pkg/buildinfo"
 	"github.com/usport/usport-api/pkg/database"
 	"github.com/usport/usport-api/pkg/logger"
 	"github.com/usport/usport-api/pkg/redis"
 	"github.com/usport/usport-api/pkg/wechat"
-
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -41,10 +42,10 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to connect to database", zap.Error(err))
 	}
-	defer func() {
-		sqlDB, _ := db.DB()
-		sqlDB.Close()
-	}()
+	if err := db.AutoMigrate(&model.User{}, &model.Activity{}, &model.ActivityParticipant{}); err != nil {
+		log.Fatal("failed to migrate database schema", zap.Error(err))
+	}
+	defer closeDB(db)
 
 	rdb := redis.NewClient(redis.Config{
 		Host:     cfg.Redis.Host,
@@ -54,30 +55,29 @@ func main() {
 		PoolSize: cfg.Redis.PoolSize,
 	})
 	if err := rdb.Ping(ctx).Err(); err != nil {
-		log.Fatal("failed to connect to redis", zap.Error(err))
+		log.Warn("failed to connect to redis, cache disabled", zap.Error(err))
+		rdb = nil
 	}
-	defer rdb.Close()
+	if rdb != nil {
+		defer rdb.Close()
+	}
 
 	wechatSvc := wechat.NewWechatService(&cfg.Wechat)
-	dbQuery := query.NewQuery(db)
+	userRepo := repository.NewUserRepository(db)
+	activityRepo := repository.NewActivityRepository(db)
 
-	userSvc := service.NewUserService(dbQuery, wechatSvc, rdb, cfg.JWT.Secret, cfg.JWT.Expire)
+	userSvc := service.NewUserService(userRepo, wechatSvc, rdb, cfg.JWT.Secret, cfg.JWT.Expire)
+	activitySvc := service.NewActivityService(activityRepo)
+
 	userHandler := handler.NewUserHandler(userSvc)
+	activityHandler := handler.NewActivityHandler(activitySvc)
 
-	router := gin.New()
-	router.Use(middleware.Logger(log), middleware.Recovery(log), middleware.CORS())
-
-	api := router.Group("/api/v1")
-	{
-		api.GET("/health", handler.HealthCheck)
-
-		users := api.Group("/users")
-		{
-			users.POST("/wechat_login", userHandler.WechatLogin)
-			users.POST("/phone_login", userHandler.PhoneLogin)
-			users.GET("/:id", middleware.Auth(cfg.JWT.Secret), userHandler.GetByID)
-		}
-	}
+	router := appserver.NewRouter(appserver.RouterDependencies{
+		Log:             log,
+		JWTSecret:       cfg.JWT.Secret,
+		UserHandler:     userHandler,
+		ActivityHandler: activityHandler,
+	})
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
@@ -85,7 +85,13 @@ func main() {
 	}
 
 	go func() {
-		log.Info("starting server", zap.String("addr", srv.Addr))
+		log.Info(
+			"starting server",
+			zap.String("addr", srv.Addr),
+			zap.String("version", buildinfo.Version),
+			zap.String("commit", buildinfo.Commit),
+			zap.String("build_time", buildinfo.BuildTime),
+		)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal("server error", zap.Error(err))
 		}
@@ -97,12 +103,20 @@ func main() {
 
 	log.Info("shutting down server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := srv.Shutdown(shutdownCtx); err != nil {
 		log.Fatal("server forced to shutdown", zap.Error(err))
 	}
 
 	log.Info("server exited")
+}
+
+func closeDB(db *gorm.DB) {
+	sqlDB, err := db.DB()
+	if err != nil {
+		return
+	}
+	_ = sqlDB.Close()
 }

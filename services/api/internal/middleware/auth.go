@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/usport/usport-api/pkg/response"
 	"go.uber.org/zap"
 )
 
@@ -19,12 +20,14 @@ func Auth(secret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader(AuthorizationHeader)
 		if authHeader == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "authorization header required"})
+			response.Unauthorized(c, "缺少登录凭证")
+			c.Abort()
 			return
 		}
 
 		if !strings.HasPrefix(authHeader, BearerPrefix) {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid authorization format"})
+			response.Unauthorized(c, "登录凭证格式无效")
+			c.Abort()
 			return
 		}
 
@@ -37,19 +40,22 @@ func Auth(secret string) gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			response.Unauthorized(c, "登录态已失效，请重新登录")
+			c.Abort()
 			return
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token claims"})
+			response.Unauthorized(c, "登录态解析失败")
+			c.Abort()
 			return
 		}
 
 		userID, ok := claims["user_id"].(float64)
 		if !ok {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid user id in token"})
+			response.Unauthorized(c, "登录用户信息无效")
+			c.Abort()
 			return
 		}
 
@@ -69,7 +75,8 @@ func Recovery(log *zap.Logger) gin.HandlerFunc {
 		defer func() {
 			if err := recover(); err != nil {
 				log.Error("panic recovered", zap.Any("error", err))
-				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+				response.Error(c, http.StatusInternalServerError, "服务开小差了，请稍后再试", nil)
+				c.Abort()
 			}
 		}()
 		c.Next()
