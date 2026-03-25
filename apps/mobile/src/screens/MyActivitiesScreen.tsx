@@ -72,28 +72,38 @@ export default function MyActivitiesScreen({ navigation }: Props) {
   }, [role]);
 
   const handleCancel = (activity: MyActivityItem) => {
-    Alert.alert(
-      "退出活动",
-      `确定退出「${activity.title}」吗？退出后你的报名名额会被释放。`,
-      [
-        { text: "保留", style: "cancel" },
-        {
-          text: "退出",
-          style: "destructive",
-          onPress: async () => {
-            setCancellingId(activity.id);
-            try {
+    const isHostAction = activity.canManage;
+    const dialogTitle = isHostAction ? "取消活动" : "退出活动";
+    const dialogMessage = isHostAction
+      ? `确定取消「${activity.title}」吗？已报名和候补用户都会同步收到取消结果。`
+      : `确定退出「${activity.title}」吗？退出后你的报名名额会被释放。`;
+
+    Alert.alert(dialogTitle, dialogMessage, [
+      { text: "保留", style: "cancel" },
+      {
+        text: isHostAction ? "取消活动" : "退出",
+        style: "destructive",
+        onPress: async () => {
+          setCancellingId(activity.id);
+          try {
+            // 这里统一收口主办方和参与者动作，避免页面层分散维护两套状态流。
+            if (isHostAction) {
+              await activityApi.cancelActivity(activity.id);
+            } else {
               await activityApi.cancelRegistration(activity.id);
-              await loadItems(role, true);
-            } catch (error: unknown) {
-              Alert.alert("退出失败", getErrorMessage(error, "请稍后再试"));
-            } finally {
-              setCancellingId(null);
             }
-          },
+            await loadItems(role, true);
+          } catch (error: unknown) {
+            Alert.alert(
+              isHostAction ? "取消失败" : "退出失败",
+              getErrorMessage(error, "请稍后再试"),
+            );
+          } finally {
+            setCancellingId(null);
+          }
         },
-      ],
-    );
+      },
+    ]);
   };
 
   return (
@@ -201,14 +211,18 @@ export default function MyActivitiesScreen({ navigation }: Props) {
                     <Text style={styles.footerHint}>
                       {item.attendanceLabel}
                     </Text>
-                    {item.canCancel ? (
+                    {item.canManage || item.canCancel ? (
                       <Pressable
                         style={styles.ghostButton}
                         onPress={() => handleCancel(item)}
                         disabled={cancellingId === item.id}
                       >
                         <Text style={styles.ghostButtonText}>
-                          {cancellingId === item.id ? "处理中..." : "退出活动"}
+                          {cancellingId === item.id
+                            ? "处理中..."
+                            : item.canManage
+                              ? "取消活动"
+                              : "退出活动"}
                         </Text>
                       </Pressable>
                     ) : null}

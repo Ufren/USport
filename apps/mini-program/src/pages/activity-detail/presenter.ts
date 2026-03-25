@@ -51,75 +51,67 @@ function buildActionState(
   signupStatus: ActivitySignupStatus,
   isLoggedIn: boolean,
 ): DetailActionState {
+  if (detail.status === "cancelled") {
+    return {
+      helperText: "活动已取消，平台建议你查看同城其它可成局活动。",
+      primaryLabel: "已取消",
+      primaryDisabled: true,
+      secondaryLabel: "返回发现",
+    };
+  }
+
+  if (detail.status === "signup_closed") {
+    return {
+      helperText: "报名已经截止，你可以关注主办方后续新局。",
+      primaryLabel: "已截止",
+      primaryDisabled: true,
+      secondaryLabel: "看看同类活动",
+    };
+  }
+
   if (signupStatus === "registered") {
     return {
-      helperText:
-        "\u4f60\u5df2\u62a5\u540d\u6210\u529f\uff0c\u5efa\u8bae\u63d0\u524d 15 \u5206\u949f\u5230\u573a\u70ed\u8eab\u3002",
-      primaryLabel: "\u5df2\u62a5\u540d",
+      helperText: "你已报名成功，建议提前 15 分钟到场热身。",
+      primaryLabel: "已报名",
       primaryDisabled: true,
-      secondaryLabel: "\u5206\u4eab\u6d3b\u52a8",
+      secondaryLabel: "分享活动",
     };
   }
 
   if (signupStatus === "waitlisted") {
     return {
-      helperText:
-        "\u4f60\u5df2\u8fdb\u5165\u5019\u8865\u961f\u5217\uff0c\u82e5\u6709\u4eba\u9000\u51fa\u4f1a\u4f18\u5148\u8865\u4f4d\u3002",
-      primaryLabel: "\u5df2\u5019\u8865",
+      helperText: "你已进入候补队列，若有人退出会优先补位。",
+      primaryLabel: "已候补",
       primaryDisabled: true,
-      secondaryLabel: "\u5206\u4eab\u6d3b\u52a8",
+      secondaryLabel: "分享活动",
     };
   }
 
   if (!isLoggedIn) {
     return {
-      helperText:
-        "\u767b\u5f55\u540e\u53ef\u4e00\u952e\u62a5\u540d\uff0c\u5e76\u6c89\u6dc0\u4f60\u7684\u5c65\u7ea6\u8bb0\u5f55\u3002",
-      primaryLabel: "\u767b\u5f55\u540e\u62a5\u540d",
+      helperText: "登录后可一键报名，并沉淀你的履约记录。",
+      primaryLabel: "登录后报名",
       primaryDisabled: false,
-      secondaryLabel: "\u5148\u770b\u770b",
+      secondaryLabel: "先看看",
     };
   }
 
   if (detail.status === "full") {
     return {
       helperText: detail.allowWaitlist
-        ? "\u5f53\u524d\u540d\u989d\u5df2\u6ee1\uff0c\u4f60\u53ef\u4ee5\u5148\u5019\u8865\u7b49\u5f85\u8865\u4f4d\u3002"
-        : "\u5f53\u524d\u540d\u989d\u5df2\u6ee1\uff0c\u5efa\u8bae\u770b\u770b\u540c\u7c7b\u6d3b\u52a8\u3002",
-      primaryLabel: detail.allowWaitlist
-        ? "\u5019\u8865\u62a5\u540d"
-        : "\u5df2\u6ee1\u5458",
+        ? "当前名额已满，你可以先候补等待补位。"
+        : "当前名额已满，建议看看同类活动。",
+      primaryLabel: detail.allowWaitlist ? "候补报名" : "已满员",
       primaryDisabled: !detail.allowWaitlist,
-      secondaryLabel: "\u5206\u4eab\u6d3b\u52a8",
-    };
-  }
-
-  if (detail.status === "signup_closed") {
-    return {
-      helperText:
-        "\u62a5\u540d\u5df2\u7ecf\u622a\u6b62\uff0c\u4f60\u53ef\u4ee5\u5173\u6ce8\u4e3b\u529e\u65b9\u540e\u7eed\u65b0\u5c40\u3002",
-      primaryLabel: "\u5df2\u622a\u6b62",
-      primaryDisabled: true,
-      secondaryLabel: "\u770b\u770b\u540c\u7c7b\u6d3b\u52a8",
-    };
-  }
-
-  if (detail.status === "cancelled") {
-    return {
-      helperText:
-        "\u6d3b\u52a8\u5df2\u53d6\u6d88\uff0c\u5e73\u53f0\u5efa\u8bae\u4f60\u67e5\u770b\u540c\u57ce\u5176\u5b83\u53ef\u6210\u5c40\u6d3b\u52a8\u3002",
-      primaryLabel: "\u5df2\u53d6\u6d88",
-      primaryDisabled: true,
-      secondaryLabel: "\u8fd4\u56de\u53d1\u73b0",
+      secondaryLabel: "分享活动",
     };
   }
 
   return {
-    helperText:
-      "\u73b0\u5728\u62a5\u540d\u8fd8\u80fd\u5360\u4f4f\u597d\u65f6\u6bb5\uff0c\u540e\u7eed\u4e5f\u66f4\u5bb9\u6613\u6c89\u6dc0\u590d\u7ea6\u5173\u7cfb\u3002",
-    primaryLabel: "\u7acb\u5373\u62a5\u540d",
+    helperText: "现在报名还能占住好时段，后续也更容易沉淀复约关系。",
+    primaryLabel: "立即报名",
     primaryDisabled: false,
-    secondaryLabel: "\u5206\u4eab\u6d3b\u52a8",
+    secondaryLabel: "分享活动",
   };
 }
 
@@ -132,11 +124,10 @@ export function buildActivityDetailPageState(
     return {
       isEmpty: true,
       activityId: "",
-      title: "\u6d3b\u52a8\u4e0d\u5b58\u5728",
-      subtitle:
-        "\u8fd9\u573a\u6d3b\u52a8\u53ef\u80fd\u5df2\u4e0b\u7ebf\uff0c\u8fd4\u56de\u53d1\u73b0\u9875\u7ee7\u7eed\u770b\u770b\u5176\u5b83\u53ef\u6210\u5c40\u7684\u5c40\u3002",
+      title: "活动不存在",
+      subtitle: "这场活动可能已下线，返回发现页继续看看其它可成局的局。",
       coverLabel: "USport",
-      statusLabel: "\u5f85\u786e\u8ba4",
+      statusLabel: "待确认",
       statusClassName: toneClassMap.neutral,
       riskHint: "",
       infoItems: [],
@@ -151,11 +142,10 @@ export function buildActivityDetailPageState(
       description: "",
       notices: [],
       actionState: {
-        helperText:
-          "\u8fd4\u56de\u53d1\u73b0\u9875\u7ee7\u7eed\u5bfb\u627e\u540c\u57ce\u8fd0\u52a8\u5c40\u3002",
-        primaryLabel: "\u8fd4\u56de\u53d1\u73b0",
+        helperText: "返回发现页继续寻找同城运动局。",
+        primaryLabel: "返回发现",
         primaryDisabled: false,
-        secondaryLabel: "\u7a0d\u540e\u518d\u770b",
+        secondaryLabel: "稍后再看",
       },
     };
   }
@@ -172,27 +162,27 @@ export function buildActivityDetailPageState(
     infoItems: [
       {
         id: "time",
-        label: "\u6d3b\u52a8\u65f6\u95f4",
+        label: "活动时间",
         value: `${detail.startTimeLabel} - ${detail.endTimeLabel}`,
       },
       {
         id: "deadline",
-        label: "\u62a5\u540d\u622a\u6b62",
+        label: "报名截止",
         value: detail.signupDeadlineLabel,
       },
       {
         id: "venue",
-        label: "\u573a\u5730\u4f4d\u7f6e",
+        label: "场地位置",
         value: `${detail.district} · ${detail.venueName}`,
       },
       {
         id: "people",
-        label: "\u4eba\u6570\u60c5\u51b5",
+        label: "人数情况",
         value: detail.participantSummary,
       },
       {
         id: "fee",
-        label: "\u8d39\u7528\u8bf4\u660e",
+        label: "费用说明",
         value: detail.feeLabel,
       },
     ],

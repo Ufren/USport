@@ -8,10 +8,11 @@ import (
 )
 
 type RouterDependencies struct {
-	Log             *zap.Logger
-	JWTSecret       string
-	UserHandler     *handler.UserHandler
-	ActivityHandler *handler.ActivityHandler
+	Log               *zap.Logger
+	JWTSecret         string
+	UserHandler       *handler.UserHandler
+	ActivityHandler   *handler.ActivityHandler
+	InvitationHandler *handler.InvitationHandler
 }
 
 func NewRouter(deps RouterDependencies) *gin.Engine {
@@ -41,6 +42,18 @@ func NewRouter(deps RouterDependencies) *gin.Engine {
 			activities.POST("", middleware.Auth(deps.JWTSecret), deps.ActivityHandler.Create)
 			activities.POST("/:id/register", middleware.Auth(deps.JWTSecret), deps.ActivityHandler.Register)
 			activities.POST("/:id/cancel-registration", middleware.Auth(deps.JWTSecret), deps.ActivityHandler.CancelRegistration)
+			activities.POST("/:id/cancel", middleware.Auth(deps.JWTSecret), deps.ActivityHandler.CancelActivity)
+		}
+
+		invitations := api.Group("/invitations", middleware.Auth(deps.JWTSecret))
+		{
+			invitations.GET("", deps.InvitationHandler.List)
+			invitations.POST("/:id/respond", deps.InvitationHandler.Respond)
+		}
+
+		messages := api.Group("/messages", middleware.Auth(deps.JWTSecret))
+		{
+			messages.GET("", deps.InvitationHandler.MessagePreviews)
 		}
 	}
 

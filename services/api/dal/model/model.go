@@ -22,6 +22,13 @@ const (
 	ParticipantStatusCancelled  = "cancelled"
 )
 
+const (
+	InvitationStatusPending  = "pending"
+	InvitationStatusAccepted = "accepted"
+	InvitationStatusDeclined = "declined"
+	InvitationStatusExpired  = "expired"
+)
+
 type User struct {
 	ID        uint      `json:"id" gorm:"primaryKey"`
 	Openid    string    `json:"openid" gorm:"size:100;uniqueIndex"`
@@ -80,4 +87,22 @@ type ActivityParticipant struct {
 
 func (ActivityParticipant) TableName() string {
 	return "activity_participants"
+}
+
+type Invitation struct {
+	ID             uint      `json:"id" gorm:"primaryKey"`
+	ActivityID     uint      `json:"activityId" gorm:"index;not null"`
+	Activity       Activity  `json:"activity" gorm:"foreignKey:ActivityID"`
+	SenderUserID   uint      `json:"senderUserId" gorm:"index;not null"`
+	SenderUser     User      `json:"senderUser" gorm:"foreignKey:SenderUserID"`
+	ReceiverUserID uint      `json:"receiverUserId" gorm:"index;not null"`
+	ReceiverUser   User      `json:"receiverUser" gorm:"foreignKey:ReceiverUserID"`
+	Message        string    `json:"message" gorm:"size:255"`
+	Status         string    `json:"status" gorm:"size:32;index;not null;default:'pending'"`
+	CreatedAt      time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt      time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+}
+
+func (Invitation) TableName() string {
+	return "invitations"
 }

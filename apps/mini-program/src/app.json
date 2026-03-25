@@ -5,6 +5,8 @@
     "pages/auth/index",
     "pages/activity-detail/index",
     "pages/create-activity/index",
+    "pages/my-activities/index",
+    "pages/invitations/index",
     "pages/index/index",
     "pages/user/user",
     "pages/login/login"

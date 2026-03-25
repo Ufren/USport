@@ -19,6 +19,7 @@ import {
 
 import ActivityDetailScreen from "./src/screens/ActivityDetailScreen";
 import CreateActivityScreen from "./src/screens/CreateActivityScreen";
+import InvitationInboxScreen from "./src/screens/InvitationInboxScreenClean";
 import MyActivitiesScreen from "./src/screens/MyActivitiesScreen";
 import MessagesScreen from "./src/screens/MessagesScreen";
 import DiscoverScreen from "./src/screens/DiscoverScreen";
@@ -32,6 +33,7 @@ export type RootStackParamList = {
   ActivityDetail: { id: string };
   CreateActivity: undefined;
   MyActivities: undefined;
+  Invitations: undefined;
 };
 
 export type MainTabParamList = {
@@ -123,6 +125,7 @@ function AppNavigator() {
         <Stack.Screen name="ActivityDetail" component={ActivityDetailScreen} />
         <Stack.Screen name="CreateActivity" component={CreateActivityScreen} />
         <Stack.Screen name="MyActivities" component={MyActivitiesScreen} />
+        <Stack.Screen name="Invitations" component={InvitationInboxScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

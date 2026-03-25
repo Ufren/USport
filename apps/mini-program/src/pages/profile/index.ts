@@ -2,7 +2,7 @@
 
 import { getUserInfo, removeToken, removeUserInfo } from "../../utils/storage";
 import { showSuccess } from "../../utils/helpers";
-import { buildProfilePageState } from "./presenter.clean";
+import { buildProfilePageState } from "./presenter";
 
 Page({
   data: {
@@ -58,7 +58,12 @@ Page({
     const menuType = String(e.currentTarget.dataset.type ?? "");
 
     if (menuType === "activities") {
-      wx.navigateTo({ url: "/pages/create-activity/index" });
+      wx.navigateTo({ url: "/pages/my-activities/index" });
+      return;
+    }
+
+    if (menuType === "invitations") {
+      wx.navigateTo({ url: "/pages/invitations/index" });
       return;
     }
 

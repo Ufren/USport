@@ -166,6 +166,25 @@ export interface MessagePreview {
   unreadCount: number;
 }
 
+export type InvitationStatus = "pending" | "accepted" | "declined" | "expired";
+
+export interface InvitationItem {
+  id: number;
+  activityId: number;
+  activityTitle: string;
+  activityTime: string;
+  venueLabel: string;
+  senderName: string;
+  senderBadge: string;
+  message: string;
+  status: InvitationStatus;
+  statusLabel: string;
+  createdAtLabel: string;
+  canAccept: boolean;
+  canDecline: boolean;
+  participantHint: string;
+}
+
 export interface ProfileHighlight {
   id: string;
   label: string;

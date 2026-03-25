@@ -1,21 +1,67 @@
-﻿import { buildDiscoverPageState } from "./presenter.clean";
+﻿import type { ExperienceActivity } from "@usport/shared";
+
+import { activityApi } from "../../services/activity";
+import { buildDiscoverPageState } from "./presenter.clean";
+
+function filterActivities(
+  activities: ExperienceActivity[],
+  activeFilterId: string,
+): ExperienceActivity[] {
+  if (activeFilterId === "all") {
+    return activities;
+  }
+
+  if (activeFilterId === "weekend") {
+    return activities.filter((activity) =>
+      activity.startTimeLabel.includes("周"),
+    );
+  }
+
+  return activities.filter((activity) => activity.sportCode === activeFilterId);
+}
 
 Page({
-  data: buildDiscoverPageState(),
+  data: {
+    allActivities: [] as ExperienceActivity[],
+    ...buildDiscoverPageState(),
+  },
 
   onLoad() {
-    this.refreshPage();
+    void this.refreshPage();
   },
 
   onPullDownRefresh() {
-    this.refreshPage();
-    wx.stopPullDownRefresh();
+    void this.refreshPage(true);
   },
 
-  refreshPage() {
-    this.setData(
-      buildDiscoverPageState(String(this.data.activeFilterId ?? "all")),
-    );
+  async refreshPage(stopPullDown: boolean = false) {
+    const activeFilterId = String(this.data.activeFilterId ?? "all");
+    const fallbackState = buildDiscoverPageState(activeFilterId);
+
+    try {
+      const allActivities = await activityApi.list();
+      const filteredActivities = filterActivities(
+        allActivities,
+        activeFilterId,
+      );
+
+      this.setData({
+        ...fallbackState,
+        allActivities,
+        featuredActivity: allActivities[0] ?? fallbackState.featuredActivity,
+        activities:
+          filteredActivities.length > 0 ? filteredActivities : allActivities,
+      });
+    } catch {
+      this.setData({
+        allActivities: fallbackState.activities,
+        ...fallbackState,
+      });
+    } finally {
+      if (stopPullDown) {
+        wx.stopPullDownRefresh();
+      }
+    }
   },
 
   onFilterTap(
@@ -25,7 +71,20 @@ Page({
     >,
   ) {
     const filterId = String(e.currentTarget.dataset.filterId ?? "all");
-    this.setData(buildDiscoverPageState(filterId));
+    const baseState = buildDiscoverPageState(filterId);
+    const sourceActivities =
+      (this.data.allActivities as ExperienceActivity[]) || [];
+    const filteredActivities = filterActivities(sourceActivities, filterId);
+
+    this.setData({
+      ...baseState,
+      allActivities: sourceActivities,
+      featuredActivity: sourceActivities[0] ?? baseState.featuredActivity,
+      activities:
+        filteredActivities.length > 0
+          ? filteredActivities
+          : baseState.activities,
+    });
   },
 
   onActivityTap(

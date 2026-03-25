@@ -1,11 +1,12 @@
 ﻿import type { CreateActivityFormDraft } from "@usport/shared";
 import { buildCreatedActivityDetail } from "@usport/shared";
 
+import { activityApi } from "../../services/activity";
 import {
   createDraftFromPartial,
   saveCreatedActivity,
 } from "../../features/activity-flow/storage";
-import { showSuccess } from "../../utils/helpers";
+import { showError, showSuccess } from "../../utils/helpers";
 import { getUserInfo } from "../../utils/storage";
 import {
   buildCreateActivityPageState,
@@ -26,7 +27,7 @@ Page({
 
     if (!userInfo?.id) {
       wx.showToast({
-        title: "\u8bf7\u5148\u767b\u5f55\u518d\u53d1\u8d77\u6d3b\u52a8",
+        title: "请先登录再发起活动",
         icon: "none",
       });
       setTimeout(() => {
@@ -36,14 +37,14 @@ Page({
     }
 
     const currentUserName =
-      userInfo.nickname || userInfo.phone || userInfo.openid || "\u4f60";
+      userInfo.nickname || userInfo.phone || userInfo.openid || "你";
 
     this.setData({
       currentUserName,
     });
   },
 
-  // \u7edf\u4e00\u4ece\u8fd9\u91cc\u5237\u65b0\u8868\u5355\u72b6\u6001\uff0c\u907f\u514d\u6bcf\u4e2a\u4e8b\u4ef6\u91cc\u91cd\u590d\u62fc\u63a5\u9875\u9762\u6570\u636e\u3002
+  // 统一从这里刷新表单状态，避免每个事件里重复拼接页面数据。
   applyDraft(nextDraft: CreateActivityFormDraft) {
     this.setData({
       ...buildCreateActivityPageState(nextDraft),
@@ -141,6 +142,10 @@ Page({
   },
 
   onSubmit() {
+    void this.handleSubmit();
+  },
+
+  async handleSubmit() {
     if (this.data.submitting) {
       return;
     }
@@ -163,16 +168,24 @@ Page({
 
     this.setData({ submitting: true });
 
-    const createdActivity = buildCreatedActivityDetail(
-      this.data.draft,
-      this.data.currentUserName,
-    );
-    saveCreatedActivity(createdActivity);
+    try {
+      const createdActivity = await activityApi.create(this.data.draft);
+      saveCreatedActivity(
+        buildCreatedActivityDetail(this.data.draft, this.data.currentUserName),
+      );
 
-    showSuccess("\u6d3b\u52a8\u5df2\u53d1\u5e03");
+      showSuccess("活动已发布");
 
-    setTimeout(() => {
-      wx.redirectTo({ url: "/pages/activity-detail/index?id=created" });
-    }, 900);
+      setTimeout(() => {
+        wx.redirectTo({
+          url: `/pages/activity-detail/index?id=${String(
+            createdActivity.sourceActivityId ?? createdActivity.id,
+          )}`,
+        });
+      }, 900);
+    } catch (error: unknown) {
+      showError(error instanceof Error ? error.message : "发布活动失败");
+      this.setData({ submitting: false });
+    }
   },
 });

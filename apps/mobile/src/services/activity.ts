@@ -46,4 +46,8 @@ export const activityApi = {
       `/activities/${id}/cancel-registration`,
     );
   },
+
+  async cancelActivity(id: string | number): Promise<{ cancelled: boolean }> {
+    return httpClient.post<{ cancelled: boolean }>(`/activities/${id}/cancel`);
+  },
 };

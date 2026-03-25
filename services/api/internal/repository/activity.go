@@ -28,8 +28,10 @@ type ActivityRepository interface {
 	Create(ctx context.Context, activity *model.Activity) error
 	UpdateStatus(ctx context.Context, activityID uint, status string) error
 	FindParticipant(ctx context.Context, activityID, userID uint) (*model.ActivityParticipant, error)
+	FindFirstWaitlistedParticipant(ctx context.Context, activityID uint) (*model.ActivityParticipant, error)
 	CreateParticipant(ctx context.Context, participant *model.ActivityParticipant) error
 	UpdateParticipantStatus(ctx context.Context, activityID, userID uint, status string) error
+	CancelParticipantsByActivity(ctx context.Context, activityID uint) error
 	CountParticipants(ctx context.Context, activityIDs []uint) (map[uint]ParticipantCounters, error)
 	WithTx(ctx context.Context, fn func(repo ActivityRepository) error) error
 }
@@ -158,11 +160,35 @@ func (r *activityRepository) CreateParticipant(ctx context.Context, participant 
 	return r.db.WithContext(ctx).Create(participant).Error
 }
 
+func (r *activityRepository) FindFirstWaitlistedParticipant(ctx context.Context, activityID uint) (*model.ActivityParticipant, error) {
+	var participant model.ActivityParticipant
+	err := r.db.WithContext(ctx).
+		Where("activity_id = ? AND status = ?", activityID, model.ParticipantStatusWaitlisted).
+		Order("created_at asc").
+		First(&participant).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &participant, nil
+}
+
 func (r *activityRepository) UpdateParticipantStatus(ctx context.Context, activityID, userID uint, status string) error {
 	return r.db.WithContext(ctx).
 		Model(&model.ActivityParticipant{}).
 		Where("activity_id = ? AND user_id = ?", activityID, userID).
 		Update("status", status).Error
+}
+
+func (r *activityRepository) CancelParticipantsByActivity(ctx context.Context, activityID uint) error {
+	return r.db.WithContext(ctx).
+		Model(&model.ActivityParticipant{}).
+		Where("activity_id = ?", activityID).
+		Where("status IN ?", []string{model.ParticipantStatusRegistered, model.ParticipantStatusWaitlisted}).
+		Update("status", model.ParticipantStatusCancelled).Error
 }
 
 func (r *activityRepository) CountParticipants(ctx context.Context, activityIDs []uint) (map[uint]ParticipantCounters, error) {

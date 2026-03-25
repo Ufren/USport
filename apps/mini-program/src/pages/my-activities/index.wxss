@@ -1,0 +1,127 @@
+.my-activities-page {
+  gap: 24rpx;
+  padding: 24rpx 24rpx 48rpx;
+}
+
+.hero-card,
+.loading-card,
+.empty-card,
+.activity-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  padding: 28rpx;
+  border-radius: 28rpx;
+  border: 1rpx solid #dce2dd;
+  background: #ffffff;
+}
+
+.hero-card {
+  background: linear-gradient(180deg, #edf3ea 0%, #ffffff 100%);
+}
+
+.hero-eyebrow {
+  color: #156b52;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.hero-title,
+.toolbar-title,
+.empty-title,
+.activity-title {
+  color: #131714;
+  font-weight: 800;
+}
+
+.hero-title {
+  font-size: 42rpx;
+  line-height: 1.3;
+}
+
+.hero-subtitle,
+.loading-text,
+.empty-text,
+.activity-subtitle,
+.meta-text,
+.footer-hint {
+  color: #66726c;
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
+.filter-row,
+.toolbar,
+.activity-top,
+.activity-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.filter-row {
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  padding: 16rpx 24rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid #dce2dd;
+  background: #ffffff;
+  color: #2d3631;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.filter-chip--active {
+  border-color: #156b52;
+  background: #156b52;
+  color: #ffffff;
+}
+
+.toolbar-btn,
+.empty-btn,
+.ghost-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.toolbar-btn,
+.empty-btn {
+  background: #156b52;
+  color: #ffffff;
+}
+
+.ghost-btn {
+  border: 1rpx solid #dce2dd;
+  background: #ffffff;
+  color: #131714;
+}
+
+.activity-list,
+.meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.activity-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.status-badge {
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: #edf3ea;
+  color: #156b52;
+  font-size: 20rpx;
+  font-weight: 700;
+}

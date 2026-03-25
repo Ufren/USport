@@ -42,7 +42,12 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to connect to database", zap.Error(err))
 	}
-	if err := db.AutoMigrate(&model.User{}, &model.Activity{}, &model.ActivityParticipant{}); err != nil {
+	if err := db.AutoMigrate(
+		&model.User{},
+		&model.Activity{},
+		&model.ActivityParticipant{},
+		&model.Invitation{},
+	); err != nil {
 		log.Fatal("failed to migrate database schema", zap.Error(err))
 	}
 	defer closeDB(db)
@@ -65,18 +70,22 @@ func main() {
 	wechatSvc := wechat.NewWechatService(&cfg.Wechat)
 	userRepo := repository.NewUserRepository(db)
 	activityRepo := repository.NewActivityRepository(db)
+	invitationRepo := repository.NewInvitationRepository(db)
 
 	userSvc := service.NewUserService(userRepo, wechatSvc, rdb, cfg.JWT.Secret, cfg.JWT.Expire)
 	activitySvc := service.NewActivityService(activityRepo)
+	invitationSvc := service.NewInvitationService(db, invitationRepo, activityRepo)
 
 	userHandler := handler.NewUserHandler(userSvc)
 	activityHandler := handler.NewActivityHandler(activitySvc)
+	invitationHandler := handler.NewInvitationHandler(invitationSvc)
 
 	router := appserver.NewRouter(appserver.RouterDependencies{
-		Log:             log,
-		JWTSecret:       cfg.JWT.Secret,
-		UserHandler:     userHandler,
-		ActivityHandler: activityHandler,
+		Log:               log,
+		JWTSecret:         cfg.JWT.Secret,
+		UserHandler:       userHandler,
+		ActivityHandler:   activityHandler,
+		InvitationHandler: invitationHandler,
 	})
 
 	srv := &http.Server{

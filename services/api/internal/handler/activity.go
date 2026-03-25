@@ -145,6 +145,33 @@ func (h *ActivityHandler) CancelRegistration(c *gin.Context) {
 	response.Success(c, gin.H{"cancelled": true})
 }
 
+func (h *ActivityHandler) CancelActivity(c *gin.Context) {
+	activityID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "无效的活动 ID", err)
+		return
+	}
+
+	userID, ok := currentUserID(c)
+	if !ok {
+		return
+	}
+
+	if err := h.activitySvc.CancelActivity(c.Request.Context(), userID, uint(activityID)); err != nil {
+		switch err {
+		case service.ErrActivityNotFound:
+			response.Error(c, http.StatusNotFound, "活动不存在", err)
+		case service.ErrActivityNotHost:
+			response.Error(c, http.StatusForbidden, err.Error(), err)
+		default:
+			response.Error(c, http.StatusBadRequest, err.Error(), err)
+		}
+		return
+	}
+
+	response.Success(c, gin.H{"cancelled": true})
+}
+
 func currentUserID(c *gin.Context) (uint, bool) {
 	userIDValue, exists := c.Get(middleware.UserIDKey)
 	if !exists {

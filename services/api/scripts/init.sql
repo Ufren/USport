@@ -65,10 +65,27 @@ CREATE TABLE IF NOT EXISTS `activity_participants` (
   KEY `idx_activity_participants_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='活动参与表';
 
+CREATE TABLE IF NOT EXISTS `invitations` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `activity_id` bigint unsigned NOT NULL COMMENT '活动 ID',
+  `sender_user_id` bigint unsigned NOT NULL COMMENT '发起邀约的用户 ID',
+  `receiver_user_id` bigint unsigned NOT NULL COMMENT '接收邀约的用户 ID',
+  `message` varchar(255) DEFAULT NULL COMMENT '邀约附言',
+  `status` varchar(32) NOT NULL DEFAULT 'pending' COMMENT '邀约状态：pending / accepted / declined / expired',
+  `created_at` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `idx_invitations_activity_id` (`activity_id`),
+  KEY `idx_invitations_sender_user_id` (`sender_user_id`),
+  KEY `idx_invitations_receiver_user_id` (`receiver_user_id`),
+  KEY `idx_invitations_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='活动邀约表';
+
 INSERT INTO `users` (`id`, `openid`, `phone`, `nickname`, `status`)
 VALUES
   (1, 'dev:mock-phone-user', '13800138000', 'USport手机用户', 1),
-  (2, 'dev:mock-code-for-rn', NULL, 'USport体验官', 1)
+  (2, 'dev:mock-code-for-rn', NULL, 'USport体验官', 1),
+  (3, 'dev:mock-running-buddy', '13900139000', '晨跑搭子', 1)
 ON DUPLICATE KEY UPDATE
   `nickname` = VALUES(`nickname`),
   `phone` = VALUES(`phone`),
@@ -112,4 +129,12 @@ VALUES
   (1001, 2, 'registered'),
   (1002, 1, 'registered')
 ON DUPLICATE KEY UPDATE
+  `status` = VALUES(`status`);
+
+INSERT INTO `invitations` (`id`, `activity_id`, `sender_user_id`, `receiver_user_id`, `message`, `status`)
+VALUES
+  (4001, 1002, 1, 2, '周六晨跑这次节奏会比较稳，欢迎你一起来。', 'pending'),
+  (4002, 1001, 1, 2, '今晚这场羽毛球局还差两位稳定搭子，我觉得你会很适合。', 'accepted')
+ON DUPLICATE KEY UPDATE
+  `message` = VALUES(`message`),
   `status` = VALUES(`status`);

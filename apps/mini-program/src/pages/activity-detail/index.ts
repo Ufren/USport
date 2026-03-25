@@ -4,12 +4,13 @@
 } from "@usport/shared";
 import { getExperienceActivityDetail } from "@usport/shared";
 
+import { activityApi } from "../../services/activity";
 import {
   persistSignupStatus,
   readSignupStatus,
   resolveActivityDetail,
 } from "../../features/activity-flow/storage";
-import { showSuccess } from "../../utils/helpers";
+import { showError, showSuccess } from "../../utils/helpers";
 import { getUserInfo } from "../../utils/storage";
 import { buildActivityDetailPageState } from "./presenter";
 
@@ -23,18 +24,29 @@ Page({
   },
 
   onLoad(options?: Record<string, string | undefined>) {
-    this.loadPage(options?.id ?? "1001");
+    void this.loadPage(options?.id ?? "1001");
   },
 
   onShow() {
-    this.loadPage(this.data.currentActivityId || "1001");
+    void this.loadPage(this.data.currentActivityId || "1001");
   },
 
-  loadPage(activityId: string) {
+  async loadPage(activityId: string) {
     const userInfo = getUserInfo();
     const fallbackDetail = getExperienceActivityDetail(activityId);
-    const activityDetail = resolveActivityDetail(activityId, fallbackDetail);
-    const signupStatus = activityDetail ? readSignupStatus(activityId) : "none";
+    let activityDetail = resolveActivityDetail(activityId, fallbackDetail);
+
+    if (activityId !== "created") {
+      try {
+        activityDetail = await activityApi.detail(activityId);
+      } catch {
+        activityDetail = resolveActivityDetail(activityId, fallbackDetail);
+      }
+    }
+
+    const signupStatus = activityDetail
+      ? readSignupStatus(activityDetail.id)
+      : "none";
     const isLoggedIn = Boolean(userInfo?.id);
 
     this.setData({
@@ -47,6 +59,10 @@ Page({
   },
 
   onPrimaryAction() {
+    void this.handlePrimaryAction();
+  },
+
+  async handlePrimaryAction() {
     const { currentActivity, signupStatus, isLoggedIn } = this.data;
 
     if (!currentActivity) {
@@ -61,36 +77,36 @@ Page({
 
     if (signupStatus === "registered" || signupStatus === "waitlisted") {
       wx.showToast({
-        title: "\u4f60\u5df2\u7ecf\u5728\u8fd9\u573a\u6d3b\u52a8\u91cc\u4e86",
+        title: "你已经在这场活动里了",
         icon: "none",
       });
       return;
     }
 
-    let nextStatus: ActivitySignupStatus | null = null;
-    let successText = "";
-
-    if (currentActivity.status === "published") {
-      nextStatus = "registered";
-      successText = "\u62a5\u540d\u6210\u529f";
-    }
-
-    if (currentActivity.status === "full" && currentActivity.allowWaitlist) {
-      nextStatus = "waitlisted";
-      successText = "\u5df2\u8fdb\u5165\u5019\u8865";
-    }
-
-    if (!nextStatus) {
+    if (
+      currentActivity.status !== "published" &&
+      !(currentActivity.status === "full" && currentActivity.allowWaitlist)
+    ) {
       wx.showToast({
-        title: "\u5f53\u524d\u72b6\u6001\u6682\u4e0d\u53ef\u62a5\u540d",
+        title: "当前状态暂不可报名",
         icon: "none",
       });
       return;
     }
 
-    persistSignupStatus(currentActivity.id, nextStatus);
-    showSuccess(successText);
-    this.loadPage(currentActivity.id);
+    try {
+      const result = await activityApi.register(
+        currentActivity.sourceActivityId ?? currentActivity.id,
+      );
+      const nextStatus = result.status as ActivitySignupStatus;
+      persistSignupStatus(currentActivity.id, nextStatus);
+      showSuccess(nextStatus === "waitlisted" ? "已进入候补" : "报名成功");
+      await this.loadPage(
+        String(currentActivity.sourceActivityId ?? currentActivity.id),
+      );
+    } catch (error: unknown) {
+      showError(error instanceof Error ? error.message : "报名失败");
+    }
   },
 
   onSecondaryAction() {
@@ -100,7 +116,7 @@ Page({
     }
 
     wx.showToast({
-      title: "\u5206\u4eab\u80fd\u529b\u5f00\u53d1\u4e2d",
+      title: "分享能力开发中",
       icon: "none",
     });
   },

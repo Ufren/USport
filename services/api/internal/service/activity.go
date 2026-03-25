@@ -18,6 +18,7 @@ var (
 	ErrActivityNotFound      = errors.New("活动不存在")
 	ErrActivityCapacityFull  = errors.New("活动名额已满")
 	ErrActivityAlreadyJoined = errors.New("你已加入该活动")
+	ErrActivityNotHost       = errors.New("只有主办方可以取消活动")
 )
 
 type ActivityService interface {
@@ -27,6 +28,7 @@ type ActivityService interface {
 	CreateActivity(ctx context.Context, userID uint, req dto.CreateActivityRequest) (*dto.ActivityDetail, error)
 	RegisterActivity(ctx context.Context, userID, activityID uint) (*dto.RegisterActivityResult, error)
 	CancelRegistration(ctx context.Context, userID, activityID uint) error
+	CancelActivity(ctx context.Context, userID, activityID uint) error
 }
 
 type activityService struct {
@@ -213,64 +215,14 @@ func (s *activityService) CreateActivity(ctx context.Context, userID uint, req d
 }
 
 func (s *activityService) RegisterActivity(ctx context.Context, userID, activityID uint) (*dto.RegisterActivityResult, error) {
-	result := &dto.RegisterActivityResult{}
+	var result *dto.RegisterActivityResult
 
 	err := s.activityRepo.WithTx(ctx, func(repo repository.ActivityRepository) error {
-		activity, err := repo.LockByID(ctx, activityID)
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return ErrActivityNotFound
+		nextResult, registerErr := registerActivityParticipant(ctx, repo, activityID, userID)
+		if registerErr != nil {
+			return registerErr
 		}
-		if err != nil {
-			return err
-		}
-
-		existingParticipant, err := repo.FindParticipant(ctx, activityID, userID)
-		if err != nil {
-			return err
-		}
-		if existingParticipant != nil && existingParticipant.Status != model.ParticipantStatusCancelled {
-			return ErrActivityAlreadyJoined
-		}
-
-		counts, err := repo.CountParticipants(ctx, []uint{activityID})
-		if err != nil {
-			return err
-		}
-		current := counts[activityID]
-
-		status := model.ParticipantStatusRegistered
-		switch {
-		case current.Registered < int64(activity.Capacity):
-			status = model.ParticipantStatusRegistered
-		case activity.WaitlistCapacity > 0 && current.Waitlisted < int64(activity.WaitlistCapacity):
-			status = model.ParticipantStatusWaitlisted
-		default:
-			return ErrActivityCapacityFull
-		}
-
-		if err := repo.CreateParticipant(ctx, &model.ActivityParticipant{
-			ActivityID: activityID,
-			UserID:     userID,
-			Status:     status,
-		}); err != nil {
-			return err
-		}
-
-		if status == model.ParticipantStatusRegistered {
-			current.Registered++
-		} else {
-			current.Waitlisted++
-		}
-
-		nextStatus := assembler.DeriveActivityStatus(*activity, current)
-		if nextStatus != activity.Status {
-			if err := repo.UpdateStatus(ctx, activityID, nextStatus); err != nil {
-				return err
-			}
-		}
-
-		result.Status = status
-		result.ParticipantSummary = assembler.FormatParticipantSummary(activity.Capacity, activity.WaitlistCapacity, current)
+		result = nextResult
 		return nil
 	})
 	if err != nil {
@@ -317,6 +269,12 @@ func (s *activityService) CancelRegistration(ctx context.Context, userID, activi
 			current.Waitlisted--
 		}
 
+		if participant.Status == model.ParticipantStatusRegistered {
+			if err := s.promoteWaitlistedParticipant(ctx, repo, activityID, &current); err != nil {
+				return err
+			}
+		}
+
 		nextStatus := assembler.DeriveActivityStatus(*activity, current)
 		if nextStatus != activity.Status {
 			if err := repo.UpdateStatus(ctx, activityID, nextStatus); err != nil {
@@ -325,6 +283,31 @@ func (s *activityService) CancelRegistration(ctx context.Context, userID, activi
 		}
 
 		return nil
+	})
+}
+
+func (s *activityService) CancelActivity(ctx context.Context, userID, activityID uint) error {
+	return s.activityRepo.WithTx(ctx, func(repo repository.ActivityRepository) error {
+		activity, err := repo.LockByID(ctx, activityID)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrActivityNotFound
+		}
+		if err != nil {
+			return err
+		}
+
+		if activity.HostUserID != userID {
+			return ErrActivityNotHost
+		}
+		if activity.Status == model.ActivityStatusCancelled {
+			return nil
+		}
+
+		if err := repo.UpdateStatus(ctx, activityID, model.ActivityStatusCancelled); err != nil {
+			return err
+		}
+
+		return repo.CancelParticipantsByActivity(ctx, activityID)
 	})
 }
 
@@ -378,4 +361,35 @@ func maxInt(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func (s *activityService) promoteWaitlistedParticipant(
+	ctx context.Context,
+	repo repository.ActivityRepository,
+	activityID uint,
+	current *repository.ParticipantCounters,
+) error {
+	waitlistedParticipant, err := repo.FindFirstWaitlistedParticipant(ctx, activityID)
+	if err != nil {
+		return err
+	}
+	if waitlistedParticipant == nil {
+		return nil
+	}
+
+	if err := repo.UpdateParticipantStatus(
+		ctx,
+		activityID,
+		waitlistedParticipant.UserID,
+		model.ParticipantStatusRegistered,
+	); err != nil {
+		return err
+	}
+
+	current.Registered++
+	if current.Waitlisted > 0 {
+		current.Waitlisted--
+	}
+
+	return nil
 }
