@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>USport Admin</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div>
+          <p class="eyebrow">USport</p>
+          <h1>运营后台</h1>
+          <p class="sidebar-copy">聚焦治理、会员和运营履约的最小后台工作台。</p>
+        </div>
+
+        <section class="panel">
+          <h2>连接配置</h2>
+          <label class="field">
+            <span>接口地址</span>
+            <input
+              id="apiBase"
+              type="text"
+              placeholder="http://127.0.0.1:8080/api/v1"
+            />
+          </label>
+          <label class="field">
+            <span>后台令牌</span>
+            <input
+              id="adminToken"
+              type="password"
+              placeholder="usport-admin-dev"
+            />
+          </label>
+          <label class="field">
+            <span>操作人</span>
+            <input id="adminOperator" type="text" placeholder="ops.luna" />
+          </label>
+          <button id="reloadButton" class="primary-button">刷新后台数据</button>
+          <p id="statusText" class="status-text">等待连接</p>
+        </section>
+      </aside>
+
+      <main class="content">
+        <section class="hero">
+          <div>
+            <p class="eyebrow">治理总览</p>
+            <h2>把举报处理、会员订单和审计动作统一收口</h2>
+            <p class="hero-copy">
+              这一版后台优先服务冷启动运营，不追求复杂表单，而追求稳定、清晰、可追溯。
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <h3>核心指标</h3>
+            <button id="refreshDashboardButton" class="ghost-button">
+              刷新
+            </button>
+          </div>
+          <div id="dashboardGrid" class="metric-grid"></div>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <h3>举报工单</h3>
+            <select id="reportFilter" class="select">
+              <option value="">全部状态</option>
+              <option value="open">待处理</option>
+              <option value="in_review">处理中</option>
+              <option value="resolved_valid">有效</option>
+              <option value="resolved_invalid">无效</option>
+              <option value="closed">已关闭</option>
+            </select>
+          </div>
+          <div id="reportList" class="card-list"></div>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <h3>会员订单</h3>
+          </div>
+          <div id="orderList" class="card-list"></div>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <h3>审计日志</h3>
+          </div>
+          <div id="auditList" class="card-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

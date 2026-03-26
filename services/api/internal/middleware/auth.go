@@ -13,6 +13,7 @@ import (
 const (
 	AuthorizationHeader = "Authorization"
 	BearerPrefix        = "Bearer "
+	AdminTokenHeader    = "X-Admin-Token"
 	UserIDKey           = "user_id"
 )
 
@@ -87,10 +88,29 @@ func CORS() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization, X-Admin-Token")
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+
+		c.Next()
+	}
+}
+
+func AdminAuth(expectedToken string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token := strings.TrimSpace(c.GetHeader(AdminTokenHeader))
+		if token == "" {
+			response.Unauthorized(c, "缺少后台访问令牌")
+			c.Abort()
+			return
+		}
+
+		if token != expectedToken {
+			response.Unauthorized(c, "后台访问令牌无效")
+			c.Abort()
 			return
 		}
 

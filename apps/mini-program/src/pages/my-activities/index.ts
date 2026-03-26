@@ -118,7 +118,11 @@ Page({
       Record<string, never>,
       {
         id?: string | number;
-        action?: "cancel-registration" | "cancel-activity";
+        action?:
+          | "cancel-registration"
+          | "cancel-activity"
+          | "check-in"
+          | "finish";
         title?: string;
       }
     >,
@@ -134,10 +138,21 @@ Page({
     const modalContent =
       action === "cancel-activity"
         ? `确定取消「${title}」吗？已报名和候补用户都会收到取消结果。`
-        : `确定退出「${title}」吗？释放出的名额会自动补给候补用户。`;
+        : action === "check-in"
+          ? `确定为「${title}」完成签到吗？签到后会进入履约状态。`
+          : action === "finish"
+            ? `确定将「${title}」标记为已完赛吗？系统会同步收口参与者状态。`
+            : `确定退出「${title}」吗？释放出的名额会自动补给候补用户。`;
 
     wx.showModal({
-      title: action === "cancel-activity" ? "取消活动" : "退出活动",
+      title:
+        action === "cancel-activity"
+          ? "取消活动"
+          : action === "check-in"
+            ? "活动签到"
+            : action === "finish"
+              ? "完赛确认"
+              : "退出活动",
       content: modalContent,
       success: async (result) => {
         if (!result.confirm) {
@@ -148,6 +163,12 @@ Page({
           if (action === "cancel-activity") {
             await activityApi.cancelActivity(id);
             showSuccess("活动已取消");
+          } else if (action === "check-in") {
+            await activityApi.checkIn(id);
+            showSuccess("签到成功");
+          } else if (action === "finish") {
+            await activityApi.finish(id);
+            showSuccess("活动已完赛");
           } else {
             await activityApi.cancelRegistration(id);
             setActivitySignupStatus(id, "none");

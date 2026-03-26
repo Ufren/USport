@@ -58,6 +58,18 @@ export const activityApi = {
     );
   },
 
+  async checkIn(id: string | number): Promise<{ checkedIn: boolean }> {
+    return unwrapResponse(
+      await request.post<{ checkedIn: boolean }>(`/activities/${id}/check-in`),
+    );
+  },
+
+  async finish(id: string | number): Promise<{ finished: boolean }> {
+    return unwrapResponse(
+      await request.post<{ finished: boolean }>(`/activities/${id}/finish`),
+    );
+  },
+
   async cancelRegistration(
     id: string | number,
   ): Promise<{ cancelled: boolean }> {

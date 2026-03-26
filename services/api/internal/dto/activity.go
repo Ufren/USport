@@ -20,6 +20,7 @@ type CreateActivityRequest struct {
 
 type ActivityFeedItem struct {
 	ID                 uint     `json:"id"`
+	IsOfficial         bool     `json:"isOfficial"`
 	Title              string   `json:"title"`
 	Subtitle           string   `json:"subtitle"`
 	SportCode          string   `json:"sportCode"`
@@ -52,6 +53,7 @@ type ActivityHost struct {
 type ActivityDetail struct {
 	ID                  string             `json:"id"`
 	SourceActivityID    uint               `json:"sourceActivityId"`
+	IsOfficial          bool               `json:"isOfficial"`
 	Title               string             `json:"title"`
 	SportCode           string             `json:"sportCode"`
 	SportLabel          string             `json:"sportLabel"`
@@ -96,4 +98,6 @@ type MyActivityItem struct {
 	RegistrationStatus string         `json:"registrationStatus,omitempty"`
 	CanCancel          bool           `json:"canCancel"`
 	CanManage          bool           `json:"canManage"`
+	CanCheckIn         bool           `json:"canCheckIn"`
+	CanFinish          bool           `json:"canFinish"`
 }

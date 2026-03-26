@@ -1,0 +1,83 @@
+<view class="container credit-page">
+  <view class="hero-card">
+    <text class="hero-eyebrow">USport / 信用与履约</text>
+    <text class="hero-title">把履约、风险和举报处理收在一个工作区</text>
+    <text class="hero-subtitle">
+      信用会真实作用于推荐、邀约通过率和活动曝光，所以必须清晰、可解释。
+    </text>
+  </view>
+
+  <view wx:if="{{summary}}" class="score-card">
+    <text class="score-value">{{summary.score}}</text>
+    <text class="score-level">{{summary.levelLabel}}</text>
+    <text class="score-hint">{{summary.improvementSuggestion}}</text>
+    <text class="score-meta">
+      稳定记录 {{summary.positiveCount}} · 风险记录 {{summary.riskCount}} · 履约率 {{summary.completionRate}}
+    </text>
+  </view>
+
+  <view class="section-card">
+    <view class="section-header">
+      <text class="section-title">最近信用记录</text>
+      <text class="section-subtitle">让用户知道自己的信用变化来自哪些行为。</text>
+    </view>
+    <view wx:if="{{summary && summary.recentRecords.length > 0}}" class="list">
+      <view wx:for="{{summary.recentRecords}}" wx:key="id" class="list-card">
+        <view class="list-top">
+          <text class="list-title">{{item.label}}</text>
+          <text class="list-delta">{{item.delta}}</text>
+        </view>
+        <text class="list-copy">{{item.description}}</text>
+        <text class="list-time">{{item.createdAt}}</text>
+      </view>
+    </view>
+    <view wx:else class="list-card">
+      <text class="list-copy">当前还没有信用变化记录。</text>
+    </view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-header">
+      <text class="section-title">提交举报</text>
+      <text class="section-subtitle">先把清晰、最小可运营的举报入口建立起来。</text>
+    </view>
+    <view class="reason-row">
+      <view
+        wx:for="{{reasonOptions}}"
+        wx:key="value"
+        class="reason-chip {{selectedReason === item.value ? 'reason-chip--active' : ''}}"
+        bindtap="onReasonTap"
+        data-value="{{item.value}}"
+      >
+        {{item.label}}
+      </view>
+    </view>
+    <textarea
+      class="textarea"
+      placeholder="补充现场情况、时间点以及你观察到的问题。"
+      value="{{description}}"
+      bindinput="onDescriptionInput"
+    />
+    <button class="submit-btn" bindtap="onSubmitReport">提交举报</button>
+  </view>
+
+  <view class="section-card">
+    <view class="section-header">
+      <text class="section-title">我的举报</text>
+      <text class="section-subtitle">让举报人知道自己的工单没有石沉大海。</text>
+    </view>
+    <view wx:if="{{reports.length > 0}}" class="list">
+      <view wx:for="{{reports}}" wx:key="id" class="list-card">
+        <view class="list-top">
+          <text class="list-title">{{item.reasonCode}}</text>
+          <text class="list-status">{{item.statusLabel}}</text>
+        </view>
+        <text class="list-copy">{{item.description}}</text>
+        <text class="list-time">{{item.createdAtLabel}}</text>
+      </view>
+    </view>
+    <view wx:else class="list-card">
+      <text class="list-copy">你还没有提交过举报。</text>
+    </view>
+  </view>
+</view>

@@ -27,6 +27,8 @@ type ActivityService interface {
 	ListMyActivities(ctx context.Context, userID uint, role string) ([]dto.MyActivityItem, error)
 	CreateActivity(ctx context.Context, userID uint, req dto.CreateActivityRequest) (*dto.ActivityDetail, error)
 	RegisterActivity(ctx context.Context, userID, activityID uint) (*dto.RegisterActivityResult, error)
+	CheckInActivity(ctx context.Context, userID, activityID uint) error
+	FinishActivity(ctx context.Context, userID, activityID uint) error
 	CancelRegistration(ctx context.Context, userID, activityID uint) error
 	CancelActivity(ctx context.Context, userID, activityID uint) error
 }

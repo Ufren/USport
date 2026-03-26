@@ -19,6 +19,8 @@ const (
 const (
 	ParticipantStatusRegistered = "registered"
 	ParticipantStatusWaitlisted = "waitlisted"
+	ParticipantStatusCheckedIn  = "checked_in"
+	ParticipantStatusFinished   = "finished"
 	ParticipantStatusCancelled  = "cancelled"
 )
 
@@ -27,6 +29,34 @@ const (
 	InvitationStatusAccepted = "accepted"
 	InvitationStatusDeclined = "declined"
 	InvitationStatusExpired  = "expired"
+)
+
+const (
+	ReportStatusOpen            = "open"
+	ReportStatusInReview        = "in_review"
+	ReportStatusResolvedValid   = "resolved_valid"
+	ReportStatusResolvedInvalid = "resolved_invalid"
+	ReportStatusClosed          = "closed"
+)
+
+const (
+	CreditEventAttendanceStable = "attendance_stable"
+	CreditEventLateCancel       = "late_cancel"
+	CreditEventNoShow           = "no_show"
+	CreditEventReportValid      = "report_valid"
+)
+
+const (
+	OrderStatusPending  = "pending"
+	OrderStatusPaid     = "paid"
+	OrderStatusClosed   = "closed"
+	OrderStatusRefunded = "refunded"
+	OrderStatusFailed   = "failed"
+)
+
+const (
+	SubscriptionStatusActive  = "active"
+	SubscriptionStatusExpired = "expired"
 )
 
 type User struct {
@@ -49,6 +79,7 @@ type Activity struct {
 	ID               uint      `json:"id" gorm:"primaryKey"`
 	HostUserID       uint      `json:"hostUserId" gorm:"index;not null"`
 	HostUser         User      `json:"hostUser" gorm:"foreignKey:HostUserID"`
+	IsOfficial       bool      `json:"isOfficial" gorm:"not null;default:false"`
 	Title            string    `json:"title" gorm:"size:120;not null"`
 	Description      string    `json:"description" gorm:"type:text"`
 	SportCode        string    `json:"sportCode" gorm:"size:32;index;not null"`
@@ -105,4 +136,98 @@ type Invitation struct {
 
 func (Invitation) TableName() string {
 	return "invitations"
+}
+
+type Report struct {
+	ID             uint      `json:"id" gorm:"primaryKey"`
+	ReporterUserID uint      `json:"reporterUserId" gorm:"index;not null"`
+	ReporterUser   User      `json:"reporterUser" gorm:"foreignKey:ReporterUserID"`
+	TargetType     string    `json:"targetType" gorm:"size:32;index;not null"`
+	TargetID       uint      `json:"targetId" gorm:"index;not null"`
+	ReasonCode     string    `json:"reasonCode" gorm:"size:64;not null"`
+	Description    string    `json:"description" gorm:"size:500"`
+	Status         string    `json:"status" gorm:"size:32;index;not null;default:'open'"`
+	CreatedAt      time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt      time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+}
+
+func (Report) TableName() string {
+	return "reports"
+}
+
+type CreditRecord struct {
+	ID          uint      `json:"id" gorm:"primaryKey"`
+	UserID      uint      `json:"userId" gorm:"index;not null"`
+	User        User      `json:"user" gorm:"foreignKey:UserID"`
+	EventCode   string    `json:"eventCode" gorm:"size:64;index;not null"`
+	Delta       int       `json:"delta" gorm:"not null"`
+	Description string    `json:"description" gorm:"size:255"`
+	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime"`
+}
+
+func (CreditRecord) TableName() string {
+	return "credit_records"
+}
+
+type MembershipPlan struct {
+	ID           uint      `json:"id" gorm:"primaryKey"`
+	Code         string    `json:"code" gorm:"size:32;uniqueIndex;not null"`
+	Name         string    `json:"name" gorm:"size:64;not null"`
+	PriceCents   int       `json:"priceCents" gorm:"not null"`
+	DurationDays int       `json:"durationDays" gorm:"not null"`
+	Description  string    `json:"description" gorm:"size:255"`
+	Benefits     []string  `json:"benefits" gorm:"serializer:json"`
+	IsActive     bool      `json:"isActive" gorm:"not null;default:true"`
+	CreatedAt    time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt    time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+}
+
+func (MembershipPlan) TableName() string {
+	return "membership_plans"
+}
+
+type Subscription struct {
+	ID        uint      `json:"id" gorm:"primaryKey"`
+	UserID    uint      `json:"userId" gorm:"index;not null"`
+	User      User      `json:"user" gorm:"foreignKey:UserID"`
+	PlanCode  string    `json:"planCode" gorm:"size:32;index;not null"`
+	Status    string    `json:"status" gorm:"size:32;index;not null"`
+	StartAt   time.Time `json:"startAt"`
+	ExpireAt  time.Time `json:"expireAt"`
+	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+}
+
+func (Subscription) TableName() string {
+	return "subscriptions"
+}
+
+type PaymentOrder struct {
+	ID          uint      `json:"id" gorm:"primaryKey"`
+	UserID      uint      `json:"userId" gorm:"index;not null"`
+	User        User      `json:"user" gorm:"foreignKey:UserID"`
+	PlanCode    string    `json:"planCode" gorm:"size:32;index;not null"`
+	AmountCents int       `json:"amountCents" gorm:"not null"`
+	Status      string    `json:"status" gorm:"size:32;index;not null"`
+	PaidAt      time.Time `json:"paidAt"`
+	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt   time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+}
+
+func (PaymentOrder) TableName() string {
+	return "payment_orders"
+}
+
+type AdminAuditLog struct {
+	ID         uint      `json:"id" gorm:"primaryKey"`
+	Operator   string    `json:"operator" gorm:"size:64;not null"`
+	ActionCode string    `json:"actionCode" gorm:"size:64;index;not null"`
+	TargetType string    `json:"targetType" gorm:"size:32;index;not null"`
+	TargetID   uint      `json:"targetId" gorm:"index;not null"`
+	Detail     string    `json:"detail" gorm:"size:500"`
+	CreatedAt  time.Time `json:"created_at" gorm:"autoCreateTime"`
+}
+
+func (AdminAuditLog) TableName() string {
+	return "admin_audit_logs"
 }

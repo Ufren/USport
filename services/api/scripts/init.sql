@@ -81,6 +81,91 @@ CREATE TABLE IF NOT EXISTS `invitations` (
   KEY `idx_invitations_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='活动邀约表';
 
+CREATE TABLE IF NOT EXISTS `reports` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `reporter_user_id` bigint unsigned NOT NULL COMMENT '举报人用户 ID',
+  `target_type` varchar(32) NOT NULL COMMENT '举报对象类型',
+  `target_id` bigint unsigned NOT NULL COMMENT '举报对象 ID',
+  `reason_code` varchar(64) NOT NULL COMMENT '举报原因编码',
+  `description` varchar(500) DEFAULT NULL COMMENT '举报补充说明',
+  `status` varchar(32) NOT NULL DEFAULT 'open' COMMENT '举报状态',
+  `created_at` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `idx_reports_reporter_user_id` (`reporter_user_id`),
+  KEY `idx_reports_target` (`target_type`,`target_id`),
+  KEY `idx_reports_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='举报工单表';
+
+CREATE TABLE IF NOT EXISTS `credit_records` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL COMMENT '用户 ID',
+  `event_code` varchar(64) NOT NULL COMMENT '信用事件编码',
+  `delta` int NOT NULL COMMENT '信用分变动',
+  `description` varchar(255) DEFAULT NULL COMMENT '信用事件说明',
+  `created_at` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `idx_credit_records_user_id` (`user_id`),
+  KEY `idx_credit_records_event_code` (`event_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='信用记录表';
+
+CREATE TABLE IF NOT EXISTS `membership_plans` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `code` varchar(32) NOT NULL COMMENT '套餐编码',
+  `name` varchar(64) NOT NULL COMMENT '套餐名称',
+  `price_cents` int NOT NULL COMMENT '价格（分）',
+  `duration_days` int NOT NULL COMMENT '有效天数',
+  `description` varchar(255) DEFAULT NULL COMMENT '套餐说明',
+  `benefits` json DEFAULT NULL COMMENT '权益列表',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1' COMMENT '是否可售',
+  `created_at` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_membership_plans_code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会员套餐表';
+
+CREATE TABLE IF NOT EXISTS `subscriptions` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL COMMENT '用户 ID',
+  `plan_code` varchar(32) NOT NULL COMMENT '套餐编码',
+  `status` varchar(32) NOT NULL COMMENT '订阅状态',
+  `start_at` datetime DEFAULT NULL COMMENT '生效时间',
+  `expire_at` datetime DEFAULT NULL COMMENT '过期时间',
+  `created_at` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `idx_subscriptions_user_id` (`user_id`),
+  KEY `idx_subscriptions_plan_code` (`plan_code`),
+  KEY `idx_subscriptions_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会员订阅表';
+
+CREATE TABLE IF NOT EXISTS `payment_orders` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL COMMENT '用户 ID',
+  `plan_code` varchar(32) NOT NULL COMMENT '套餐编码',
+  `amount_cents` int NOT NULL COMMENT '订单金额（分）',
+  `status` varchar(32) NOT NULL COMMENT '订单状态',
+  `created_at` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `idx_payment_orders_user_id` (`user_id`),
+  KEY `idx_payment_orders_plan_code` (`plan_code`),
+  KEY `idx_payment_orders_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会员订单表';
+
+CREATE TABLE IF NOT EXISTS `admin_audit_logs` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `operator` varchar(64) NOT NULL COMMENT '后台操作人',
+  `action_code` varchar(64) NOT NULL COMMENT '操作类型',
+  `target_type` varchar(32) NOT NULL COMMENT '目标类型',
+  `target_id` bigint unsigned NOT NULL COMMENT '目标 ID',
+  `detail` varchar(500) DEFAULT NULL COMMENT '补充说明',
+  `created_at` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `idx_admin_audit_logs_action_code` (`action_code`),
+  KEY `idx_admin_audit_logs_target` (`target_type`,`target_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='后台审计日志表';
+
 INSERT INTO `users` (`id`, `openid`, `phone`, `nickname`, `status`)
 VALUES
   (1, 'dev:mock-phone-user', '13800138000', 'USport手机用户', 1),
@@ -138,3 +223,57 @@ VALUES
 ON DUPLICATE KEY UPDATE
   `message` = VALUES(`message`),
   `status` = VALUES(`status`);
+
+INSERT INTO `reports` (`id`, `reporter_user_id`, `target_type`, `target_id`, `reason_code`, `description`, `status`)
+VALUES
+  (5001, 2, 'activity', 1001, 'host_no_show', '主办方临时迟到，现场组织比较混乱。', 'in_review'),
+  (5002, 1, 'user', 2, 'spam_invite', '短时间内重复发送无关邀约。', 'resolved_invalid')
+ON DUPLICATE KEY UPDATE
+  `description` = VALUES(`description`),
+  `status` = VALUES(`status`);
+
+INSERT INTO `credit_records` (`id`, `user_id`, `event_code`, `delta`, `description`)
+VALUES
+  (6001, 1, 'attendance_stable', 4, '连续 3 场稳定到场'),
+  (6002, 1, 'attendance_stable', 2, '本周履约表现稳定'),
+  (6003, 2, 'late_cancel', -6, '活动开始前 1 小时临时取消'),
+  (6004, 2, 'report_valid', -8, '举报成立，推荐权重下调')
+ON DUPLICATE KEY UPDATE
+  `delta` = VALUES(`delta`),
+  `description` = VALUES(`description`);
+
+INSERT INTO `membership_plans` (`id`, `code`, `name`, `price_cents`, `duration_days`, `description`, `benefits`, `is_active`)
+VALUES
+  (7001, 'starter_month', '月度会员', 1990, 30, '适合稳定每周参加 2-3 次同城运动局的用户。', JSON_ARRAY('活动曝光提升', '高级筛选', '推荐优先展示'), 1),
+  (7002, 'season_pass', '季度会员', 4990, 90, '适合持续找搭子、频繁组局和沉淀履约信用的深度用户。', JSON_ARRAY('更高曝光加权', '优先候补转正', '更完整履约数据看板'), 1)
+ON DUPLICATE KEY UPDATE
+  `name` = VALUES(`name`),
+  `price_cents` = VALUES(`price_cents`),
+  `duration_days` = VALUES(`duration_days`),
+  `description` = VALUES(`description`),
+  `benefits` = VALUES(`benefits`),
+  `is_active` = VALUES(`is_active`);
+
+INSERT INTO `subscriptions` (`id`, `user_id`, `plan_code`, `status`, `start_at`, `expire_at`)
+VALUES
+  (8001, 1, 'season_pass', 'active', '2026-03-01 00:00:00', '2026-05-30 23:59:59')
+ON DUPLICATE KEY UPDATE
+  `plan_code` = VALUES(`plan_code`),
+  `status` = VALUES(`status`),
+  `start_at` = VALUES(`start_at`),
+  `expire_at` = VALUES(`expire_at`);
+
+INSERT INTO `payment_orders` (`id`, `user_id`, `plan_code`, `amount_cents`, `status`)
+VALUES
+  (9001, 1, 'season_pass', 4990, 'paid'),
+  (9002, 2, 'starter_month', 1990, 'paid')
+ON DUPLICATE KEY UPDATE
+  `amount_cents` = VALUES(`amount_cents`),
+  `status` = VALUES(`status`);
+
+INSERT INTO `admin_audit_logs` (`id`, `operator`, `action_code`, `target_type`, `target_id`, `detail`)
+VALUES
+  (10001, 'ops.luna', 'report_in_review', 'report', 5001, '已转入人工复核'),
+  (10002, 'ops.luna', 'report_resolved_invalid', 'report', 5002, '证据不足，关闭工单')
+ON DUPLICATE KEY UPDATE
+  `detail` = VALUES(`detail`);

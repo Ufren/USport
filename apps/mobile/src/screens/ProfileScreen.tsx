@@ -114,6 +114,16 @@ export default function ProfileScreen() {
                   return;
                 }
 
+                if (item.id === "credit") {
+                  navigation.navigate("CreditCenter");
+                  return;
+                }
+
+                if (item.id === "membership") {
+                  navigation.navigate("MembershipCenter");
+                  return;
+                }
+
                 Alert.alert(
                   "开发中",
                   `${item.title} 会在下一阶段接入真实流程。`,

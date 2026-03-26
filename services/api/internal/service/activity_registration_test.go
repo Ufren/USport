@@ -86,6 +86,20 @@ func (r *fakeActivityRepository) UpdateParticipantStatus(_ context.Context, acti
 	return errors.New("participant not found")
 }
 
+func (r *fakeActivityRepository) FinishParticipantsByActivity(_ context.Context, activityID uint) error {
+	for index := range r.participants {
+		if r.participants[index].ActivityID != activityID {
+			continue
+		}
+		if r.participants[index].Status == model.ParticipantStatusRegistered ||
+			r.participants[index].Status == model.ParticipantStatusCheckedIn {
+			r.participants[index].Status = model.ParticipantStatusFinished
+		}
+	}
+
+	return nil
+}
+
 func (r *fakeActivityRepository) CancelParticipantsByActivity(context.Context, uint) error {
 	return nil
 }

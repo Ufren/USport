@@ -47,6 +47,12 @@ func main() {
 		&model.Activity{},
 		&model.ActivityParticipant{},
 		&model.Invitation{},
+		&model.Report{},
+		&model.CreditRecord{},
+		&model.MembershipPlan{},
+		&model.Subscription{},
+		&model.PaymentOrder{},
+		&model.AdminAuditLog{},
 	); err != nil {
 		log.Fatal("failed to migrate database schema", zap.Error(err))
 	}
@@ -71,14 +77,24 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	activityRepo := repository.NewActivityRepository(db)
 	invitationRepo := repository.NewInvitationRepository(db)
+	reportRepo := repository.NewReportRepository(db)
+	creditRepo := repository.NewCreditRepository(db)
+	membershipRepo := repository.NewMembershipRepository(db)
+	adminRepo := repository.NewAdminRepository(db)
 
 	userSvc := service.NewUserService(userRepo, wechatSvc, rdb, cfg.JWT.Secret, cfg.JWT.Expire)
 	activitySvc := service.NewActivityService(activityRepo)
 	invitationSvc := service.NewInvitationService(db, invitationRepo, activityRepo)
+	governanceSvc := service.NewGovernanceService(reportRepo, creditRepo)
+	membershipSvc := service.NewMembershipService(membershipRepo)
+	adminSvc := service.NewAdminService(adminRepo, activityRepo)
 
 	userHandler := handler.NewUserHandler(userSvc)
 	activityHandler := handler.NewActivityHandler(activitySvc)
 	invitationHandler := handler.NewInvitationHandler(invitationSvc)
+	governanceHandler := handler.NewGovernanceHandler(governanceSvc)
+	membershipHandler := handler.NewMembershipHandler(membershipSvc)
+	adminHandler := handler.NewAdminHandler(adminSvc)
 
 	router := appserver.NewRouter(appserver.RouterDependencies{
 		Log:               log,
@@ -86,6 +102,10 @@ func main() {
 		UserHandler:       userHandler,
 		ActivityHandler:   activityHandler,
 		InvitationHandler: invitationHandler,
+		GovernanceHandler: governanceHandler,
+		MembershipHandler: membershipHandler,
+		AdminHandler:      adminHandler,
+		AdminToken:        cfg.Admin.Token,
 	})
 
 	srv := &http.Server{

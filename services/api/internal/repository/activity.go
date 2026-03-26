@@ -31,6 +31,7 @@ type ActivityRepository interface {
 	FindFirstWaitlistedParticipant(ctx context.Context, activityID uint) (*model.ActivityParticipant, error)
 	CreateParticipant(ctx context.Context, participant *model.ActivityParticipant) error
 	UpdateParticipantStatus(ctx context.Context, activityID, userID uint, status string) error
+	FinishParticipantsByActivity(ctx context.Context, activityID uint) error
 	CancelParticipantsByActivity(ctx context.Context, activityID uint) error
 	CountParticipants(ctx context.Context, activityIDs []uint) (map[uint]ParticipantCounters, error)
 	WithTx(ctx context.Context, fn func(repo ActivityRepository) error) error
@@ -70,7 +71,12 @@ func (r *activityRepository) ListJoinedByUser(ctx context.Context, userID uint, 
 	var participants []model.ActivityParticipant
 	if err := r.db.WithContext(ctx).
 		Where("user_id = ?", userID).
-		Where("status IN ?", []string{model.ParticipantStatusRegistered, model.ParticipantStatusWaitlisted}).
+		Where("status IN ?", []string{
+			model.ParticipantStatusRegistered,
+			model.ParticipantStatusWaitlisted,
+			model.ParticipantStatusCheckedIn,
+			model.ParticipantStatusFinished,
+		}).
 		Order("created_at desc").
 		Limit(limit).
 		Find(&participants).Error; err != nil {
@@ -183,11 +189,26 @@ func (r *activityRepository) UpdateParticipantStatus(ctx context.Context, activi
 		Update("status", status).Error
 }
 
+func (r *activityRepository) FinishParticipantsByActivity(ctx context.Context, activityID uint) error {
+	return r.db.WithContext(ctx).
+		Model(&model.ActivityParticipant{}).
+		Where("activity_id = ?", activityID).
+		Where("status IN ?", []string{
+			model.ParticipantStatusRegistered,
+			model.ParticipantStatusCheckedIn,
+		}).
+		Update("status", model.ParticipantStatusFinished).Error
+}
+
 func (r *activityRepository) CancelParticipantsByActivity(ctx context.Context, activityID uint) error {
 	return r.db.WithContext(ctx).
 		Model(&model.ActivityParticipant{}).
 		Where("activity_id = ?", activityID).
-		Where("status IN ?", []string{model.ParticipantStatusRegistered, model.ParticipantStatusWaitlisted}).
+		Where("status IN ?", []string{
+			model.ParticipantStatusRegistered,
+			model.ParticipantStatusWaitlisted,
+			model.ParticipantStatusCheckedIn,
+		}).
 		Update("status", model.ParticipantStatusCancelled).Error
 }
 
@@ -208,7 +229,12 @@ func (r *activityRepository) CountParticipants(ctx context.Context, activityIDs 
 		Model(&model.ActivityParticipant{}).
 		Select("activity_id, status, COUNT(*) AS count").
 		Where("activity_id IN ?", activityIDs).
-		Where("status IN ?", []string{model.ParticipantStatusRegistered, model.ParticipantStatusWaitlisted}).
+		Where("status IN ?", []string{
+			model.ParticipantStatusRegistered,
+			model.ParticipantStatusWaitlisted,
+			model.ParticipantStatusCheckedIn,
+			model.ParticipantStatusFinished,
+		}).
 		Group("activity_id, status").
 		Find(&rows).Error
 	if err != nil {
@@ -218,10 +244,10 @@ func (r *activityRepository) CountParticipants(ctx context.Context, activityIDs 
 	for _, item := range rows {
 		current := result[item.ActivityID]
 		switch item.Status {
-		case model.ParticipantStatusRegistered:
-			current.Registered = item.Count
+		case model.ParticipantStatusRegistered, model.ParticipantStatusCheckedIn, model.ParticipantStatusFinished:
+			current.Registered += item.Count
 		case model.ParticipantStatusWaitlisted:
-			current.Waitlisted = item.Count
+			current.Waitlisted += item.Count
 		}
 		result[item.ActivityID] = current
 	}

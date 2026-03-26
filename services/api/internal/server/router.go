@@ -13,6 +13,10 @@ type RouterDependencies struct {
 	UserHandler       *handler.UserHandler
 	ActivityHandler   *handler.ActivityHandler
 	InvitationHandler *handler.InvitationHandler
+	GovernanceHandler *handler.GovernanceHandler
+	MembershipHandler *handler.MembershipHandler
+	AdminHandler      *handler.AdminHandler
+	AdminToken        string
 }
 
 func NewRouter(deps RouterDependencies) *gin.Engine {
@@ -41,6 +45,8 @@ func NewRouter(deps RouterDependencies) *gin.Engine {
 			activities.GET("/:id", deps.ActivityHandler.Detail)
 			activities.POST("", middleware.Auth(deps.JWTSecret), deps.ActivityHandler.Create)
 			activities.POST("/:id/register", middleware.Auth(deps.JWTSecret), deps.ActivityHandler.Register)
+			activities.POST("/:id/check-in", middleware.Auth(deps.JWTSecret), deps.ActivityHandler.CheckIn)
+			activities.POST("/:id/finish", middleware.Auth(deps.JWTSecret), deps.ActivityHandler.Finish)
 			activities.POST("/:id/cancel-registration", middleware.Auth(deps.JWTSecret), deps.ActivityHandler.CancelRegistration)
 			activities.POST("/:id/cancel", middleware.Auth(deps.JWTSecret), deps.ActivityHandler.CancelActivity)
 		}
@@ -54,6 +60,27 @@ func NewRouter(deps RouterDependencies) *gin.Engine {
 		messages := api.Group("/messages", middleware.Auth(deps.JWTSecret))
 		{
 			messages.GET("", deps.InvitationHandler.MessagePreviews)
+		}
+
+		governance := api.Group("", middleware.Auth(deps.JWTSecret))
+		{
+			governance.GET("/users/me/credit-summary", deps.GovernanceHandler.CreditSummary)
+			governance.GET("/reports", deps.GovernanceHandler.ListMyReports)
+			governance.POST("/reports", deps.GovernanceHandler.CreateReport)
+			governance.GET("/membership/plans", deps.MembershipHandler.ListPlans)
+			governance.GET("/membership/summary", deps.MembershipHandler.Summary)
+			governance.GET("/membership/orders", deps.MembershipHandler.ListOrders)
+			governance.POST("/membership/orders", deps.MembershipHandler.CreateOrder)
+		}
+
+		admin := api.Group("/admin", middleware.AdminAuth(deps.AdminToken))
+		{
+			admin.GET("/dashboard", deps.AdminHandler.Dashboard)
+			admin.POST("/activities", deps.AdminHandler.CreateOfficialActivity)
+			admin.GET("/reports", deps.AdminHandler.Reports)
+			admin.POST("/reports/:id/decision", deps.AdminHandler.DecideReport)
+			admin.GET("/membership/orders", deps.AdminHandler.MembershipOrders)
+			admin.GET("/audit-logs", deps.AdminHandler.AuditLogs)
 		}
 	}
 

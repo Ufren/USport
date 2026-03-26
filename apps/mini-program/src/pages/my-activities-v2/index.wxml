@@ -1,0 +1,75 @@
+<view class="container my-activities-page">
+  <view class="hero-card">
+    <text class="hero-eyebrow">USport / 我的活动</text>
+    <text class="hero-title">把发起、报名、签到和完赛都收进同一个工作区</text>
+    <text class="hero-subtitle">先把履约状态管理清楚，再往后做更复杂的复约运营。</text>
+  </view>
+
+  <view class="filter-row">
+    <view
+      class="filter-chip {{role === item.value ? 'filter-chip--active' : ''}}"
+      wx:for="{{roleOptions}}"
+      wx:key="value"
+      bindtap="onRoleTap"
+      data-role="{{item.value}}"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
+  <view class="toolbar">
+    <text class="toolbar-title">活动清单</text>
+    <button class="toolbar-btn" size="mini" bindtap="onPrimaryAction">发起活动</button>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading-card">
+    <text class="loading-text">正在同步你的活动...</text>
+  </view>
+
+  <view wx:elif="{{items.length === 0}}" class="empty-card">
+    <text class="empty-title">{{emptyTitle}}</text>
+    <text class="empty-text">{{emptyDescription}}</text>
+    <button class="empty-btn" bindtap="onEmptyAction">
+      {{role === 'host' ? '去发起活动' : '去发现活动'}}
+    </button>
+  </view>
+
+  <view wx:else class="activity-list">
+    <view
+      class="activity-card"
+      wx:for="{{items}}"
+      wx:key="id"
+      bindtap="onActivityTap"
+      data-id="{{item.id}}"
+    >
+      <view class="activity-top">
+        <view class="activity-copy">
+          <text class="activity-title">{{item.title}}</text>
+          <text class="activity-subtitle">{{item.subtitle}}</text>
+        </view>
+        <text class="status-badge">{{item.statusLabel}}</text>
+      </view>
+
+      <view class="meta-list">
+        <text class="meta-text">{{item.startTimeLabel}}</text>
+        <text class="meta-text">{{item.district}} · {{item.venueName}}</text>
+        <text class="meta-text">{{item.feeLabel}} · {{item.participantSummary}}</text>
+      </view>
+
+      <view class="activity-footer">
+        <text class="footer-hint">{{item.attendanceLabel}}</text>
+
+        <button
+          wx:if="{{item.actionLabel}}"
+          class="ghost-btn"
+          size="mini"
+          catchtap="onManageTap"
+          data-id="{{item.id}}"
+          data-title="{{item.title}}"
+        >
+          {{item.actionLabel}}
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

@@ -58,12 +58,22 @@ Page({
     const menuType = String(e.currentTarget.dataset.type ?? "");
 
     if (menuType === "activities") {
-      wx.navigateTo({ url: "/pages/my-activities/index" });
+      wx.navigateTo({ url: "/pages/my-activities-v2/index" });
       return;
     }
 
     if (menuType === "invitations") {
       wx.navigateTo({ url: "/pages/invitations/index" });
+      return;
+    }
+
+    if (menuType === "credit") {
+      wx.navigateTo({ url: "/pages/credit-center-v2/index" });
+      return;
+    }
+
+    if (menuType === "membership") {
+      wx.navigateTo({ url: "/pages/membership-center/index" });
       return;
     }
 

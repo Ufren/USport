@@ -16,6 +16,7 @@ func ToActivityFeedItem(activity model.Activity, count repository.ParticipantCou
 
 	return dto.ActivityFeedItem{
 		ID:                 activity.ID,
+		IsOfficial:         activity.IsOfficial,
 		Title:              activity.Title,
 		Subtitle:           buildSubtitle(activity),
 		SportCode:          activity.SportCode,
@@ -54,6 +55,7 @@ func ToActivityDetail(activity model.Activity, count repository.ParticipantCount
 	return dto.ActivityDetail{
 		ID:                  strconv.FormatUint(uint64(activity.ID), 10),
 		SourceActivityID:    activity.ID,
+		IsOfficial:          activity.IsOfficial,
 		Title:               activity.Title,
 		SportCode:           activity.SportCode,
 		SportLabel:          activity.SportLabel,
@@ -93,13 +95,21 @@ func ToMyActivityItem(
 	registrationStatus string,
 ) dto.MyActivityItem {
 	feed := ToActivityFeedItem(activity, count)
+	status := DeriveActivityStatus(activity, count)
 
 	return dto.MyActivityItem{
 		ActivityFeedItem:   feed,
 		Role:               role,
 		RegistrationStatus: registrationStatus,
-		CanCancel:          role == dto.MyActivityRoleParticipant,
-		CanManage:          role == dto.MyActivityRoleHost,
+		CanCancel: role == dto.MyActivityRoleParticipant &&
+			(registrationStatus == model.ParticipantStatusRegistered ||
+				registrationStatus == model.ParticipantStatusWaitlisted),
+		CanManage: role == dto.MyActivityRoleHost,
+		CanCheckIn: role == dto.MyActivityRoleParticipant &&
+			registrationStatus == model.ParticipantStatusRegistered &&
+			status == model.ActivityStatusOngoing,
+		CanFinish: role == dto.MyActivityRoleHost &&
+			status == model.ActivityStatusOngoing,
 	}
 }
 
@@ -153,6 +163,9 @@ func buildSubtitle(activity model.Activity) string {
 
 func buildActivityTags(activity model.Activity, status string) []string {
 	tags := []string{activity.SportLabel, activity.District}
+	if activity.IsOfficial {
+		tags = append(tags, "官方活动")
+	}
 	if status == model.ActivityStatusPublished {
 		tags = append(tags, "可直接成局")
 	}
@@ -209,6 +222,9 @@ func buildAttendanceLabel(hostName string) string {
 }
 
 func buildHostBadge(hostName string) string {
+	if strings.Contains(hostName, "官方") {
+		return "官方主办"
+	}
 	if hostName == "" {
 		return "已认证主办方"
 	}

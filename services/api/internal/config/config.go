@@ -12,6 +12,7 @@ type Config struct {
 	DB     DBConfig     `mapstructure:"db"`
 	Redis  RedisConfig  `mapstructure:"redis"`
 	JWT    JWTConfig    `mapstructure:"jwt"`
+	Admin  AdminConfig  `mapstructure:"admin"`
 	Wechat WechatConfig `mapstructure:"wechat"`
 	Log    LogConfig    `mapstructure:"log"`
 }
@@ -43,6 +44,10 @@ type RedisConfig struct {
 type JWTConfig struct {
 	Secret string `mapstructure:"secret"`
 	Expire int    `mapstructure:"expire"`
+}
+
+type AdminConfig struct {
+	Token string `mapstructure:"token"`
 }
 
 type WechatConfig struct {
@@ -97,6 +102,7 @@ func setDefaults(configurator *viper.Viper) {
 	configurator.SetDefault("redis.db", 0)
 	configurator.SetDefault("redis.pool_size", 10)
 	configurator.SetDefault("jwt.expire", 86400)
+	configurator.SetDefault("admin.token", "usport-admin-dev")
 	configurator.SetDefault("log.level", "info")
 	configurator.SetDefault("log.encoding", "json")
 }
@@ -109,6 +115,8 @@ func validate(cfg Config) {
 		panic("db.user is required")
 	case cfg.JWT.Secret == "":
 		panic("jwt.secret is required")
+	case cfg.Admin.Token == "":
+		panic("admin.token is required")
 	case cfg.Server.Port <= 0:
 		panic("server.port must be positive")
 	}

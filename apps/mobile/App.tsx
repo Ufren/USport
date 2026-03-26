@@ -19,8 +19,10 @@ import {
 
 import ActivityDetailScreen from "./src/screens/ActivityDetailScreen";
 import CreateActivityScreen from "./src/screens/CreateActivityScreen";
+import CreditCenterScreen from "./src/screens/CreditCenterScreenClean";
 import InvitationInboxScreen from "./src/screens/InvitationInboxScreenClean";
-import MyActivitiesScreen from "./src/screens/MyActivitiesScreen";
+import MembershipCenterScreen from "./src/screens/MembershipCenterScreen";
+import MyActivitiesScreen from "./src/screens/MyActivitiesScreenClean";
 import MessagesScreen from "./src/screens/MessagesScreen";
 import DiscoverScreen from "./src/screens/DiscoverScreen";
 import LoginEntryScreen from "./src/screens/LoginEntryScreen";
@@ -34,6 +36,8 @@ export type RootStackParamList = {
   CreateActivity: undefined;
   MyActivities: undefined;
   Invitations: undefined;
+  CreditCenter: undefined;
+  MembershipCenter: undefined;
 };
 
 export type MainTabParamList = {
@@ -126,6 +130,11 @@ function AppNavigator() {
         <Stack.Screen name="CreateActivity" component={CreateActivityScreen} />
         <Stack.Screen name="MyActivities" component={MyActivitiesScreen} />
         <Stack.Screen name="Invitations" component={InvitationInboxScreen} />
+        <Stack.Screen name="CreditCenter" component={CreditCenterScreen} />
+        <Stack.Screen
+          name="MembershipCenter"
+          component={MembershipCenterScreen}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

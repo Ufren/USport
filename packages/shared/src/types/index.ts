@@ -82,6 +82,7 @@ export interface ExperienceMetric {
 
 export interface ExperienceActivity {
   id: number;
+  isOfficial?: boolean;
   title: string;
   subtitle: string;
   sportCode: string;
@@ -99,7 +100,12 @@ export interface ExperienceActivity {
   actionLabel: string;
 }
 
-export type ActivitySignupStatus = "none" | "registered" | "waitlisted";
+export type ActivitySignupStatus =
+  | "none"
+  | "registered"
+  | "waitlisted"
+  | "checked_in"
+  | "finished";
 
 export interface ActivityStatusTone {
   label: string;
@@ -116,6 +122,7 @@ export interface ExperienceActivityHost {
 export interface ExperienceActivityDetail {
   id: string;
   sourceActivityId?: number;
+  isOfficial?: boolean;
   title: string;
   sportCode: string;
   sportLabel: string;
@@ -199,6 +206,137 @@ export interface ProfileMenuItem {
   badge?: string;
 }
 
+export interface ReportItem {
+  id: number;
+  targetType: string;
+  targetId: number;
+  reasonCode: string;
+  description: string;
+  status: string;
+  statusLabel: string;
+  createdAtLabel: string;
+}
+
+export interface CreditItem {
+  id: number;
+  eventCode: string;
+  delta: number;
+  label: string;
+  description: string;
+  createdAt: string;
+}
+
+export interface CreditSummary {
+  score: number;
+  levelLabel: string;
+  positiveCount: number;
+  riskCount: number;
+  completionRate: string;
+  recentRecords: CreditItem[];
+  improvementSuggestion: string;
+}
+
+export interface MembershipPlanItem {
+  id: number;
+  code: string;
+  name: string;
+  priceLabel: string;
+  durationLabel: string;
+  description: string;
+  benefits: string[];
+  isActive: boolean;
+}
+
+export interface SubscriptionSummary {
+  isMember: boolean;
+  planCode?: string;
+  planName?: string;
+  statusLabel: string;
+  expireAtLabel?: string;
+  exposureBoost: string;
+  filterUnlocks: string;
+  recommendationPriority: string;
+}
+
+export interface CreateMembershipOrderRequest {
+  planCode: string;
+}
+
+export interface MembershipOrderItem {
+  id: number;
+  planCode: string;
+  amountLabel: string;
+  status: string;
+  statusLabel: string;
+  createdAt: string;
+}
+
+export interface AdminDashboardSummary {
+  usersTotal: number;
+  publishedActivities: number;
+  openReports: number;
+  inReviewReports: number;
+  paidOrders: number;
+  activeMembers: number;
+}
+
+export interface AdminReportItem {
+  id: number;
+  reporterUserId: number;
+  reporterName: string;
+  targetType: string;
+  targetId: number;
+  reasonCode: string;
+  description: string;
+  status: string;
+  statusLabel: string;
+  createdAtLabel: string;
+  canResolve: boolean;
+  canEscalate: boolean;
+}
+
+export interface AdminReportDecisionRequest {
+  decision: "in_review" | "resolved_valid" | "resolved_invalid" | "closed";
+  note: string;
+}
+
+export interface AdminMembershipOrderItem {
+  id: number;
+  userId: number;
+  planCode: string;
+  amountLabel: string;
+  status: string;
+  statusLabel: string;
+  createdAt: string;
+}
+
+export interface AdminAuditLogItem {
+  id: number;
+  operator: string;
+  actionCode: string;
+  targetType: string;
+  targetId: number;
+  detail: string;
+  createdAt: string;
+}
+
+export interface AdminOfficialActivityItem {
+  id: number;
+  title: string;
+  sportLabel: string;
+  startTimeLabel: string;
+  venueName: string;
+  district: string;
+  participantHint: string;
+}
+
+export interface CreateReportRequest {
+  targetType: string;
+  targetId: number;
+  reasonCode: string;
+  description: string;
+}
+
 export interface CreateActivityOption {
   value: string;
   label: string;
@@ -227,7 +365,9 @@ export type MyActivityRole = "host" | "participant";
 
 export interface MyActivityItem extends ExperienceActivity {
   role: MyActivityRole;
-  registrationStatus?: "registered" | "waitlisted";
+  registrationStatus?: "registered" | "waitlisted" | "checked_in" | "finished";
   canCancel: boolean;
   canManage: boolean;
+  canCheckIn: boolean;
+  canFinish: boolean;
 }
