@@ -13,6 +13,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   getErrorMessage,
   usportColors,
+  usportMotion,
   usportRadius,
   usportSpacing,
   usportTypography,
@@ -155,8 +156,16 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
       }
     >
       <View style={styles.heroCard}>
+        <View style={styles.heroGlow} />
         <View style={styles.heroHeader}>
-          <Text style={styles.coverLabel}>{detail.coverLabel}</Text>
+          <View style={styles.heroLabelGroup}>
+            <Text style={styles.coverLabel}>{detail.coverLabel}</Text>
+            {detail.isOfficial ? (
+              <View style={styles.officialBadge}>
+                <Text style={styles.officialBadgeText}>官方活动</Text>
+              </View>
+            ) : null}
+          </View>
           <View
             style={[
               styles.statusPill,
@@ -200,7 +209,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
       <View style={styles.panel}>
         <SectionHeader
           title="主办方"
-          subtitle="尽量让你在报名之前就知道这局靠不靠谱。"
+          subtitle="更稳定的主办方，通常意味着更高的成局概率。"
         />
         <View style={styles.infoCard}>
           <Text style={styles.infoTitle}>{detail.host.name}</Text>
@@ -225,7 +234,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
             ))}
           </View>
           <Text style={styles.infoText}>
-            水平建议：{detail.skillLevelLabel}
+            技能门槛：{detail.skillLevelLabel}
           </Text>
           <Text style={styles.infoText}>
             性别规则：{detail.genderRuleLabel}
@@ -248,8 +257,9 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
           </View>
         ) : null}
         <Pressable
-          style={[
+          style={({ pressed }) => [
             styles.actionButton,
+            pressed && styles.actionButtonPressed,
             submitting && styles.actionButtonDisabled,
           ]}
           onPress={() => void handleRegister()}
@@ -269,10 +279,7 @@ export default function ActivityDetailScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: usportColors.pageBackground,
-  },
+  container: { flex: 1, backgroundColor: usportColors.pageBackground },
   content: {
     padding: usportSpacing.xl,
     paddingBottom: usportSpacing["4xl"],
@@ -291,12 +298,27 @@ const styles = StyleSheet.create({
     fontSize: usportTypography.body,
   },
   heroCard: {
-    backgroundColor: usportColors.cardBackground,
-    borderRadius: usportRadius.lg,
+    overflow: "hidden",
+    backgroundColor: usportColors.cardBackgroundStrong,
+    borderRadius: usportRadius.xl,
     borderWidth: 1,
     borderColor: usportColors.border,
-    padding: usportSpacing.xl,
+    padding: usportSpacing["2xl"],
     gap: usportSpacing.lg,
+    shadowColor: usportColors.shadowStrong,
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 1,
+    shadowRadius: 30,
+    elevation: 10,
+  },
+  heroGlow: {
+    position: "absolute",
+    top: -40,
+    right: -10,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: "rgba(10,132,255,0.10)",
   },
   heroHeader: {
     flexDirection: "row",
@@ -304,60 +326,76 @@ const styles = StyleSheet.create({
     gap: usportSpacing.md,
     alignItems: "center",
   },
+  heroLabelGroup: { flex: 1, gap: usportSpacing.sm },
   coverLabel: {
-    color: usportColors.brandPrimary,
+    color: usportColors.textTertiary,
     fontSize: usportTypography.caption,
     fontWeight: "700",
-    flex: 1,
+    letterSpacing: 0.4,
+  },
+  officialBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: usportSpacing.md,
+    paddingVertical: 6,
+    borderRadius: usportRadius.pill,
+    backgroundColor: usportColors.pageBackgroundElevated,
+    borderWidth: 1,
+    borderColor: usportColors.border,
+  },
+  officialBadgeText: {
+    color: usportColors.brandPrimary,
+    fontSize: usportTypography.caption,
+    fontWeight: "800",
   },
   statusPill: {
     borderRadius: usportRadius.pill,
     paddingHorizontal: usportSpacing.md,
-    paddingVertical: usportSpacing.xs,
+    paddingVertical: 6,
   },
   statusText: {
     fontSize: usportTypography.caption,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   title: {
     color: usportColors.textPrimary,
-    fontSize: usportTypography.h2,
+    fontSize: usportTypography.h1,
     fontWeight: "800",
-    lineHeight: 32,
+    lineHeight: 38,
   },
   subtitle: {
     color: usportColors.textSecondary,
     fontSize: usportTypography.body,
     lineHeight: 24,
   },
-  metaList: {
-    gap: usportSpacing.sm,
-  },
+  metaList: { gap: usportSpacing.sm },
   metaText: {
     color: usportColors.textSecondary,
     fontSize: usportTypography.bodySm,
     lineHeight: 20,
   },
   riskHint: {
-    color: usportColors.brandAccent,
+    color: usportColors.brandPrimary,
     fontSize: usportTypography.bodySm,
     lineHeight: 20,
   },
-  panel: {
-    gap: usportSpacing.lg,
-  },
+  panel: { gap: usportSpacing.lg },
   infoCard: {
     backgroundColor: usportColors.cardBackground,
-    borderRadius: usportRadius.md,
+    borderRadius: usportRadius.lg,
     borderWidth: 1,
     borderColor: usportColors.border,
     padding: usportSpacing.xl,
     gap: usportSpacing.sm,
+    shadowColor: usportColors.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 20,
+    elevation: 3,
   },
   infoTitle: {
     color: usportColors.textPrimary,
     fontSize: usportTypography.title,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   infoText: {
     color: usportColors.textSecondary,
@@ -373,14 +411,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: usportSpacing.sm,
-    marginTop: usportSpacing.sm,
-    marginBottom: usportSpacing.sm,
   },
   tagChip: {
     borderRadius: usportRadius.pill,
+    backgroundColor: usportColors.pageBackground,
     paddingHorizontal: usportSpacing.md,
-    paddingVertical: usportSpacing.sm,
-    backgroundColor: usportColors.mutedBackground,
+    paddingVertical: usportSpacing.xs,
+    borderWidth: 1,
+    borderColor: usportColors.border,
   },
   tagText: {
     color: usportColors.textSecondary,
@@ -388,18 +426,18 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   noticeText: {
-    color: usportColors.textTertiary,
+    color: usportColors.textSecondary,
     fontSize: usportTypography.bodySm,
     lineHeight: 20,
   },
-  actionPanel: {
-    gap: usportSpacing.md,
-  },
+  actionPanel: { gap: usportSpacing.md },
   joinedBanner: {
     backgroundColor: usportColors.successSoft,
-    borderRadius: usportRadius.md,
+    borderRadius: usportRadius.lg,
     padding: usportSpacing.lg,
     gap: usportSpacing.xs,
+    borderWidth: 1,
+    borderColor: usportColors.border,
   },
   joinedTitle: {
     color: usportColors.success,
@@ -416,6 +454,14 @@ const styles = StyleSheet.create({
     backgroundColor: usportColors.brandPrimary,
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: usportColors.shadowStrong,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 1,
+    shadowRadius: 20,
+    elevation: 6,
+  },
+  actionButtonPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
   },
   actionButtonDisabled: {
     opacity: 0.7,
@@ -423,6 +469,6 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: usportColors.textInverse,
     fontSize: usportTypography.body,
-    fontWeight: "700",
+    fontWeight: "800",
   },
 });

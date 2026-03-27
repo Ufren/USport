@@ -173,6 +173,14 @@ export interface MessagePreview {
   unreadCount: number;
 }
 
+export interface InboxWorkspace {
+  pendingCount: number;
+  unreadCount: number;
+  totalMessages: number;
+  invitations: InvitationItem[];
+  messages: MessagePreview[];
+}
+
 export type InvitationStatus = "pending" | "accepted" | "declined" | "expired";
 
 export interface InvitationItem {
@@ -269,6 +277,8 @@ export interface MembershipOrderItem {
   status: string;
   statusLabel: string;
   createdAt: string;
+  canPay: boolean;
+  canRefund: boolean;
 }
 
 export interface AdminDashboardSummary {

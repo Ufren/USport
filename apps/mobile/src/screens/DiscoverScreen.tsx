@@ -219,18 +219,24 @@ const styles = StyleSheet.create({
     paddingTop: usportSpacing["4xl"],
     paddingBottom: usportSpacing["2xl"],
     gap: usportSpacing.lg,
+    marginHorizontal: usportSpacing.lg,
+    marginTop: usportSpacing.lg,
+    borderRadius: usportRadius.xl,
+    backgroundColor: usportColors.pageBackgroundElevated,
+    borderWidth: 1,
+    borderColor: usportColors.border,
   },
   eyebrow: {
-    color: usportColors.brandPrimary,
+    color: usportColors.textTertiary,
     fontSize: usportTypography.caption,
     fontWeight: "700",
-    letterSpacing: 0.4,
+    letterSpacing: 0.5,
   },
   heroTitle: {
     color: usportColors.textPrimary,
     fontSize: usportTypography.hero,
     fontWeight: "800",
-    lineHeight: 38,
+    lineHeight: 40,
   },
   heroSubtitle: {
     color: usportColors.textSecondary,
@@ -242,11 +248,16 @@ const styles = StyleSheet.create({
   },
   metricCard: {
     backgroundColor: usportColors.cardBackground,
-    borderRadius: usportRadius.md,
+    borderRadius: usportRadius.lg,
     padding: usportSpacing.xl,
     borderWidth: 1,
     borderColor: usportColors.border,
     gap: usportSpacing.sm,
+    shadowColor: usportColors.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 18,
+    elevation: 3,
   },
   metricValue: {
     color: usportColors.textPrimary,
@@ -274,15 +285,15 @@ const styles = StyleSheet.create({
   },
   filterChip: {
     paddingHorizontal: usportSpacing.lg,
-    paddingVertical: usportSpacing.md,
+    paddingVertical: 10,
     borderRadius: usportRadius.pill,
     backgroundColor: usportColors.cardBackground,
     borderWidth: 1,
     borderColor: usportColors.border,
   },
   filterChipActive: {
-    backgroundColor: usportColors.brandSecondary,
-    borderColor: usportColors.brandSecondary,
+    backgroundColor: usportColors.textPrimary,
+    borderColor: usportColors.textPrimary,
   },
   filterChipText: {
     color: usportColors.textSecondary,
@@ -290,7 +301,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   filterChipTextActive: {
-    color: usportColors.textPrimary,
+    color: usportColors.textInverse,
   },
   section: {
     paddingHorizontal: usportSpacing.xl,
@@ -298,7 +309,7 @@ const styles = StyleSheet.create({
   },
   loadingCard: {
     backgroundColor: usportColors.cardBackground,
-    borderRadius: usportRadius.md,
+    borderRadius: usportRadius.lg,
     borderWidth: 1,
     borderColor: usportColors.border,
     padding: usportSpacing.xl,

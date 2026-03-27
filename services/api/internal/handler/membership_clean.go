@@ -1,5 +1,3 @@
-//go:build ignore
-
 package handler
 
 import (
@@ -61,7 +59,7 @@ func (h *MembershipHandler) CreateOrder(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case service.ErrMembershipPlanInvalid:
-			response.Error(c, http.StatusBadRequest, err.Error(), err)
+			response.Error(c, http.StatusBadRequest, "会员套餐不存在或暂不可购买", err)
 		default:
 			response.Error(c, http.StatusInternalServerError, "创建会员订单失败", err)
 		}
@@ -92,6 +90,8 @@ func (h *MembershipHandler) MockPayOrder(c *gin.Context) {
 			response.Error(c, http.StatusBadRequest, "会员订单已支付", err)
 		case service.ErrMembershipOrderClosed:
 			response.Error(c, http.StatusBadRequest, "会员订单当前状态不支持支付", err)
+		case service.ErrMembershipPlanInvalid:
+			response.Error(c, http.StatusBadRequest, "会员套餐不存在或暂不可购买", err)
 		default:
 			response.Error(c, http.StatusInternalServerError, "会员订单支付失败", err)
 		}

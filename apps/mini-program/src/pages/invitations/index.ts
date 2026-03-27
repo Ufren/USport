@@ -1,16 +1,22 @@
-import type { InvitationItem, MessagePreview } from "@usport/shared";
+import type { InboxWorkspace, InvitationItem } from "@usport/shared";
 
 import { invitationApi } from "../../services/invitation";
 import { showError, showSuccess } from "../../utils/helpers";
 import { getUserInfo } from "../../utils/storage";
 
+const emptyWorkspace: InboxWorkspace = {
+  pendingCount: 0,
+  unreadCount: 0,
+  totalMessages: 0,
+  invitations: [],
+  messages: [],
+};
+
 Page({
   data: {
     loading: true,
     isLoggedIn: false,
-    invitations: [] as InvitationItem[],
-    messages: [] as MessagePreview[],
-    pendingCount: 0,
+    workspace: emptyWorkspace,
   },
 
   onLoad() {
@@ -33,6 +39,7 @@ Page({
     });
 
     if (!isLoggedIn) {
+      this.setData({ workspace: emptyWorkspace });
       if (stopPullDown) {
         wx.stopPullDownRefresh();
       }
@@ -40,19 +47,10 @@ Page({
     }
 
     try {
-      const [invitations, messages] = await Promise.all([
-        invitationApi.list(),
-        invitationApi.messages(),
-      ]);
-
-      this.setData({
-        invitations,
-        messages,
-        pendingCount: invitations.filter((item) => item.status === "pending")
-          .length,
-      });
+      const workspace = await invitationApi.workspace();
+      this.setData({ workspace });
     } catch (error: unknown) {
-      showError(error instanceof Error ? error.message : "获取邀约失败");
+      showError(error instanceof Error ? error.message : "获取消息工作区失败");
     } finally {
       this.setData({ loading: false });
       if (stopPullDown) {
@@ -76,9 +74,7 @@ Page({
       return;
     }
 
-    wx.navigateTo({
-      url: `/pages/activity-detail/index?id=${activityId}`,
-    });
+    wx.navigateTo({ url: `/pages/activity-detail/index?id=${activityId}` });
   },
 
   onMessageTap(
@@ -87,17 +83,17 @@ Page({
       { id?: string | number }
     >,
   ) {
-    const messageID = Number(e.currentTarget.dataset.id ?? 0);
-    const matchedInvitation = (this.data.invitations as InvitationItem[]).find(
-      (item) => item.id === messageID,
-    );
-    const activityId = String(matchedInvitation?.activityId ?? "");
-    if (!activityId) {
+    const messageId = Number(e.currentTarget.dataset.id ?? 0);
+    const matchedInvitation = (
+      this.data.workspace.invitations as InvitationItem[]
+    ).find((item) => item.id === messageId);
+
+    if (!matchedInvitation) {
       return;
     }
 
     wx.navigateTo({
-      url: `/pages/activity-detail/index?id=${activityId}`,
+      url: `/pages/activity-detail/index?id=${matchedInvitation.activityId}`,
     });
   },
 
@@ -113,22 +109,18 @@ Page({
       return;
     }
 
-    const title = action === "accept" ? "接受邀约" : "婉拒邀约";
-    const content =
-      action === "accept"
-        ? "接受后系统会同步尝试为你锁定活动席位。"
-        : "拒绝后这条邀约会进入已处理状态。";
-
     wx.showModal({
-      title,
-      content,
+      title: action === "accept" ? "接受邀约" : "婉拒邀约",
+      content:
+        action === "accept"
+          ? "接受后系统会尝试为你锁定活动名额。"
+          : "婉拒后，这条邀约会进入已处理状态。",
       success: async (result) => {
         if (!result.confirm) {
           return;
         }
 
         try {
-          // 邀约响应和席位处理统一交给后端，避免端上重复推演状态规则。
           await invitationApi.respond(id, action);
           showSuccess(action === "accept" ? "已接受邀约" : "已婉拒邀约");
           await this.loadPage();

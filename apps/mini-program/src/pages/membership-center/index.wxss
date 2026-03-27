@@ -1,6 +1,6 @@
 .membership-page {
   gap: 24rpx;
-  padding: 24rpx 24rpx 48rpx;
+  padding: 24rpx 24rpx 56rpx;
 }
 
 .hero-card,
@@ -12,19 +12,21 @@
   flex-direction: column;
   gap: 16rpx;
   padding: 28rpx;
-  border-radius: 28rpx;
-  border: 1rpx solid #dce2dd;
-  background: #ffffff;
+  border-radius: 32rpx;
+  border: 1rpx solid rgba(60, 60, 67, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 18rpx 44rpx rgba(15, 23, 42, 0.08);
 }
 
 .hero-card {
-  background: linear-gradient(180deg, #edf3ea 0%, #ffffff 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 248, 255, 0.94) 100%);
 }
 
 .hero-eyebrow,
 .summary-badge,
+.summary-pill-text,
 .list-status {
-  color: #156b52;
+  color: #0a84ff;
   font-size: 22rpx;
   font-weight: 700;
 }
@@ -35,7 +37,7 @@
 .plan-title,
 .list-title,
 .plan-price {
-  color: #131714;
+  color: #111111;
   font-weight: 800;
 }
 
@@ -49,28 +51,18 @@
 .summary-meta,
 .section-subtitle,
 .plan-description,
+.plan-duration,
 .list-copy,
 .list-time,
 .summary-list-item,
 .benefit-item {
-  color: #66726c;
+  color: rgba(17, 17, 17, 0.7);
   font-size: 24rpx;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
-.plan-price {
-  font-size: 40rpx;
-}
-
-.section-header,
-.list,
-.summary-list,
-.benefit-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
-
+.summary-top,
+.plan-top,
 .list-top {
   display: flex;
   flex-direction: row;
@@ -78,10 +70,41 @@
   gap: 16rpx;
 }
 
-.submit-btn {
+.summary-main,
+.plan-main,
+.summary-list,
+.benefit-list,
+.section-header,
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.summary-pill {
+  padding: 12rpx 22rpx;
   border-radius: 999rpx;
-  background: #156b52;
-  color: #ffffff;
+  background: #eaf2ff;
+}
+
+.plan-price {
+  font-size: 40rpx;
+}
+
+.submit-btn,
+.secondary-btn {
+  border-radius: 999rpx;
   font-size: 24rpx;
   font-weight: 700;
+}
+
+.submit-btn {
+  background: #0a84ff;
+  color: #ffffff;
+}
+
+.secondary-btn {
+  background: rgba(255, 255, 255, 0.92);
+  color: #0a84ff;
+  border: 1rpx solid rgba(10, 132, 255, 0.28);
 }

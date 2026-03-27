@@ -1,7 +1,7 @@
 <view class="container detail-page">
   <view class="detail-hero">
     <view class="hero-top">
-      <text class="hero-eyebrow">USport / 成局详情</text>
+      <text class="hero-eyebrow">USport / 活动详情</text>
       <text class="status-pill {{statusClassName}}">{{statusLabel}}</text>
     </view>
     <text class="hero-cover-label">{{coverLabel}}</text>
@@ -13,7 +13,7 @@
   <view wx:if="{{!isEmpty}}" class="content-stack">
     <view class="info-card">
       <view class="section-header">
-        <text class="section-title">关键安排</text>
+        <text class="section-title">关键信息</text>
         <text class="section-subtitle">先确认时间、地点、人数和费用，再决定是否加入。</text>
       </view>
 
@@ -28,7 +28,7 @@
     <view class="host-card">
       <view class="section-header">
         <text class="section-title">主办方</text>
-        <text class="section-subtitle">更稳定的主办方，意味着更高的成局概率。</text>
+        <text class="section-subtitle">更稳定的主办方，往往意味着更高的成局概率。</text>
       </view>
 
       <view class="host-row">
@@ -45,7 +45,7 @@
     <view class="description-card">
       <view class="section-header">
         <text class="section-title">适合谁来</text>
-        <text class="section-subtitle">看清门槛和氛围，避免报了又取消。</text>
+        <text class="section-subtitle">看清门槛和氛围，避免报名后又临时取消。</text>
       </view>
 
       <view class="tag-list">

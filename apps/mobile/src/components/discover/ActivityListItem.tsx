@@ -1,7 +1,8 @@
-﻿import React from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
   usportColors,
+  usportMotion,
   usportRadius,
   usportSpacing,
   usportTypography,
@@ -17,9 +18,20 @@ type Props = {
 
 export function ActivityListItem({ activity, onPress }: Props) {
   return (
-    <Pressable style={styles.container} onPress={onPress}>
+    <Pressable
+      style={({ pressed }) => [
+        styles.container,
+        pressed && styles.containerPressed,
+      ]}
+      onPress={onPress}
+    >
       <View style={styles.header}>
         <View style={styles.titleGroup}>
+          {activity.isOfficial ? (
+            <View style={styles.officialBadge}>
+              <Text style={styles.officialBadgeText}>官方活动</Text>
+            </View>
+          ) : null}
           <Text style={styles.title}>{activity.title}</Text>
           <Text style={styles.subtitle}>{activity.subtitle}</Text>
         </View>
@@ -47,11 +59,20 @@ export function ActivityListItem({ activity, onPress }: Props) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: usportColors.cardBackground,
-    borderRadius: usportRadius.md,
+    borderRadius: usportRadius.lg,
     padding: usportSpacing.xl,
     gap: usportSpacing.lg,
     borderWidth: 1,
     borderColor: usportColors.border,
+    shadowColor: usportColors.shadow,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 1,
+    shadowRadius: 24,
+    elevation: 4,
+  },
+  containerPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+    opacity: 0.94,
   },
   header: {
     flexDirection: "row",
@@ -63,15 +84,30 @@ const styles = StyleSheet.create({
     gap: usportSpacing.sm,
     flex: 1,
   },
+  officialBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: usportSpacing.md,
+    paddingVertical: 6,
+    borderRadius: usportRadius.pill,
+    backgroundColor: usportColors.pageBackgroundElevated,
+    borderWidth: 1,
+    borderColor: usportColors.border,
+  },
+  officialBadgeText: {
+    color: usportColors.brandPrimary,
+    fontSize: usportTypography.caption,
+    fontWeight: "800",
+  },
   title: {
     color: usportColors.textPrimary,
-    fontSize: usportTypography.title,
-    fontWeight: "700",
+    fontSize: usportTypography.h3,
+    fontWeight: "800",
+    lineHeight: 26,
   },
   subtitle: {
     color: usportColors.textSecondary,
     fontSize: usportTypography.bodySm,
-    lineHeight: 20,
+    lineHeight: 21,
   },
   infoGrid: {
     gap: usportSpacing.sm,
@@ -79,6 +115,7 @@ const styles = StyleSheet.create({
   infoText: {
     color: usportColors.textTertiary,
     fontSize: usportTypography.bodySm,
+    lineHeight: 19,
   },
   footer: {
     flexDirection: "row",
@@ -87,13 +124,14 @@ const styles = StyleSheet.create({
     gap: usportSpacing.md,
   },
   attendance: {
-    color: usportColors.textSecondary,
+    color: usportColors.textTertiary,
     fontSize: usportTypography.caption,
     flex: 1,
+    lineHeight: 18,
   },
   action: {
     color: usportColors.brandPrimary,
     fontSize: usportTypography.bodySm,
-    fontWeight: "700",
+    fontWeight: "800",
   },
 });

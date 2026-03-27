@@ -1,6 +1,7 @@
 .detail-page {
   gap: 24rpx;
   padding: 0 24rpx 220rpx;
+  background: linear-gradient(180deg, #f7f7fa 0%, #f1f2f6 100%);
 }
 
 .detail-hero {
@@ -8,10 +9,12 @@
   flex-direction: column;
   gap: 18rpx;
   margin: 24rpx 0 0;
-  padding: 32rpx 28rpx 36rpx;
-  border-radius: 32rpx;
-  background: linear-gradient(160deg, #156b52 0%, #0f4b3c 100%);
-  box-shadow: 0 24rpx 48rpx rgba(19, 23, 20, 0.12);
+  padding: 34rpx 30rpx 38rpx;
+  border-radius: 36rpx;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1rpx solid rgba(60, 60, 67, 0.12);
+  box-shadow: 0 22rpx 48rpx rgba(15, 23, 42, 0.1);
+  backdrop-filter: blur(18rpx);
 }
 
 .hero-top,
@@ -31,13 +34,13 @@
 
 .hero-eyebrow,
 .hero-cover-label {
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(17, 17, 17, 0.46);
   font-size: 22rpx;
   font-weight: 700;
 }
 
 .hero-title {
-  color: #ffffff;
+  color: #111111;
   font-size: 48rpx;
   font-weight: 800;
   line-height: 1.2;
@@ -45,7 +48,7 @@
 
 .hero-subtitle,
 .risk-hint {
-  color: rgba(255, 255, 255, 0.88);
+  color: rgba(17, 17, 17, 0.72);
   font-size: 26rpx;
   line-height: 1.6;
 }
@@ -53,7 +56,8 @@
 .risk-hint {
   padding: 18rpx 20rpx;
   border-radius: 24rpx;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(10, 132, 255, 0.08);
+  color: #0a84ff;
 }
 
 .status-pill {
@@ -64,19 +68,19 @@
 }
 
 .status-pill--success {
-  background: rgba(182, 243, 106, 0.2);
-  color: #d8ffac;
+  background: rgba(52, 199, 89, 0.14);
+  color: #34c759;
 }
 
 .status-pill--warning {
-  background: rgba(255, 233, 173, 0.18);
-  color: #ffe8a3;
+  background: rgba(255, 159, 10, 0.14);
+  color: #ff9f0a;
 }
 
 .status-pill--neutral,
 .status-pill--danger {
-  background: rgba(255, 255, 255, 0.18);
-  color: #ffffff;
+  background: rgba(238, 240, 244, 0.95);
+  color: rgba(17, 17, 17, 0.72);
 }
 
 .content-stack {
@@ -94,9 +98,10 @@
   flex-direction: column;
   gap: 18rpx;
   padding: 28rpx;
-  border: 1rpx solid #dce2dd;
-  border-radius: 28rpx;
-  background: #ffffff;
+  border: 1rpx solid rgba(60, 60, 67, 0.12);
+  border-radius: 30rpx;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 18rpx 36rpx rgba(15, 23, 42, 0.08);
 }
 
 .section-header {
@@ -107,7 +112,7 @@
 
 .section-title,
 .empty-title {
-  color: #131714;
+  color: #111111;
   font-size: 34rpx;
   font-weight: 800;
 }
@@ -119,7 +124,7 @@
 .notice-text,
 .bottom-helper,
 .empty-text {
-  color: #66726c;
+  color: rgba(17, 17, 17, 0.48);
   font-size: 24rpx;
   line-height: 1.6;
 }
@@ -140,7 +145,7 @@
 .info-value,
 .rule-value {
   flex: 1;
-  color: #131714;
+  color: #111111;
   font-size: 24rpx;
   line-height: 1.6;
   text-align: right;
@@ -158,7 +163,7 @@
   width: 96rpx;
   height: 96rpx;
   border-radius: 48rpx;
-  background: #156b52;
+  background: #0a84ff;
   color: #ffffff;
   font-size: 34rpx;
   font-weight: 800;
@@ -172,13 +177,13 @@
 }
 
 .host-name {
-  color: #131714;
+  color: #111111;
   font-size: 30rpx;
   font-weight: 700;
 }
 
 .host-badge {
-  color: #156b52;
+  color: #0a84ff;
   font-size: 22rpx;
   font-weight: 700;
 }
@@ -192,8 +197,8 @@
 .tag-chip {
   padding: 10rpx 18rpx;
   border-radius: 999rpx;
-  background: #edf3ea;
-  color: #156b52;
+  background: rgba(238, 240, 244, 0.92);
+  color: rgba(17, 17, 17, 0.72);
   font-size: 22rpx;
   font-weight: 700;
 }
@@ -209,7 +214,7 @@
   height: 12rpx;
   margin-top: 12rpx;
   border-radius: 999rpx;
-  background: #156b52;
+  background: #0a84ff;
 }
 
 .bottom-bar {
@@ -222,9 +227,9 @@
   gap: 16rpx;
   padding: 24rpx;
   padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
-  background: rgba(244, 247, 242, 0.96);
-  backdrop-filter: blur(12rpx);
-  border-top: 1rpx solid rgba(184, 193, 187, 0.6);
+  background: rgba(245, 245, 247, 0.92);
+  backdrop-filter: blur(18rpx);
+  border-top: 1rpx solid rgba(60, 60, 67, 0.12);
 }
 
 .bottom-actions {
@@ -240,21 +245,21 @@
   min-height: 92rpx;
   border-radius: 999rpx;
   font-size: 28rpx;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .primary-btn {
-  background: #156b52;
+  background: #0a84ff;
   color: #ffffff;
 }
 
 .primary-btn[disabled] {
-  background: #b8c1bb;
+  background: rgba(60, 60, 67, 0.24);
   color: #ffffff;
 }
 
 .secondary-btn {
-  background: #ffffff;
-  border: 1rpx solid #dce2dd;
-  color: #131714;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1rpx solid rgba(60, 60, 67, 0.12);
+  color: #111111;
 }

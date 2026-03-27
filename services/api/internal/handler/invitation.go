@@ -88,3 +88,18 @@ func (h *InvitationHandler) MessagePreviews(c *gin.Context) {
 
 	response.Success(c, items)
 }
+
+func (h *InvitationHandler) InboxWorkspace(c *gin.Context) {
+	userID, ok := currentUserID(c)
+	if !ok {
+		return
+	}
+
+	item, err := h.invitationSvc.GetInboxWorkspace(c.Request.Context(), userID)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "获取消息工作区失败", err)
+		return
+	}
+
+	response.Success(c, item)
+}

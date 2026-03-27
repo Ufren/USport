@@ -9,6 +9,20 @@ type AdminDashboardSummary struct {
 	ActiveMembers       int64 `json:"activeMembers"`
 }
 
+type AdminActivityItem struct {
+	ID              uint   `json:"id"`
+	Title           string `json:"title"`
+	IsOfficial      bool   `json:"isOfficial"`
+	HostName        string `json:"hostName"`
+	SportLabel      string `json:"sportLabel"`
+	Status          string `json:"status"`
+	StatusLabel     string `json:"statusLabel"`
+	StartTimeLabel  string `json:"startTimeLabel"`
+	VenueName       string `json:"venueName"`
+	District        string `json:"district"`
+	ParticipantHint string `json:"participantHint"`
+}
+
 type AdminReportItem struct {
 	ID             uint   `json:"id"`
 	ReporterUserID uint   `json:"reporterUserId"`
@@ -37,6 +51,7 @@ type AdminMembershipOrderItem struct {
 	Status      string `json:"status"`
 	StatusLabel string `json:"statusLabel"`
 	CreatedAt   string `json:"createdAt"`
+	CanRefund   bool   `json:"canRefund"`
 }
 
 type AdminAuditLogItem struct {

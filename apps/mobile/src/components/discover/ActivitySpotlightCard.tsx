@@ -2,6 +2,7 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
   usportColors,
+  usportMotion,
   usportRadius,
   usportSpacing,
   usportTypography,
@@ -16,7 +17,13 @@ type Props = {
 
 export function ActivitySpotlightCard({ activity }: Props) {
   return (
-    <Pressable style={styles.container}>
+    <Pressable
+      style={({ pressed }) => [
+        styles.container,
+        pressed && styles.containerPressed,
+      ]}
+    >
+      <View style={styles.glow} />
       <View style={styles.heroRow}>
         <StatusPill status={activity.status} />
         <Text style={styles.sportLabel}>{activity.sportLabel}</Text>
@@ -57,15 +64,31 @@ export function ActivitySpotlightCard({ activity }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: usportColors.brandPrimary,
-    borderRadius: usportRadius.lg,
+    overflow: "hidden",
+    backgroundColor: usportColors.cardBackgroundStrong,
+    borderRadius: usportRadius.xl,
     padding: usportSpacing["2xl"],
     gap: usportSpacing.lg,
+    borderWidth: 1,
+    borderColor: usportColors.border,
     shadowColor: usportColors.shadowStrong,
-    shadowOffset: { width: 0, height: 16 },
+    shadowOffset: { width: 0, height: 18 },
     shadowOpacity: 1,
-    shadowRadius: 24,
-    elevation: 8,
+    shadowRadius: 30,
+    elevation: 10,
+    marginHorizontal: usportSpacing.xl,
+  },
+  containerPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+  },
+  glow: {
+    position: "absolute",
+    top: -36,
+    right: -18,
+    width: 196,
+    height: 196,
+    borderRadius: 98,
+    backgroundColor: "rgba(10,132,255,0.10)",
   },
   heroRow: {
     flexDirection: "row",
@@ -73,18 +96,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sportLabel: {
-    color: usportColors.brandSecondary,
+    color: usportColors.brandPrimary,
     fontSize: usportTypography.bodySm,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   title: {
-    color: usportColors.textInverse,
+    color: usportColors.textPrimary,
     fontSize: usportTypography.h1,
-    fontWeight: "700",
-    lineHeight: 34,
+    fontWeight: "800",
+    lineHeight: 36,
   },
   subtitle: {
-    color: "rgba(255,255,255,0.82)",
+    color: usportColors.textSecondary,
     fontSize: usportTypography.body,
     lineHeight: 24,
   },
@@ -92,7 +115,7 @@ const styles = StyleSheet.create({
     gap: usportSpacing.sm,
   },
   metaText: {
-    color: "rgba(255,255,255,0.84)",
+    color: usportColors.textTertiary,
     fontSize: usportTypography.bodySm,
   },
   tagRow: {
@@ -101,13 +124,13 @@ const styles = StyleSheet.create({
     gap: usportSpacing.sm,
   },
   tag: {
-    backgroundColor: "rgba(255,255,255,0.12)",
+    backgroundColor: usportColors.pageBackground,
     borderRadius: usportRadius.pill,
     paddingHorizontal: usportSpacing.md,
     paddingVertical: usportSpacing.xs,
   },
   tagText: {
-    color: usportColors.textInverse,
+    color: usportColors.textSecondary,
     fontSize: usportTypography.caption,
     fontWeight: "600",
   },
@@ -122,23 +145,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   hostName: {
-    color: usportColors.textInverse,
+    color: usportColors.textPrimary,
     fontSize: usportTypography.title,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   hostBadge: {
-    color: "rgba(255,255,255,0.78)",
+    color: usportColors.textTertiary,
     fontSize: usportTypography.caption,
   },
   cta: {
-    backgroundColor: usportColors.brandSecondary,
+    backgroundColor: usportColors.brandPrimary,
     borderRadius: usportRadius.pill,
     paddingHorizontal: usportSpacing.xl,
     paddingVertical: usportSpacing.md,
   },
   ctaText: {
-    color: usportColors.textPrimary,
+    color: usportColors.textInverse,
     fontSize: usportTypography.bodySm,
-    fontWeight: "700",
+    fontWeight: "800",
   },
 });

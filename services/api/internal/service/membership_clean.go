@@ -1,5 +1,3 @@
-//go:build ignore
-
 package service
 
 import (
@@ -15,10 +13,7 @@ import (
 )
 
 var (
-	ErrMembershipPlanInvalid = errors.New("会员套餐不存在或暂不可购买")
-)
-
-var (
+	ErrMembershipPlanInvalid  = errors.New("会员套餐不存在或暂不可购买")
 	ErrMembershipOrderInvalid = errors.New("会员订单不存在")
 	ErrMembershipOrderPaid    = errors.New("会员订单已支付")
 	ErrMembershipOrderClosed  = errors.New("会员订单当前状态不支持此操作")
@@ -153,7 +148,6 @@ func (s *membershipService) MockPayOrder(
 		order.PaidAt = now
 
 		// 支付成功后再激活订阅，避免“下单即生效”的状态穿透问题。
-		if err := activateSubscription(ctx, repo, userID, *plan, now); err != nil {
 		if err := activateSubscription(ctx, repo, userID, *plan, now); err != nil {
 			return err
 		}

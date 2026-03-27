@@ -25,4 +25,10 @@ export const membershipApi = {
   ): Promise<MembershipOrderItem> {
     return httpClient.post<MembershipOrderItem>("/membership/orders", payload);
   },
+
+  async mockPayOrder(orderId: number): Promise<MembershipOrderItem> {
+    return httpClient.post<MembershipOrderItem>(
+      `/membership/orders/${orderId}/mock-pay`,
+    );
+  },
 };

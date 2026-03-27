@@ -1,9 +1,9 @@
 <view class="container create-page">
   <view class="create-hero">
     <text class="hero-eyebrow">USport / 发起活动</text>
-    <text class="hero-title">先把一场能成局的活动写清楚</text>
+    <text class="hero-title">先把一场能顺利成局的活动写清楚。</text>
     <text class="hero-subtitle">
-      不是把字段填满，而是让用户一眼看懂这场局是否适合自己、是否值得马上报名。
+      不是把字段填满，而是让用户一眼判断这场局是否适合自己、是否值得马上报名。
     </text>
   </view>
 
@@ -18,7 +18,7 @@
   <view class="form-section">
     <view class="section-header">
       <text class="section-title">活动定位</text>
-      <text class="section-subtitle">运动品类和标题决定了第一眼是否会有人点开。</text>
+      <text class="section-subtitle">运动品类和标题决定了第一眼是否有人愿意点开。</text>
     </view>
 
     <view class="chip-list">
@@ -26,6 +26,7 @@
         class="option-chip {{draft.sportCode === item.value ? 'option-chip--active' : ''}}"
         wx:for="{{sportOptions}}"
         wx:key="value"
+        hover-class="option-chip--pressed"
         bindtap="onOptionSelect"
         data-field="sportCode"
         data-value="{{item.value}}"
@@ -52,7 +53,7 @@
       <text class="field-label">活动描述</text>
       <textarea
         class="text-area"
-        placeholder="说清楚强度、轮转方式、是否欢迎单人报名，以及现场有什么特别安排。"
+        placeholder="写清强度、轮转方式、是否欢迎单人报名，以及现场是否有特别安排。"
         maxlength="300"
         value="{{draft.description}}"
         bindinput="onFieldInput"
@@ -65,7 +66,7 @@
   <view class="form-section">
     <view class="section-header">
       <text class="section-title">时间与地点</text>
-      <text class="section-subtitle">清楚的时空信息，是降低取消率的第一步。</text>
+      <text class="section-subtitle">清晰的时空信息，是降低取消率的第一步。</text>
     </view>
 
     <view class="field-card">
@@ -122,6 +123,7 @@
         class="mini-chip {{draft.district === item.value ? 'mini-chip--active' : ''}}"
         wx:for="{{districtOptions}}"
         wx:key="value"
+        hover-class="mini-chip--pressed"
         bindtap="onOptionSelect"
         data-field="district"
         data-value="{{item.value}}"
@@ -147,12 +149,12 @@
   <view class="form-section">
     <view class="section-header">
       <text class="section-title">人数与费用</text>
-      <text class="section-subtitle">人数越多、费用越高，就越需要讲清楚规则。</text>
+      <text class="section-subtitle">人数越多、费用越高，就越要把规则说清楚。</text>
     </view>
 
     <view class="stepper-card">
       <view class="stepper-row">
-        <text class="field-label">人数上限</text>
+        <text class="field-label">正式名额</text>
         <view class="stepper">
           <view class="stepper-btn" bindtap="onStepperTap" data-field="capacity" data-delta="-1">-</view>
           <text class="stepper-value">{{draft.capacity}}</text>
@@ -161,7 +163,7 @@
       </view>
 
       <view class="stepper-row">
-        <text class="field-label">候补人数</text>
+        <text class="field-label">候补名额</text>
         <view class="stepper">
           <view class="stepper-btn" bindtap="onStepperTap" data-field="waitlistCapacity" data-delta="-1">-</view>
           <text class="stepper-value">{{draft.waitlistCapacity}}</text>
@@ -175,6 +177,7 @@
         class="option-chip {{draft.feeType === item.value ? 'option-chip--active' : ''}}"
         wx:for="{{feeOptions}}"
         wx:key="value"
+        hover-class="option-chip--pressed"
         bindtap="onOptionSelect"
         data-field="feeType"
         data-value="{{item.value}}"
@@ -209,6 +212,7 @@
         class="mini-chip {{draft.joinRule === item.value ? 'mini-chip--active' : ''}}"
         wx:for="{{joinRuleOptions}}"
         wx:key="value"
+        hover-class="mini-chip--pressed"
         bindtap="onOptionSelect"
         data-field="joinRule"
         data-value="{{item.value}}"
@@ -222,6 +226,7 @@
         class="mini-chip {{draft.visibility === item.value ? 'mini-chip--active' : ''}}"
         wx:for="{{visibilityOptions}}"
         wx:key="value"
+        hover-class="mini-chip--pressed"
         bindtap="onOptionSelect"
         data-field="visibility"
         data-value="{{item.value}}"

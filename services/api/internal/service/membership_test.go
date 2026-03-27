@@ -89,7 +89,7 @@ func (r *fakeMembershipRepository) WithTx(_ context.Context, fn func(repo reposi
 	return fn(r)
 }
 
-func TestCreateMembershipOrderActivatesSubscription(t *testing.T) {
+func TestCreateMembershipOrderKeepsPendingBeforePayment(t *testing.T) {
 	repo := &fakeMembershipRepository{
 		plans: []model.MembershipPlan{
 			{
@@ -111,12 +111,51 @@ func TestCreateMembershipOrderActivatesSubscription(t *testing.T) {
 		t.Fatalf("CreateOrder returned error: %v", err)
 	}
 
+	if item.Status != model.OrderStatusPending {
+		t.Fatalf("expected pending order, got %s", item.Status)
+	}
+
+	if repo.subscription != nil {
+		t.Fatal("expected subscription to stay empty before payment")
+	}
+}
+
+func TestMockPayOrderActivatesSubscription(t *testing.T) {
+	repo := &fakeMembershipRepository{
+		plans: []model.MembershipPlan{
+			{
+				ID:           1,
+				Code:         "starter_month",
+				Name:         "月度会员",
+				PriceCents:   1990,
+				DurationDays: 30,
+				IsActive:     true,
+			},
+		},
+		orders: []model.PaymentOrder{
+			{
+				ID:          11,
+				UserID:      7,
+				PlanCode:    "starter_month",
+				AmountCents: 1990,
+				Status:      model.OrderStatusPending,
+				CreatedAt:   time.Now(),
+			},
+		},
+	}
+
+	svc := NewMembershipService(repo)
+	item, err := svc.MockPayOrder(context.Background(), 7, 11)
+	if err != nil {
+		t.Fatalf("MockPayOrder returned error: %v", err)
+	}
+
 	if item.Status != model.OrderStatusPaid {
 		t.Fatalf("expected paid order, got %s", item.Status)
 	}
 
 	if repo.subscription == nil {
-		t.Fatal("expected subscription to be created")
+		t.Fatal("expected subscription to be created after payment")
 	}
 
 	if repo.subscription.Status != model.SubscriptionStatusActive {

@@ -1,7 +1,7 @@
-﻿<view class="container discover-page">
+<view class="container discover-page">
   <view class="hero-panel">
     <text class="hero-eyebrow">USport / 同城运动成局</text>
-    <text class="hero-title">{{cityName}}今晚，优先看真正能成局的局</text>
+    <text class="hero-title">{{cityName}}今晚，优先看真正能成局的局。</text>
     <text class="hero-subtitle">把高履约主办方、合适时段和稳定场馆放进同一个推荐面板。</text>
 
     <view class="metric-list">
@@ -13,7 +13,12 @@
     </view>
   </view>
 
-  <view class="featured-card" bindtap="onActivityTap" data-id="{{featuredActivity.id}}">
+  <view
+    class="featured-card"
+    bindtap="onActivityTap"
+    data-id="{{featuredActivity.id}}"
+    hover-class="card-hover"
+  >
     <view class="featured-top">
       <text class="featured-status">报名中</text>
       <text class="featured-sport">{{featuredActivity.sportLabel}}</text>
@@ -48,6 +53,7 @@
           wx:key="id"
           bindtap="onFilterTap"
           data-filter-id="{{item.id}}"
+          hover-class="chip-hover"
         >
           {{item.label}}
         </view>
@@ -67,9 +73,11 @@
         wx:key="id"
         bindtap="onActivityTap"
         data-id="{{item.id}}"
+        hover-class="card-hover"
       >
         <view class="activity-item-top">
           <view>
+            <text wx:if="{{item.isOfficial}}" class="activity-badge">官方活动</text>
             <text class="activity-title">{{item.title}}</text>
             <text class="activity-subtitle">{{item.subtitle}}</text>
           </view>
@@ -101,6 +109,7 @@
           wx:key="id"
           bindtap="onVenueTap"
           data-name="{{item.name}}"
+          hover-class="card-hover"
         >
           <view class="venue-cover">
             <text class="venue-name">{{item.name}}</text>

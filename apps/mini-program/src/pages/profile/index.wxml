@@ -1,4 +1,4 @@
-﻿<view class="container profile-page">
+<view class="container profile-page">
   <view class="profile-card">
     <view class="profile-avatar">{{avatarInitial}}</view>
     <view class="profile-body">
@@ -36,6 +36,7 @@
       wx:key="id"
       bindtap="onMenuClick"
       data-type="{{item.id}}"
+      hover-class="item-hover"
     >
       <view class="menu-copy">
         <view class="menu-title-row">
@@ -44,9 +45,9 @@
         </view>
         <text class="menu-description">{{item.description}}</text>
       </view>
-      <text class="menu-arrow">→</text>
+      <text class="menu-arrow">›</text>
     </view>
   </view>
 
-  <button wx:if="{{isLoggedIn}}" class="logout-btn" type="warn" bindtap="onLogout">退出登录</button>
+  <button wx:if="{{isLoggedIn}}" class="logout-btn" bindtap="onLogout">退出登录</button>
 </view>

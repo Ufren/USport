@@ -50,6 +50,7 @@ func (r *activityRepository) ListVisible(ctx context.Context, limit int) ([]mode
 	err := r.db.WithContext(ctx).
 		Preload("HostUser").
 		Where("status IN ?", []string{model.ActivityStatusPublished, model.ActivityStatusFull}).
+		Order("is_official desc").
 		Order("start_at asc").
 		Limit(limit).
 		Find(&activities).Error

@@ -58,7 +58,7 @@ Page({
     const menuType = String(e.currentTarget.dataset.type ?? "");
 
     if (menuType === "activities") {
-      wx.navigateTo({ url: "/pages/my-activities-v2/index" });
+      wx.navigateTo({ url: "/pages/my-activities/index" });
       return;
     }
 
@@ -68,7 +68,7 @@ Page({
     }
 
     if (menuType === "credit") {
-      wx.navigateTo({ url: "/pages/credit-center-v2/index" });
+      wx.navigateTo({ url: "/pages/credit-center/index" });
       return;
     }
 

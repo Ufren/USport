@@ -21,6 +21,7 @@ var (
 type InvitationService interface {
 	ListMyInvitations(ctx context.Context, userID uint) ([]dto.InvitationItem, error)
 	ListMessagePreviews(ctx context.Context, userID uint) ([]dto.MessagePreview, error)
+	GetInboxWorkspace(ctx context.Context, userID uint) (*dto.InboxWorkspace, error)
 	RespondInvitation(
 		ctx context.Context,
 		userID uint,
@@ -79,6 +80,41 @@ func (s *invitationService) ListMessagePreviews(
 	}
 
 	return items, nil
+}
+
+func (s *invitationService) GetInboxWorkspace(
+	ctx context.Context,
+	userID uint,
+) (*dto.InboxWorkspace, error) {
+	invitations, err := s.ListMyInvitations(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	messages, err := s.ListMessagePreviews(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	pendingCount := 0
+	for _, item := range invitations {
+		if item.Status == model.InvitationStatusPending {
+			pendingCount++
+		}
+	}
+
+	unreadCount := 0
+	for _, item := range messages {
+		unreadCount += item.UnreadCount
+	}
+
+	return &dto.InboxWorkspace{
+		PendingCount:  pendingCount,
+		UnreadCount:   unreadCount,
+		TotalMessages: len(messages),
+		Invitations:   invitations,
+		Messages:      messages,
+	}, nil
 }
 
 func (s *invitationService) RespondInvitation(

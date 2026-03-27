@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -12,6 +12,7 @@ import {
 import {
   getErrorMessage,
   usportColors,
+  usportMotion,
   usportRadius,
   usportSpacing,
   usportTypography,
@@ -23,13 +24,29 @@ import {
 import { SectionHeader } from "../components/common/SectionHeader";
 import { membershipApi } from "../services/membership";
 
+type PageState = {
+  plans: MembershipPlanItem[];
+  summary: SubscriptionSummary | null;
+  orders: MembershipOrderItem[];
+};
+
+const initialState: PageState = {
+  plans: [],
+  summary: null,
+  orders: [],
+};
+
 export default function MembershipCenterScreen() {
+  const [pageState, setPageState] = useState<PageState>(initialState);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [submittingPlan, setSubmittingPlan] = useState<string | null>(null);
-  const [plans, setPlans] = useState<MembershipPlanItem[]>([]);
-  const [summary, setSummary] = useState<SubscriptionSummary | null>(null);
-  const [orders, setOrders] = useState<MembershipOrderItem[]>([]);
+  const [payingOrderId, setPayingOrderId] = useState<number | null>(null);
+
+  const planNameMap = useMemo(
+    () => new Map(pageState.plans.map((item) => [item.code, item.name])),
+    [pageState.plans],
+  );
 
   const loadPage = async (isRefresh = false) => {
     if (isRefresh) {
@@ -39,16 +56,15 @@ export default function MembershipCenterScreen() {
     }
 
     try {
-      const [nextPlans, nextSummary, nextOrders] = await Promise.all([
+      const [plans, summary, orders] = await Promise.all([
         membershipApi.plans(),
         membershipApi.summary(),
         membershipApi.orders(),
       ]);
-      setPlans(nextPlans);
-      setSummary(nextSummary);
-      setOrders(nextOrders);
+
+      setPageState({ plans, summary, orders });
     } catch (error: unknown) {
-      Alert.alert("加载失败", getErrorMessage(error, "暂时无法获取会员信息"));
+      Alert.alert("加载失败", getErrorMessage(error, "暂时无法同步会员信息"));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -59,24 +75,43 @@ export default function MembershipCenterScreen() {
     void loadPage();
   }, []);
 
+  const handleMockPay = async (orderId: number) => {
+    setPayingOrderId(orderId);
+    try {
+      await membershipApi.mockPayOrder(orderId);
+      Alert.alert("支付成功", "会员权益已生效，推荐和曝光优先级已经更新。");
+      await loadPage(true);
+    } catch (error: unknown) {
+      Alert.alert("支付失败", getErrorMessage(error, "请稍后再试"));
+    } finally {
+      setPayingOrderId(null);
+    }
+  };
+
   const handlePurchase = async (planCode: string) => {
     setSubmittingPlan(planCode);
     try {
-      await membershipApi.createOrder({ planCode });
-      Alert.alert("开通成功", "会员权益已经生效，你的推荐与曝光能力已更新。");
+      const order = await membershipApi.createOrder({ planCode });
+      Alert.alert("订单已创建", "是否现在完成模拟支付，立即开通会员权益？", [
+        { text: "稍后支付", style: "cancel" },
+        {
+          text: "立即支付",
+          onPress: () => void handleMockPay(order.id),
+        },
+      ]);
       await loadPage(true);
     } catch (error: unknown) {
-      Alert.alert("开通失败", getErrorMessage(error, "稍后再试一次"));
+      Alert.alert("下单失败", getErrorMessage(error, "请稍后再试"));
     } finally {
       setSubmittingPlan(null);
     }
   };
 
-  if (loading && !summary) {
+  if (loading && !pageState.summary) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator color={usportColors.brandPrimary} />
-        <Text style={styles.loadingText}>正在同步会员工作区...</Text>
+        <Text style={styles.loadingText}>正在同步会员中心...</Text>
       </View>
     );
   }
@@ -93,35 +128,50 @@ export default function MembershipCenterScreen() {
         />
       }
     >
-      <View style={styles.hero}>
+      <View style={styles.heroCard}>
         <Text style={styles.eyebrow}>USport / 会员中心</Text>
         <Text style={styles.title}>
-          把曝光、推荐和高阶筛选集中为一套稳定权益
+          把曝光、推荐和组局效率收进一套透明的权益里。
         </Text>
         <Text style={styles.subtitle}>
-          会员不是炫耀身份，而是让稳定履约、频繁组局和长期找搭子的用户，获得更高效的成局体验。
+          我们先把权益说明、支付状态和订单回流做清楚，再逐步接入真实支付网关。
         </Text>
       </View>
 
-      {summary ? (
+      {pageState.summary ? (
         <View style={styles.summaryCard}>
-          <Text style={styles.summaryBadge}>
-            {summary.isMember ? "会员有效中" : "未开通会员"}
-          </Text>
-          <Text style={styles.summaryTitle}>
-            {summary.planName ?? "标准账户"}
-          </Text>
-          <Text style={styles.summaryHint}>{summary.statusLabel}</Text>
-          {summary.expireAtLabel ? (
+          <View style={styles.rowBetween}>
+            <View style={styles.summaryMain}>
+              <Text style={styles.summaryBadge}>
+                {pageState.summary.isMember ? "会员有效中" : "未开通会员"}
+              </Text>
+              <Text style={styles.summaryTitle}>
+                {pageState.summary.planName ?? "标准账户"}
+              </Text>
+              <Text style={styles.summaryHint}>
+                {pageState.summary.statusLabel}
+              </Text>
+            </View>
+            <View style={styles.summaryPill}>
+              <Text style={styles.summaryPillText}>
+                {pageState.summary.isMember ? "已生效" : "可升级"}
+              </Text>
+            </View>
+          </View>
+          {pageState.summary.expireAtLabel ? (
             <Text style={styles.summaryMeta}>
-              有效期至 {summary.expireAtLabel}
+              有效期至 {pageState.summary.expireAtLabel}
             </Text>
           ) : null}
-          <View style={styles.summaryList}>
-            <Text style={styles.summaryListItem}>{summary.exposureBoost}</Text>
-            <Text style={styles.summaryListItem}>{summary.filterUnlocks}</Text>
-            <Text style={styles.summaryListItem}>
-              {summary.recommendationPriority}
+          <View style={styles.benefitStack}>
+            <Text style={styles.benefitLine}>
+              {pageState.summary.exposureBoost}
+            </Text>
+            <Text style={styles.benefitLine}>
+              {pageState.summary.filterUnlocks}
+            </Text>
+            <Text style={styles.benefitLine}>
+              {pageState.summary.recommendationPriority}
             </Text>
           </View>
         </View>
@@ -130,31 +180,39 @@ export default function MembershipCenterScreen() {
       <View style={styles.section}>
         <SectionHeader
           title="可选套餐"
-          subtitle="先用少量、明确、可理解的权益打磨付费体验。"
+          subtitle="权益文案必须简洁直白，用户不需要读很久才能做决定。"
         />
-        <View style={styles.cardList}>
-          {plans.map((item) => (
+        <View style={styles.stack}>
+          {pageState.plans.map((item) => (
             <View key={item.code} style={styles.planCard}>
-              <Text style={styles.planTitle}>{item.name}</Text>
-              <Text style={styles.planPrice}>{item.priceLabel}</Text>
+              <View style={styles.rowBetween}>
+                <View style={styles.planMain}>
+                  <Text style={styles.planTitle}>{item.name}</Text>
+                  <Text style={styles.planDuration}>{item.durationLabel}</Text>
+                </View>
+                <Text style={styles.planPrice}>{item.priceLabel}</Text>
+              </View>
               <Text style={styles.planDescription}>{item.description}</Text>
-              <View style={styles.benefitList}>
+              <View style={styles.benefitStack}>
                 {item.benefits.map((benefit) => (
-                  <Text key={benefit} style={styles.benefitItem}>
-                    {`• ${benefit}`}
+                  <Text key={benefit} style={styles.benefitLine}>
+                    {benefit}
                   </Text>
                 ))}
               </View>
               <Pressable
-                style={[
+                style={({ pressed }) => [
                   styles.primaryButton,
                   submittingPlan === item.code && styles.buttonDisabled,
+                  pressed && styles.primaryButtonPressed,
                 ]}
                 onPress={() => void handlePurchase(item.code)}
-                disabled={submittingPlan !== null}
+                disabled={submittingPlan !== null || payingOrderId !== null}
               >
                 <Text style={styles.primaryButtonText}>
-                  {submittingPlan === item.code ? "正在开通..." : "立即开通"}
+                  {submittingPlan === item.code
+                    ? "正在创建订单..."
+                    : "创建订单"}
                 </Text>
               </Pressable>
             </View>
@@ -165,23 +223,40 @@ export default function MembershipCenterScreen() {
       <View style={styles.section}>
         <SectionHeader
           title="最近订单"
-          subtitle="让用户能看清自己的付费记录和当前状态。"
+          subtitle="把待支付、已支付和退款状态完整反馈给用户。"
         />
-        <View style={styles.cardList}>
-          {orders.length ? (
-            orders.map((item) => (
+        <View style={styles.stack}>
+          {pageState.orders.length ? (
+            pageState.orders.map((item) => (
               <View key={item.id} style={styles.orderCard}>
-                <View style={styles.orderTop}>
-                  <Text style={styles.orderTitle}>{item.planCode}</Text>
+                <View style={styles.rowBetween}>
+                  <Text style={styles.orderTitle}>
+                    {planNameMap.get(item.planCode) ?? item.planCode}
+                  </Text>
                   <Text style={styles.orderStatus}>{item.statusLabel}</Text>
                 </View>
                 <Text style={styles.orderMeta}>{item.amountLabel}</Text>
                 <Text style={styles.orderMeta}>{item.createdAt}</Text>
+                {item.canPay ? (
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.secondaryButton,
+                      payingOrderId === item.id && styles.buttonDisabled,
+                      pressed && styles.secondaryButtonPressed,
+                    ]}
+                    onPress={() => void handleMockPay(item.id)}
+                    disabled={payingOrderId !== null}
+                  >
+                    <Text style={styles.secondaryButtonText}>
+                      {payingOrderId === item.id ? "正在支付..." : "立即支付"}
+                    </Text>
+                  </Pressable>
+                ) : null}
               </View>
             ))
           ) : (
             <View style={styles.orderCard}>
-              <Text style={styles.orderMeta}>你还没有会员订单记录。</Text>
+              <Text style={styles.orderMeta}>还没有会员订单记录。</Text>
             </View>
           )}
         </View>
@@ -208,11 +283,24 @@ const styles = StyleSheet.create({
     color: usportColors.textSecondary,
     fontSize: usportTypography.body,
   },
-  hero: { gap: usportSpacing.md },
+  heroCard: {
+    gap: usportSpacing.md,
+    padding: usportSpacing.xl,
+    borderRadius: usportRadius.lg,
+    borderWidth: 1,
+    borderColor: usportColors.border,
+    backgroundColor: usportColors.cardBackground,
+    shadowColor: usportColors.shadowStrong,
+    shadowOpacity: 0.12,
+    shadowRadius: 22,
+    shadowOffset: { width: 0, height: 14 },
+    elevation: 4,
+  },
   eyebrow: {
     color: usportColors.brandPrimary,
     fontSize: usportTypography.caption,
     fontWeight: "700",
+    letterSpacing: 0.4,
   },
   title: {
     color: usportColors.textPrimary,
@@ -226,12 +314,22 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   summaryCard: {
-    backgroundColor: usportColors.cardBackground,
+    gap: usportSpacing.md,
+    padding: usportSpacing.xl,
     borderRadius: usportRadius.lg,
     borderWidth: 1,
     borderColor: usportColors.border,
-    padding: usportSpacing.xl,
+    backgroundColor: usportColors.cardBackgroundStrong,
+  },
+  rowBetween: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     gap: usportSpacing.md,
+    alignItems: "flex-start",
+  },
+  summaryMain: {
+    flex: 1,
+    gap: usportSpacing.xs,
   },
   summaryBadge: {
     color: usportColors.brandPrimary,
@@ -247,30 +345,52 @@ const styles = StyleSheet.create({
     color: usportColors.textSecondary,
     fontSize: usportTypography.bodySm,
   },
+  summaryPill: {
+    paddingHorizontal: usportSpacing.md,
+    paddingVertical: usportSpacing.sm,
+    borderRadius: usportRadius.pill,
+    backgroundColor: usportColors.brandSecondary,
+  },
+  summaryPillText: {
+    color: usportColors.brandPrimary,
+    fontSize: usportTypography.caption,
+    fontWeight: "700",
+  },
   summaryMeta: {
     color: usportColors.textTertiary,
     fontSize: usportTypography.caption,
   },
-  summaryList: { gap: usportSpacing.xs },
-  summaryListItem: {
-    color: usportColors.textPrimary,
+  benefitStack: {
+    gap: usportSpacing.sm,
+  },
+  benefitLine: {
+    color: usportColors.textSecondary,
     fontSize: usportTypography.bodySm,
-    lineHeight: 20,
+    lineHeight: 22,
   },
   section: { gap: usportSpacing.lg },
-  cardList: { gap: usportSpacing.md },
+  stack: { gap: usportSpacing.md },
   planCard: {
-    backgroundColor: usportColors.cardBackground,
+    gap: usportSpacing.md,
+    padding: usportSpacing.xl,
     borderRadius: usportRadius.md,
     borderWidth: 1,
     borderColor: usportColors.border,
-    padding: usportSpacing.xl,
-    gap: usportSpacing.md,
+    backgroundColor: usportColors.cardBackground,
+  },
+  planMain: {
+    flex: 1,
+    gap: usportSpacing.xs,
   },
   planTitle: {
     color: usportColors.textPrimary,
     fontSize: usportTypography.title,
     fontWeight: "800",
+  },
+  planDuration: {
+    color: usportColors.textTertiary,
+    fontSize: usportTypography.caption,
+    fontWeight: "700",
   },
   planPrice: {
     color: usportColors.brandPrimary,
@@ -280,40 +400,37 @@ const styles = StyleSheet.create({
   planDescription: {
     color: usportColors.textSecondary,
     fontSize: usportTypography.bodySm,
-    lineHeight: 20,
-  },
-  benefitList: { gap: usportSpacing.xs },
-  benefitItem: {
-    color: usportColors.textPrimary,
-    fontSize: usportTypography.bodySm,
+    lineHeight: 22,
   },
   primaryButton: {
-    minHeight: 48,
-    borderRadius: usportRadius.pill,
-    backgroundColor: usportColors.brandPrimary,
+    minHeight: 50,
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: usportRadius.pill,
+    backgroundColor: usportColors.brandPrimary,
+  },
+  primaryButtonPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+    backgroundColor: usportColors.brandPrimaryPressed,
   },
   primaryButtonText: {
     color: usportColors.textInverse,
     fontSize: usportTypography.body,
     fontWeight: "700",
   },
-  buttonDisabled: { opacity: 0.7 },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
   orderCard: {
-    backgroundColor: usportColors.cardBackground,
+    gap: usportSpacing.sm,
+    padding: usportSpacing.xl,
     borderRadius: usportRadius.md,
     borderWidth: 1,
     borderColor: usportColors.border,
-    padding: usportSpacing.xl,
-    gap: usportSpacing.sm,
-  },
-  orderTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: usportSpacing.md,
+    backgroundColor: usportColors.cardBackground,
   },
   orderTitle: {
+    flex: 1,
     color: usportColors.textPrimary,
     fontSize: usportTypography.body,
     fontWeight: "700",
@@ -326,5 +443,23 @@ const styles = StyleSheet.create({
   orderMeta: {
     color: usportColors.textSecondary,
     fontSize: usportTypography.bodySm,
+  },
+  secondaryButton: {
+    minHeight: 46,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: usportRadius.pill,
+    borderWidth: 1,
+    borderColor: usportColors.brandPrimary,
+    backgroundColor: usportColors.cardBackgroundStrong,
+  },
+  secondaryButtonPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+    opacity: 0.88,
+  },
+  secondaryButtonText: {
+    color: usportColors.brandPrimary,
+    fontSize: usportTypography.bodySm,
+    fontWeight: "700",
   },
 });

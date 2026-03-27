@@ -2,6 +2,7 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
   usportColors,
+  usportMotion,
   usportRadius,
   usportSpacing,
   usportTypography,
@@ -14,7 +15,12 @@ type Props = {
 
 export function VenueSpotlightCard({ venue }: Props) {
   return (
-    <Pressable style={styles.container}>
+    <Pressable
+      style={({ pressed }) => [
+        styles.container,
+        pressed && styles.containerPressed,
+      ]}
+    >
       <View style={styles.cover}>
         <Text style={styles.coverTitle}>{venue.name}</Text>
         <Text style={styles.coverSubtitle}>{venue.surfaceLabel}</Text>
@@ -40,22 +46,31 @@ export function VenueSpotlightCard({ venue }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    width: 260,
+    width: 268,
     backgroundColor: usportColors.cardBackground,
     borderRadius: usportRadius.lg,
     overflow: "hidden",
     borderWidth: 1,
     borderColor: usportColors.border,
+    shadowColor: usportColors.shadow,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 1,
+    shadowRadius: 22,
+    elevation: 4,
+  },
+  containerPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+    opacity: 0.96,
   },
   cover: {
-    backgroundColor: usportColors.mutedBackground,
-    padding: usportSpacing.xl,
+    backgroundColor: usportColors.pageBackgroundElevated,
+    padding: usportSpacing["2xl"],
     gap: usportSpacing.sm,
   },
   coverTitle: {
     color: usportColors.textPrimary,
     fontSize: usportTypography.title,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   coverSubtitle: {
     color: usportColors.brandPrimary,
@@ -86,6 +101,8 @@ const styles = StyleSheet.create({
     borderRadius: usportRadius.pill,
     paddingHorizontal: usportSpacing.md,
     paddingVertical: usportSpacing.xs,
+    borderWidth: 1,
+    borderColor: usportColors.border,
   },
   featureText: {
     color: usportColors.textSecondary,

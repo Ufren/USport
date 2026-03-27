@@ -20,11 +20,14 @@ type AdminDashboardCounters struct {
 
 type AdminRepository interface {
 	GetDashboardCounters(ctx context.Context) (AdminDashboardCounters, error)
+	ListActivities(ctx context.Context, limit int) ([]model.Activity, error)
 	ListReports(ctx context.Context, status string, limit int) ([]model.Report, error)
 	FindReportByID(ctx context.Context, reportID uint) (*model.Report, error)
 	UpdateReportStatus(ctx context.Context, reportID uint, status string) error
 	AddCreditRecord(ctx context.Context, record *model.CreditRecord) error
 	ListMembershipOrders(ctx context.Context, limit int) ([]model.PaymentOrder, error)
+	FindMembershipOrderByID(ctx context.Context, orderID uint) (*model.PaymentOrder, error)
+	UpdateMembershipOrderStatus(ctx context.Context, orderID uint, status string) error
 	CreateAuditLog(ctx context.Context, log *model.AdminAuditLog) error
 	ListAuditLogs(ctx context.Context, limit int) ([]model.AdminAuditLog, error)
 }
@@ -73,6 +76,17 @@ func (r *adminRepository) GetDashboardCounters(ctx context.Context) (AdminDashbo
 	return result, nil
 }
 
+func (r *adminRepository) ListActivities(ctx context.Context, limit int) ([]model.Activity, error) {
+	var items []model.Activity
+	err := r.db.WithContext(ctx).
+		Preload("HostUser").
+		Order("is_official desc").
+		Order("start_at asc").
+		Limit(limit).
+		Find(&items).Error
+	return items, err
+}
+
 func (r *adminRepository) ListReports(ctx context.Context, status string, limit int) ([]model.Report, error) {
 	var items []model.Report
 	query := r.db.WithContext(ctx).Preload("ReporterUser").Order("created_at desc").Limit(limit)
@@ -113,6 +127,25 @@ func (r *adminRepository) ListMembershipOrders(ctx context.Context, limit int) (
 		Limit(limit).
 		Find(&items).Error
 	return items, err
+}
+
+func (r *adminRepository) FindMembershipOrderByID(ctx context.Context, orderID uint) (*model.PaymentOrder, error) {
+	var item model.PaymentOrder
+	err := r.db.WithContext(ctx).First(&item, orderID).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &item, nil
+}
+
+func (r *adminRepository) UpdateMembershipOrderStatus(ctx context.Context, orderID uint, status string) error {
+	return r.db.WithContext(ctx).
+		Model(&model.PaymentOrder{}).
+		Where("id = ?", orderID).
+		Update("status", status).Error
 }
 
 func (r *adminRepository) CreateAuditLog(ctx context.Context, log *model.AdminAuditLog) error {

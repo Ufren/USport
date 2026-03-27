@@ -17,6 +17,7 @@ import {
   createActivityVisibilityOptions,
   getErrorMessage,
   usportColors,
+  usportMotion,
   usportRadius,
   usportSpacing,
   usportTypography,
@@ -59,6 +60,18 @@ export default function CreateActivityScreen({ navigation }: Props) {
     [draft.feeType],
   );
 
+  const previewFee = useMemo(() => {
+    if (draft.feeType === "free") {
+      return "免费参与";
+    }
+
+    if (draft.feeType === "aa") {
+      return `AA 分摊，预计 ${draft.feeAmount || "0"} 元`;
+    }
+
+    return `固定费用 ${draft.feeAmount || "0"} 元`;
+  }, [draft.feeAmount, draft.feeType]);
+
   const updateDraft = <K extends keyof CreateActivityFormDraft>(
     key: K,
     value: CreateActivityFormDraft[K],
@@ -71,7 +84,7 @@ export default function CreateActivityScreen({ navigation }: Props) {
 
   const submit = async () => {
     if (!isLoggedIn) {
-      Alert.alert("请先登录", "登录后才能发布活动。", [
+      Alert.alert("请先登录", "登录后才能发起活动。", [
         { text: "取消", style: "cancel" },
         { text: "去登录", onPress: () => navigation.navigate("Login") },
       ]);
@@ -79,7 +92,7 @@ export default function CreateActivityScreen({ navigation }: Props) {
     }
 
     if (!draft.title.trim() || !draft.venueName.trim()) {
-      Alert.alert("信息不完整", "请先填写活动标题和场馆名称。");
+      Alert.alert("信息未完成", "请先填写活动标题和场馆名称。");
       return;
     }
 
@@ -96,16 +109,32 @@ export default function CreateActivityScreen({ navigation }: Props) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.hero}>
+      <View style={styles.heroCard}>
         <Text style={styles.eyebrow}>USport / 发起活动</Text>
-        <Text style={styles.title}>把成局需要的信息一次说清楚。</Text>
+        <Text style={styles.title}>把一场能顺利成局的活动写清楚。</Text>
         <Text style={styles.subtitle}>
-          标题、时间、场馆和门槛描述越准确，后续的报名质量和到场率越高。
+          标题、时间、场馆和门槛描述越明确，后续的报名质量和到场率就越稳定。
+        </Text>
+      </View>
+
+      <View style={styles.previewCard}>
+        <Text style={styles.previewLabel}>实时预览</Text>
+        <Text style={styles.previewTitle}>
+          {draft.title.trim() || "给这场活动起一个让人一眼看懂的标题"}
+        </Text>
+        <Text style={styles.previewMeta}>
+          {draft.date} · {draft.startTime} - {draft.endTime} · {draft.district}
+        </Text>
+        <Text style={styles.previewMeta}>
+          {previewFee} · 正式名额 {draft.capacity} 人
         </Text>
       </View>
 
       <View style={styles.section}>
-        <SectionHeader title="运动类型" subtitle="先确定这一局的核心玩法。" />
+        <SectionHeader
+          title="运动类型"
+          subtitle="先决定这场局的基本玩法和人群预期。"
+        />
         <OptionGroup
           options={createActivitySportOptions}
           value={draft.sportCode}
@@ -127,7 +156,7 @@ export default function CreateActivityScreen({ navigation }: Props) {
         <TextInput
           value={draft.description}
           onChangeText={(value) => updateDraft("description", value)}
-          placeholder="写清楚适合谁、强度和集合方式"
+          placeholder="写清适合谁、强度如何、是否欢迎单人报名。"
           placeholderTextColor={usportColors.textTertiary}
           style={[styles.input, styles.multilineInput]}
           multiline
@@ -144,12 +173,16 @@ export default function CreateActivityScreen({ navigation }: Props) {
       </View>
 
       <View style={styles.section}>
-        <SectionHeader title="区域与时间" subtitle="把最影响转化的字段收紧。" />
+        <SectionHeader
+          title="区域与时间"
+          subtitle="这几个字段最直接影响成局效率。"
+        />
         <OptionGroup
           options={createActivityDistrictOptions}
           value={draft.district}
           onChange={(value) => updateDraft("district", value)}
         />
+
         <View style={styles.formCard}>
           <FieldLabel label="活动日期" />
           <TextInput
@@ -159,6 +192,7 @@ export default function CreateActivityScreen({ navigation }: Props) {
             placeholderTextColor={usportColors.textTertiary}
             style={styles.input}
           />
+
           <View style={styles.inlineRow}>
             <View style={styles.inlineField}>
               <FieldLabel label="开始时间" />
@@ -181,6 +215,7 @@ export default function CreateActivityScreen({ navigation }: Props) {
               />
             </View>
           </View>
+
           <FieldLabel label="报名截止" />
           <TextInput
             value={draft.deadlineTime}
@@ -194,8 +229,8 @@ export default function CreateActivityScreen({ navigation }: Props) {
 
       <View style={styles.section}>
         <SectionHeader
-          title="名额与收费"
-          subtitle="这些规则会直接决定报名门槛。"
+          title="人数与费用"
+          subtitle="规则越直白，报名决策越轻。"
         />
         <View style={styles.formCard}>
           <View style={styles.inlineRow}>
@@ -229,6 +264,7 @@ export default function CreateActivityScreen({ navigation }: Props) {
             </View>
           </View>
         </View>
+
         <OptionGroup
           options={createActivityFeeOptions}
           value={draft.feeType}
@@ -236,6 +272,7 @@ export default function CreateActivityScreen({ navigation }: Props) {
             updateDraft("feeType", value as CreateActivityFormDraft["feeType"])
           }
         />
+
         <View style={styles.formCard}>
           <FieldLabel label="参考费用" />
           <TextInput
@@ -251,7 +288,10 @@ export default function CreateActivityScreen({ navigation }: Props) {
       </View>
 
       <View style={styles.section}>
-        <SectionHeader title="可见范围" subtitle="让优质报名尽量前置发生。" />
+        <SectionHeader
+          title="报名规则"
+          subtitle="把筛选机制和曝光范围说明白。"
+        />
         <OptionGroup
           options={createActivityJoinRuleOptions}
           value={draft.joinRule}
@@ -275,12 +315,16 @@ export default function CreateActivityScreen({ navigation }: Props) {
       </View>
 
       <Pressable
-        style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
+        style={({ pressed }) => [
+          styles.submitButton,
+          submitting && styles.submitButtonDisabled,
+          pressed && styles.submitButtonPressed,
+        ]}
         onPress={() => void submit()}
         disabled={submitting}
       >
         <Text style={styles.submitButtonText}>
-          {submitting ? "发布中..." : "发布活动"}
+          {submitting ? "正在发布..." : "发布活动"}
         </Text>
       </Pressable>
     </ScrollView>
@@ -307,7 +351,11 @@ function OptionGroup({
         return (
           <Pressable
             key={option.value}
-            style={[styles.optionCard, active && styles.optionCardActive]}
+            style={({ pressed }) => [
+              styles.optionCard,
+              active && styles.optionCardActive,
+              pressed && styles.optionCardPressed,
+            ]}
             onPress={() => onChange(option.value)}
           >
             <Text
@@ -328,22 +376,30 @@ function OptionGroup({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: usportColors.pageBackground,
-  },
+  container: { flex: 1, backgroundColor: usportColors.pageBackground },
   content: {
     padding: usportSpacing.xl,
     paddingBottom: usportSpacing["4xl"],
     gap: usportSpacing.xl,
   },
-  hero: {
+  heroCard: {
     gap: usportSpacing.md,
+    padding: usportSpacing.xl,
+    borderRadius: usportRadius.lg,
+    borderWidth: 1,
+    borderColor: usportColors.border,
+    backgroundColor: usportColors.cardBackground,
+    shadowColor: usportColors.shadowStrong,
+    shadowOpacity: 0.12,
+    shadowRadius: 22,
+    shadowOffset: { width: 0, height: 14 },
+    elevation: 4,
   },
   eyebrow: {
     color: usportColors.brandPrimary,
     fontSize: usportTypography.caption,
     fontWeight: "700",
+    letterSpacing: 0.4,
   },
   title: {
     color: usportColors.textPrimary,
@@ -356,23 +412,47 @@ const styles = StyleSheet.create({
     fontSize: usportTypography.body,
     lineHeight: 24,
   },
-  section: {
-    gap: usportSpacing.lg,
+  previewCard: {
+    gap: usportSpacing.sm,
+    padding: usportSpacing.xl,
+    borderRadius: usportRadius.lg,
+    borderWidth: 1,
+    borderColor: usportColors.border,
+    backgroundColor: usportColors.cardBackgroundStrong,
   },
-  optionGroup: {
-    gap: usportSpacing.md,
+  previewLabel: {
+    color: usportColors.brandPrimary,
+    fontSize: usportTypography.caption,
+    fontWeight: "700",
   },
+  previewTitle: {
+    color: usportColors.textPrimary,
+    fontSize: usportTypography.title,
+    fontWeight: "800",
+    lineHeight: 24,
+  },
+  previewMeta: {
+    color: usportColors.textSecondary,
+    fontSize: usportTypography.bodySm,
+    lineHeight: 22,
+  },
+  section: { gap: usportSpacing.lg },
+  optionGroup: { gap: usportSpacing.md },
   optionCard: {
-    backgroundColor: usportColors.cardBackground,
+    gap: usportSpacing.xs,
+    padding: usportSpacing.lg,
     borderRadius: usportRadius.md,
     borderWidth: 1,
     borderColor: usportColors.border,
-    padding: usportSpacing.lg,
-    gap: usportSpacing.xs,
+    backgroundColor: usportColors.cardBackground,
   },
   optionCardActive: {
     borderColor: usportColors.brandPrimary,
-    backgroundColor: usportColors.successSoft,
+    backgroundColor: usportColors.brandSecondary,
+  },
+  optionCardPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+    opacity: 0.92,
   },
   optionTitle: {
     color: usportColors.textPrimary,
@@ -391,12 +471,12 @@ const styles = StyleSheet.create({
     color: usportColors.textSecondary,
   },
   formCard: {
-    backgroundColor: usportColors.cardBackground,
+    gap: usportSpacing.md,
+    padding: usportSpacing.lg,
     borderRadius: usportRadius.md,
     borderWidth: 1,
     borderColor: usportColors.border,
-    padding: usportSpacing.lg,
-    gap: usportSpacing.md,
+    backgroundColor: usportColors.cardBackground,
   },
   fieldLabel: {
     color: usportColors.textSecondary,
@@ -404,13 +484,13 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   input: {
-    minHeight: 48,
+    minHeight: 50,
+    paddingHorizontal: usportSpacing.md,
+    paddingVertical: usportSpacing.md,
     borderRadius: usportRadius.md,
     borderWidth: 1,
     borderColor: usportColors.border,
-    backgroundColor: usportColors.pageBackground,
-    paddingHorizontal: usportSpacing.md,
-    paddingVertical: usportSpacing.md,
+    backgroundColor: usportColors.pageBackgroundElevated,
     color: usportColors.textPrimary,
     fontSize: usportTypography.body,
   },
@@ -431,10 +511,14 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     minHeight: 54,
-    borderRadius: usportRadius.pill,
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: usportRadius.pill,
     backgroundColor: usportColors.brandPrimary,
+  },
+  submitButtonPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+    backgroundColor: usportColors.brandPrimaryPressed,
   },
   submitButtonDisabled: {
     opacity: 0.7,

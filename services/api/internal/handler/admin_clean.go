@@ -1,5 +1,3 @@
-//go:build ignore
-
 package handler
 
 import (
@@ -31,6 +29,16 @@ func (h *AdminHandler) Dashboard(c *gin.Context) {
 	response.Success(c, item)
 }
 
+func (h *AdminHandler) Activities(c *gin.Context) {
+	items, err := h.adminSvc.ListActivities(c.Request.Context())
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "获取活动管理列表失败", err)
+		return
+	}
+
+	response.Success(c, items)
+}
+
 func (h *AdminHandler) Reports(c *gin.Context) {
 	items, err := h.adminSvc.ListReports(c.Request.Context(), c.Query("status"))
 	if err != nil {
@@ -53,7 +61,7 @@ func (h *AdminHandler) CreateOfficialActivity(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case service.ErrAdminOperatorNameInvalid:
-			response.Error(c, http.StatusBadRequest, err.Error(), err)
+			response.Error(c, http.StatusBadRequest, "后台操作人不能为空", err)
 		default:
 			response.Error(c, http.StatusBadRequest, err.Error(), err)
 		}
@@ -81,7 +89,7 @@ func (h *AdminHandler) DecideReport(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case service.ErrAdminReportNotFound:
-			response.Error(c, http.StatusNotFound, err.Error(), err)
+			response.Error(c, http.StatusNotFound, "举报工单不存在", err)
 		case service.ErrAdminDecisionInvalid, service.ErrAdminOperatorNameInvalid:
 			response.Error(c, http.StatusBadRequest, err.Error(), err)
 		default:
@@ -101,6 +109,30 @@ func (h *AdminHandler) MembershipOrders(c *gin.Context) {
 	}
 
 	response.Success(c, items)
+}
+
+func (h *AdminHandler) RefundMembershipOrder(c *gin.Context) {
+	orderID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "会员订单 ID 无效", err)
+		return
+	}
+
+	operator := strings.TrimSpace(c.GetHeader("X-Admin-Operator"))
+	item, err := h.adminSvc.RefundMembershipOrder(c.Request.Context(), operator, uint(orderID))
+	if err != nil {
+		switch err {
+		case service.ErrAdminMembershipOrderNotFound:
+			response.Error(c, http.StatusNotFound, "会员订单不存在", err)
+		case service.ErrAdminMembershipOrderNotRefund, service.ErrAdminOperatorNameInvalid:
+			response.Error(c, http.StatusBadRequest, err.Error(), err)
+		default:
+			response.Error(c, http.StatusInternalServerError, "会员订单退款失败", err)
+		}
+		return
+	}
+
+	response.Success(c, item)
 }
 
 func (h *AdminHandler) AuditLogs(c *gin.Context) {

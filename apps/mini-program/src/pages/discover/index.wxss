@@ -1,30 +1,37 @@
 .discover-page {
   gap: 32rpx;
-  padding: 32rpx 24rpx 48rpx;
+  padding: 24rpx 24rpx 56rpx;
+  background: linear-gradient(180deg, #f7f7fa 0%, #f1f2f6 100%);
 }
 
 .hero-panel {
   display: flex;
   gap: 20rpx;
+  padding: 32rpx 28rpx;
+  border-radius: 36rpx;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1rpx solid rgba(60, 60, 67, 0.12);
+  box-shadow: 0 18rpx 40rpx rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(18rpx);
 }
 
 .hero-eyebrow {
-  color: #156b52;
+  color: rgba(17, 17, 17, 0.46);
   font-size: 22rpx;
   font-weight: 700;
   letter-spacing: 1rpx;
 }
 
 .hero-title {
-  color: #131714;
+  color: #111111;
   font-size: 56rpx;
   font-weight: 800;
   line-height: 1.2;
 }
 
 .hero-subtitle {
-  color: #2d3631;
-  font-size: 28rpx;
+  color: rgba(17, 17, 17, 0.72);
+  font-size: 27rpx;
   line-height: 1.6;
 }
 
@@ -38,25 +45,25 @@
   display: flex;
   gap: 8rpx;
   padding: 28rpx;
-  background: #ffffff;
-  border: 1rpx solid #dce2dd;
-  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1rpx solid rgba(60, 60, 67, 0.08);
+  border-radius: 30rpx;
 }
 
 .metric-value {
-  color: #131714;
+  color: #111111;
   font-size: 42rpx;
   font-weight: 800;
 }
 
 .metric-label {
-  color: #2d3631;
+  color: rgba(17, 17, 17, 0.72);
   font-size: 24rpx;
   font-weight: 700;
 }
 
 .metric-hint {
-  color: #66726c;
+  color: rgba(17, 17, 17, 0.46);
   font-size: 22rpx;
   line-height: 1.5;
 }
@@ -65,9 +72,10 @@
   display: flex;
   gap: 18rpx;
   padding: 30rpx;
-  border-radius: 34rpx;
-  background: #156b52;
-  box-shadow: 0 18rpx 36rpx rgba(19, 23, 20, 0.12);
+  border-radius: 36rpx;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(249, 250, 252, 0.96) 100%);
+  border: 1rpx solid rgba(60, 60, 67, 0.1);
+  box-shadow: 0 22rpx 48rpx rgba(15, 23, 42, 0.1);
 }
 
 .featured-top,
@@ -87,20 +95,20 @@
 .featured-status {
   padding: 8rpx 18rpx;
   border-radius: 999rpx;
-  background: rgba(232, 247, 239, 0.18);
-  color: #ffffff;
+  background: rgba(52, 199, 89, 0.12);
+  color: #34c759;
   font-size: 20rpx;
   font-weight: 700;
 }
 
 .featured-sport {
-  color: #b6f36a;
+  color: #0a84ff;
   font-size: 22rpx;
   font-weight: 700;
 }
 
 .featured-title {
-  color: #ffffff;
+  color: #111111;
   font-size: 44rpx;
   font-weight: 800;
   line-height: 1.3;
@@ -109,7 +117,7 @@
 .featured-subtitle,
 .featured-meta,
 .featured-host-badge {
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(17, 17, 17, 0.56);
   font-size: 24rpx;
   line-height: 1.5;
 }
@@ -124,8 +132,8 @@
 .featured-tag {
   padding: 8rpx 18rpx;
   border-radius: 999rpx;
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
+  background: rgba(238, 240, 244, 0.95);
+  color: rgba(17, 17, 17, 0.72);
   font-size: 20rpx;
 }
 
@@ -141,7 +149,7 @@
 }
 
 .featured-host-name {
-  color: #ffffff;
+  color: #111111;
   font-size: 30rpx;
   font-weight: 700;
 }
@@ -149,10 +157,10 @@
 .featured-cta {
   padding: 18rpx 28rpx;
   border-radius: 999rpx;
-  background: #b6f36a;
-  color: #131714;
+  background: #0a84ff;
+  color: #ffffff;
   font-size: 24rpx;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .section {
@@ -161,13 +169,13 @@
 }
 
 .section-title {
-  color: #131714;
+  color: #111111;
   font-size: 36rpx;
   font-weight: 800;
 }
 
 .section-subtitle {
-  color: #66726c;
+  color: rgba(17, 17, 17, 0.46);
   font-size: 24rpx;
   line-height: 1.5;
 }
@@ -190,18 +198,19 @@
   align-items: center;
   justify-content: center;
   padding: 18rpx 26rpx;
-  border: 1rpx solid #dce2dd;
+  border: 1rpx solid rgba(60, 60, 67, 0.12);
   border-radius: 999rpx;
-  background: #ffffff;
-  color: #2d3631;
+  background: rgba(255, 255, 255, 0.82);
+  color: rgba(17, 17, 17, 0.72);
   font-size: 24rpx;
   font-weight: 700;
+  transition: all 160ms ease;
 }
 
 .filter-chip--active {
-  background: #b6f36a;
-  border-color: #b6f36a;
-  color: #131714;
+  background: #111111;
+  border-color: #111111;
+  color: #ffffff;
 }
 
 .activity-list {
@@ -215,9 +224,11 @@
   display: flex;
   gap: 16rpx;
   padding: 28rpx;
-  background: #ffffff;
-  border: 1rpx solid #dce2dd;
-  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1rpx solid rgba(60, 60, 67, 0.12);
+  border-radius: 30rpx;
+  box-shadow: 0 18rpx 36rpx rgba(15, 23, 42, 0.08);
+  transition: transform 160ms ease, opacity 160ms ease;
 }
 
 .activity-item-top {
@@ -225,8 +236,20 @@
 }
 
 .activity-title {
-  color: #131714;
+  color: #111111;
   font-size: 32rpx;
+  font-weight: 800;
+}
+
+.activity-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  margin-bottom: 8rpx;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(10, 132, 255, 0.1);
+  color: #0a84ff;
+  font-size: 20rpx;
   font-weight: 700;
 }
 
@@ -235,7 +258,7 @@
 .activity-attendance,
 .venue-meta,
 .venue-vibe {
-  color: #66726c;
+  color: rgba(17, 17, 17, 0.48);
   font-size: 24rpx;
   line-height: 1.5;
 }
@@ -243,15 +266,15 @@
 .activity-status {
   padding: 8rpx 18rpx;
   border-radius: 999rpx;
-  background: #e8f7ef;
-  color: #1f9d61;
+  background: rgba(52, 199, 89, 0.12);
+  color: #34c759;
   font-size: 20rpx;
   font-weight: 700;
 }
 
 .activity-status--warning {
-  background: #fff4d8;
-  color: #e6a019;
+  background: rgba(255, 159, 10, 0.12);
+  color: #ff9f0a;
 }
 
 .activity-footer {
@@ -259,9 +282,9 @@
 }
 
 .activity-action {
-  color: #156b52;
+  color: #0a84ff;
   font-size: 24rpx;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .venue-card {
@@ -274,17 +297,17 @@
   display: flex;
   gap: 8rpx;
   padding: 28rpx;
-  background: #edf3ea;
+  background: linear-gradient(180deg, rgba(250, 250, 252, 1) 0%, rgba(241, 243, 247, 1) 100%);
 }
 
 .venue-name {
-  color: #131714;
+  color: #111111;
   font-size: 30rpx;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .venue-surface {
-  color: #156b52;
+  color: #0a84ff;
   font-size: 22rpx;
   font-weight: 700;
 }
@@ -298,7 +321,16 @@
 .venue-tag {
   padding: 8rpx 18rpx;
   border-radius: 999rpx;
-  background: #f4f7f2;
-  color: #2d3631;
+  background: rgba(238, 240, 244, 0.92);
+  color: rgba(17, 17, 17, 0.72);
   font-size: 20rpx;
+}
+
+.card-hover {
+  transform: scale(0.985);
+  opacity: 0.92;
+}
+
+.chip-hover {
+  opacity: 0.85;
 }

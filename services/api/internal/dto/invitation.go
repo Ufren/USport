@@ -21,6 +21,14 @@ type RespondInvitationRequest struct {
 	Action string `json:"action" binding:"required"`
 }
 
+type InboxWorkspace struct {
+	PendingCount  int              `json:"pendingCount"`
+	UnreadCount   int              `json:"unreadCount"`
+	TotalMessages int              `json:"totalMessages"`
+	Invitations   []InvitationItem `json:"invitations"`
+	Messages      []MessagePreview `json:"messages"`
+}
+
 type MessagePreview struct {
 	ID             uint   `json:"id"`
 	Title          string `json:"title"`

@@ -1,44 +1,67 @@
 <view class="container credit-page">
   <view class="hero-card">
-    <text class="hero-eyebrow">USport / 信用与履约</text>
-    <text class="hero-title">把履约、风险和举报处理收在一个工作区</text>
-    <text class="hero-subtitle">信用会真实作用于推荐、邀约通过率和活动曝光。</text>
+    <text class="hero-eyebrow">USport / 信用与治理</text>
+    <text class="hero-title">把履约、风险和举报处理放在一条清晰的链路里。</text>
+    <text class="hero-subtitle">
+      信用会真实影响推荐曝光、邀约通过率和活动转化，所以它必须透明、克制、可解释。
+    </text>
   </view>
 
   <view wx:if="{{summary}}" class="score-card">
-    <text class="score-value">{{summary.score}}</text>
-    <text class="score-level">{{summary.levelLabel}}</text>
-    <text class="score-hint">{{summary.improvementSuggestion}}</text>
-    <text class="score-meta">稳定记录 {{summary.positiveCount}} · 风险记录 {{summary.riskCount}} · 履约率 {{summary.completionRate}}</text>
-  </view>
-
-  <view class="section-card">
-    <view class="section-header">
-      <text class="section-title">最近信用记录</text>
-      <text class="section-subtitle">让用户知道自己的信用变化为什么发生。</text>
+    <view class="score-top">
+      <view class="score-main">
+        <text class="score-caption">当前信用分</text>
+        <text class="score-value">{{summary.score}}</text>
+      </view>
+      <view class="score-pill">
+        <text class="score-pill-text">{{summary.levelLabel}}</text>
+      </view>
     </view>
-    <view wx:if="{{summary && summary.recentRecords.length > 0}}" class="list">
-      <view wx:for="{{summary.recentRecords}}" wx:key="id" class="list-card">
-        <view class="list-top">
-          <text class="list-title">{{item.label}}</text>
-          <text class="list-delta">{{item.delta}}</text>
-        </view>
-        <text class="list-copy">{{item.description}}</text>
-        <text class="list-time">{{item.createdAt}}</text>
+    <text class="score-hint">{{summary.improvementSuggestion}}</text>
+    <view class="metric-row">
+      <view class="metric-chip">
+        <text class="metric-text">稳定记录 {{summary.positiveCount}}</text>
+      </view>
+      <view class="metric-chip">
+        <text class="metric-text">风险记录 {{summary.riskCount}}</text>
+      </view>
+      <view class="metric-chip">
+        <text class="metric-text">履约率 {{summary.completionRate}}</text>
       </view>
     </view>
   </view>
 
   <view class="section-card">
     <view class="section-header">
+      <text class="section-title">最近记录</text>
+      <text class="section-subtitle">让用户知道信用变化来自哪些行为，避免平台黑箱感。</text>
+    </view>
+    <view wx:if="{{summary && summary.recentRecords.length > 0}}" class="list">
+      <view wx:for="{{summary.recentRecords}}" wx:key="id" class="list-card">
+        <view class="list-top">
+          <text class="list-title">{{item.label}}</text>
+          <text class="list-delta">{{item.delta > 0 ? '+' + item.delta : item.delta}}</text>
+        </view>
+        <text class="list-copy">{{item.description}}</text>
+        <text class="list-time">{{item.createdAt}}</text>
+      </view>
+    </view>
+    <view wx:else class="list-card">
+      <text class="list-copy">当前还没有信用变化记录。</text>
+    </view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-header">
       <text class="section-title">提交举报</text>
-      <text class="section-subtitle">先交付最小可运营的举报入口，后续再接后台审核。</text>
+      <text class="section-subtitle">入口尽量简单，但反馈必须明确。</text>
     </view>
     <view class="reason-row">
       <view
         wx:for="{{reasonOptions}}"
         wx:key="value"
         class="reason-chip {{selectedReason === item.value ? 'reason-chip--active' : ''}}"
+        hover-class="reason-chip--pressed"
         bindtap="onReasonTap"
         data-value="{{item.value}}"
       >
@@ -47,7 +70,8 @@
     </view>
     <textarea
       class="textarea"
-      placeholder="补充现场情况、时间点和你观察到的问题。"
+      placeholder="补充现场情况、时间点，以及你观察到的具体问题。"
+      maxlength="240"
       value="{{description}}"
       bindinput="onDescriptionInput"
     />
@@ -57,7 +81,7 @@
   <view class="section-card">
     <view class="section-header">
       <text class="section-title">我的举报</text>
-      <text class="section-subtitle">让举报人知道自己的工单没有石沉大海。</text>
+      <text class="section-subtitle">让用户知道工单没有沉默消失。</text>
     </view>
     <view wx:if="{{reports.length > 0}}" class="list">
       <view wx:for="{{reports}}" wx:key="id" class="list-card">
@@ -68,6 +92,9 @@
         <text class="list-copy">{{item.description}}</text>
         <text class="list-time">{{item.createdAtLabel}}</text>
       </view>
+    </view>
+    <view wx:else class="list-card">
+      <text class="list-copy">你还没有提交过举报。</text>
     </view>
   </view>
 </view>

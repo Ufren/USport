@@ -42,4 +42,12 @@ export const membershipApi = {
       await request.post<MembershipOrderItem>("/membership/orders", payload),
     );
   },
+
+  async mockPayOrder(orderId: number): Promise<MembershipOrderItem> {
+    return unwrapResponse(
+      await request.post<MembershipOrderItem>(
+        `/membership/orders/${orderId}/mock-pay`,
+      ),
+    );
+  },
 };

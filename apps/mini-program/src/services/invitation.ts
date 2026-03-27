@@ -1,4 +1,8 @@
-import type { InvitationItem, MessagePreview } from "@usport/shared";
+import type {
+  InboxWorkspace,
+  InvitationItem,
+  MessagePreview,
+} from "@usport/shared";
 
 import { request } from "../utils/helpers";
 import type { ApiResponse } from "../types/api";
@@ -18,6 +22,12 @@ export const invitationApi = {
 
   async messages(): Promise<MessagePreview[]> {
     return unwrapResponse(await request.get<MessagePreview[]>("/messages"));
+  },
+
+  async workspace(): Promise<InboxWorkspace> {
+    return unwrapResponse(
+      await request.get<InboxWorkspace>("/messages/workspace"),
+    );
   },
 
   async respond(

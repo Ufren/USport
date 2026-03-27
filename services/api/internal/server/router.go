@@ -60,6 +60,7 @@ func NewRouter(deps RouterDependencies) *gin.Engine {
 		messages := api.Group("/messages", middleware.Auth(deps.JWTSecret))
 		{
 			messages.GET("", deps.InvitationHandler.MessagePreviews)
+			messages.GET("/workspace", deps.InvitationHandler.InboxWorkspace)
 		}
 
 		governance := api.Group("", middleware.Auth(deps.JWTSecret))
@@ -71,15 +72,18 @@ func NewRouter(deps RouterDependencies) *gin.Engine {
 			governance.GET("/membership/summary", deps.MembershipHandler.Summary)
 			governance.GET("/membership/orders", deps.MembershipHandler.ListOrders)
 			governance.POST("/membership/orders", deps.MembershipHandler.CreateOrder)
+			governance.POST("/membership/orders/:id/mock-pay", deps.MembershipHandler.MockPayOrder)
 		}
 
 		admin := api.Group("/admin", middleware.AdminAuth(deps.AdminToken))
 		{
 			admin.GET("/dashboard", deps.AdminHandler.Dashboard)
+			admin.GET("/activities", deps.AdminHandler.Activities)
 			admin.POST("/activities", deps.AdminHandler.CreateOfficialActivity)
 			admin.GET("/reports", deps.AdminHandler.Reports)
 			admin.POST("/reports/:id/decision", deps.AdminHandler.DecideReport)
 			admin.GET("/membership/orders", deps.AdminHandler.MembershipOrders)
+			admin.POST("/membership/orders/:id/refund", deps.AdminHandler.RefundMembershipOrder)
 			admin.GET("/audit-logs", deps.AdminHandler.AuditLogs)
 		}
 	}

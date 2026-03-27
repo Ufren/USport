@@ -1,10 +1,15 @@
-﻿import type { MyActivityItem } from "@usport/shared";
+import type { MyActivityItem } from "@usport/shared";
 
 import { activityApi } from "../../services/activity";
 import { showError, showSuccess } from "../../utils/helpers";
 import { setActivitySignupStatus } from "../../utils/storage";
 
 type RoleFilter = "all" | "host" | "participant";
+type ActivityAction =
+  | "cancel-registration"
+  | "cancel-activity"
+  | "check-in"
+  | "finish";
 
 const roleOptions = [
   { value: "all", label: "全部" },
@@ -19,7 +24,7 @@ function buildEmptyState(role: RoleFilter): {
   if (role === "host") {
     return {
       title: "还没有发起活动",
-      description: "去创建第一场活动，把真正能成局的局先跑起来。",
+      description: "先创建第一场活动，把真正能成局的局跑起来。",
     };
   }
 
@@ -32,8 +37,77 @@ function buildEmptyState(role: RoleFilter): {
 
   return {
     title: "还没有活动记录",
-    description: "你的发起和报名活动会统一出现在这里，方便后续管理。",
+    description: "你发起和报名的活动会统一出现在这里，方便后续管理。",
   };
+}
+
+function buildStatusLabel(item: MyActivityItem): string {
+  if (item.role === "host") {
+    return item.canFinish ? "待完赛" : "主办中";
+  }
+
+  switch (item.registrationStatus) {
+    case "waitlisted":
+      return "候补中";
+    case "checked_in":
+      return "已签到";
+    case "finished":
+      return "已完赛";
+    default:
+      return "已报名";
+  }
+}
+
+function buildActionConfig(item: MyActivityItem):
+  | {
+      action: ActivityAction;
+      title: string;
+      content: string;
+      success: string;
+      label: string;
+    }
+  | undefined {
+  if (item.canFinish) {
+    return {
+      action: "finish",
+      title: "完赛确认",
+      content: `确认将“${item.title}”标记为已完赛吗？系统会同步更新参与者状态。`,
+      success: "活动已完赛",
+      label: "完赛收口",
+    };
+  }
+
+  if (item.canCheckIn) {
+    return {
+      action: "check-in",
+      title: "活动签到",
+      content: `确认现在为“${item.title}”完成签到吗？签到后会进入履约状态。`,
+      success: "签到成功",
+      label: "立即签到",
+    };
+  }
+
+  if (item.canManage) {
+    return {
+      action: "cancel-activity",
+      title: "取消活动",
+      content: `确认取消“${item.title}”吗？已报名和候补用户都会收到取消结果。`,
+      success: "活动已取消",
+      label: "取消活动",
+    };
+  }
+
+  if (item.canCancel) {
+    return {
+      action: "cancel-registration",
+      title: "退出活动",
+      content: `确认退出“${item.title}”吗？释放出的名额会自动补给候补用户。`,
+      success: "已退出活动",
+      label: "退出活动",
+    };
+  }
+
+  return undefined;
 }
 
 Page({
@@ -41,7 +115,9 @@ Page({
     loading: true,
     role: "all" as RoleFilter,
     roleOptions,
-    items: [] as MyActivityItem[],
+    items: [] as Array<
+      MyActivityItem & { statusLabel: string; actionLabel: string }
+    >,
     emptyTitle: buildEmptyState("all").title,
     emptyDescription: buildEmptyState("all").description,
   },
@@ -63,7 +139,14 @@ Page({
       const emptyState = buildEmptyState(nextRole);
 
       this.setData({
-        items,
+        items: items.map((item) => {
+          const actionConfig = buildActionConfig(item);
+          return {
+            ...item,
+            statusLabel: buildStatusLabel(item),
+            actionLabel: actionConfig?.label ?? "",
+          };
+        }),
         emptyTitle: emptyState.title,
         emptyDescription: emptyState.description,
       });
@@ -118,63 +201,50 @@ Page({
       Record<string, never>,
       {
         id?: string | number;
-        action?:
-          | "cancel-registration"
-          | "cancel-activity"
-          | "check-in"
-          | "finish";
-        title?: string;
       }
     >,
   ) {
     const id = String(e.currentTarget.dataset.id ?? "");
-    const action = e.currentTarget.dataset.action;
-    const title = String(e.currentTarget.dataset.title ?? "这场活动");
+    const currentItem = this.data.items.find((item) => String(item.id) === id);
 
-    if (!id || !action) {
+    if (!id || !currentItem) {
       return;
     }
 
-    const modalContent =
-      action === "cancel-activity"
-        ? `确定取消「${title}」吗？已报名和候补用户都会收到取消结果。`
-        : action === "check-in"
-          ? `确定为「${title}」完成签到吗？签到后会进入履约状态。`
-          : action === "finish"
-            ? `确定将「${title}」标记为已完赛吗？系统会同步收口参与者状态。`
-            : `确定退出「${title}」吗？释放出的名额会自动补给候补用户。`;
+    const actionConfig = buildActionConfig(currentItem);
+    if (!actionConfig) {
+      return;
+    }
 
     wx.showModal({
-      title:
-        action === "cancel-activity"
-          ? "取消活动"
-          : action === "check-in"
-            ? "活动签到"
-            : action === "finish"
-              ? "完赛确认"
-              : "退出活动",
-      content: modalContent,
+      title: actionConfig.title,
+      content: actionConfig.content,
       success: async (result) => {
         if (!result.confirm) {
           return;
         }
 
+        // 生命周期动作统一由活动服务层承接，页面只做触发和反馈。
         try {
-          if (action === "cancel-activity") {
-            await activityApi.cancelActivity(id);
-            showSuccess("活动已取消");
-          } else if (action === "check-in") {
-            await activityApi.checkIn(id);
-            showSuccess("签到成功");
-          } else if (action === "finish") {
-            await activityApi.finish(id);
-            showSuccess("活动已完赛");
-          } else {
-            await activityApi.cancelRegistration(id);
-            setActivitySignupStatus(id, "none");
-            showSuccess("已退出活动");
+          switch (actionConfig.action) {
+            case "cancel-activity":
+              await activityApi.cancelActivity(id);
+              break;
+            case "cancel-registration":
+              await activityApi.cancelRegistration(id);
+              setActivitySignupStatus(id, "none");
+              break;
+            case "check-in":
+              await activityApi.checkIn(id);
+              setActivitySignupStatus(id, "checked_in");
+              break;
+            case "finish":
+              await activityApi.finish(id);
+              setActivitySignupStatus(id, "finished");
+              break;
           }
 
+          showSuccess(actionConfig.success);
           await this.loadItems(this.data.role);
         } catch (error: unknown) {
           showError(error instanceof Error ? error.message : "操作失败");

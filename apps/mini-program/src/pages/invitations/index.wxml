@@ -1,50 +1,55 @@
 <view class="container invitations-page">
   <view class="hero-card">
-    <text class="hero-eyebrow">USport / 我的邀约</text>
-    <text class="hero-title">把值得优先回应的邀约和消息收进同一个工作区</text>
-    <text class="hero-subtitle">邀约不是泛聊天入口，而是成局前最有价值的行动信号。</text>
+    <text class="hero-eyebrow">USport / 消息工作区</text>
+    <text class="hero-title">把邀约、进度提醒和关键信息收进一个稳定入口。</text>
+    <text class="hero-subtitle">
+      这里优先展示真正影响成局和履约的消息，而不是做一个泛聊天列表。
+    </text>
 
     <view class="hero-metrics">
       <view class="metric-card">
-        <text class="metric-value">{{pendingCount}}</text>
+        <text class="metric-value">{{workspace.pendingCount}}</text>
         <text class="metric-label">待处理邀约</text>
       </view>
       <view class="metric-card">
-        <text class="metric-value">{{messages.length}}</text>
-        <text class="metric-label">消息预览</text>
+        <text class="metric-value">{{workspace.unreadCount}}</text>
+        <text class="metric-label">未读提醒</text>
       </view>
     </view>
   </view>
 
   <view wx:if="{{!isLoggedIn}}" class="empty-card">
-    <text class="empty-title">登录后查看你的邀约工作区</text>
-    <text class="empty-text">接受邀约、追踪报名进度和查看活动更新，都会集中出现在这里。</text>
+    <text class="empty-title">登录后查看你的消息工作区</text>
+    <text class="empty-text">
+      邀约、活动进度和履约提醒都会汇总到这里，帮助你更稳地安排运动节奏。
+    </text>
     <button class="primary-btn" bindtap="onGoLogin">去登录</button>
   </view>
 
   <view wx:elif="{{loading}}" class="loading-card">
-    <text class="loading-text">正在同步邀约和消息...</text>
+    <text class="loading-text">正在同步消息工作区...</text>
   </view>
 
   <block wx:else>
     <view class="section-card">
       <view class="section-header">
         <text class="section-title">待处理邀约</text>
-        <text class="section-subtitle">先处理未回应邀约，再决定是否继续安排本周运动节奏。</text>
+        <text class="section-subtitle">优先处理会影响你本周运动安排的邀约。</text>
       </view>
 
-      <view wx:if="{{invitations.length === 0}}" class="empty-inline">
+      <view wx:if="{{workspace.invitations.length === 0}}" class="empty-inline">
         <text class="empty-inline-title">还没有新的邀约</text>
-        <text class="empty-inline-text">后续别人邀请你加入活动时，会第一时间出现在这里。</text>
+        <text class="empty-inline-text">当别人邀请你加入活动时，会优先出现在这里。</text>
       </view>
 
       <view wx:else class="card-list">
         <view
           class="invite-card"
-          wx:for="{{invitations}}"
+          wx:for="{{workspace.invitations}}"
           wx:key="id"
           bindtap="onInvitationTap"
           data-activity-id="{{item.activityId}}"
+          hover-class="card-hover"
         >
           <view class="card-top">
             <view class="card-copy">
@@ -53,11 +58,9 @@
             </view>
             <text class="status-badge">{{item.statusLabel}}</text>
           </view>
-
           <text class="card-message">{{item.message}}</text>
           <text class="card-meta">{{item.senderName}} · {{item.senderBadge}}</text>
           <text class="card-meta">{{item.activityTime}} · {{item.participantHint}}</text>
-          <text class="card-meta">{{item.createdAtLabel}}</text>
 
           <view wx:if="{{item.canAccept || item.canDecline}}" class="action-row">
             <button
@@ -87,22 +90,23 @@
 
     <view class="section-card">
       <view class="section-header">
-        <text class="section-title">消息预览</text>
-        <text class="section-subtitle">把报名更新、邀约回执和活动提醒先集中看一遍。</text>
+        <text class="section-title">最近消息</text>
+        <text class="section-subtitle">汇总邀约状态变化和活动提醒。</text>
       </view>
 
-      <view wx:if="{{messages.length === 0}}" class="empty-inline">
+      <view wx:if="{{workspace.messages.length === 0}}" class="empty-inline">
         <text class="empty-inline-title">还没有新的消息</text>
-        <text class="empty-inline-text">邀约状态变化和活动进度更新会同步到这里。</text>
+        <text class="empty-inline-text">等你收到邀约和活动更新后，这里会逐步形成稳定消息流。</text>
       </view>
 
       <view wx:else class="card-list">
         <view
           class="message-card"
-          wx:for="{{messages}}"
+          wx:for="{{workspace.messages}}"
           wx:key="id"
           bindtap="onMessageTap"
           data-id="{{item.id}}"
+          hover-class="card-hover"
         >
           <view class="card-top">
             <text class="card-title">{{item.title}}</text>

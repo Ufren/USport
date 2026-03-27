@@ -19,10 +19,10 @@ import {
 
 import ActivityDetailScreen from "./src/screens/ActivityDetailScreen";
 import CreateActivityScreen from "./src/screens/CreateActivityScreen";
-import CreditCenterScreen from "./src/screens/CreditCenterScreenClean";
-import InvitationInboxScreen from "./src/screens/InvitationInboxScreenClean";
+import CreditCenterScreen from "./src/screens/CreditCenterScreen";
+import InvitationInboxScreen from "./src/screens/InvitationInboxScreen";
 import MembershipCenterScreen from "./src/screens/MembershipCenterScreen";
-import MyActivitiesScreen from "./src/screens/MyActivitiesScreenClean";
+import MyActivitiesScreen from "./src/screens/MyActivitiesScreen";
 import MessagesScreen from "./src/screens/MessagesScreen";
 import DiscoverScreen from "./src/screens/DiscoverScreen";
 import LoginEntryScreen from "./src/screens/LoginEntryScreen";

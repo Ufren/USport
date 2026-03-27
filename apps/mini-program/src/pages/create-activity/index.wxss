@@ -14,17 +14,18 @@
 }
 
 .create-hero {
-  padding: 12rpx 0;
+  padding: 8rpx 0 4rpx;
 }
 
-.hero-eyebrow {
-  color: #156b52;
+.hero-eyebrow,
+.preview-label {
+  color: #0a84ff;
   font-size: 22rpx;
   font-weight: 700;
 }
 
 .hero-title {
-  color: #131714;
+  color: #111111;
   font-size: 52rpx;
   font-weight: 800;
   line-height: 1.2;
@@ -34,35 +35,34 @@
 .section-subtitle,
 .option-description,
 .preview-meta,
+.field-error {
+  color: rgba(17, 17, 17, 0.68);
+  font-size: 24rpx;
+  line-height: 1.65;
+}
+
 .preview-risk,
 .field-error {
-  color: #66726c;
-  font-size: 24rpx;
-  line-height: 1.6;
+  color: #ff3b30;
 }
 
 .preview-card,
 .form-section {
   padding: 28rpx;
-  border-radius: 28rpx;
-  border: 1rpx solid #dce2dd;
-  background: #ffffff;
+  border-radius: 32rpx;
+  border: 1rpx solid rgba(60, 60, 67, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 18rpx 44rpx rgba(15, 23, 42, 0.08);
 }
 
 .preview-card {
-  background: linear-gradient(180deg, #edf3ea 0%, #ffffff 100%);
-}
-
-.preview-label {
-  color: #156b52;
-  font-size: 22rpx;
-  font-weight: 700;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 248, 255, 0.94) 100%);
 }
 
 .preview-title,
 .section-title,
 .field-label {
-  color: #131714;
+  color: #111111;
 }
 
 .preview-title,
@@ -74,11 +74,6 @@
 .field-label {
   font-size: 26rpx;
   font-weight: 700;
-}
-
-.preview-risk,
-.field-error {
-  color: #d64545;
 }
 
 .section-header {
@@ -97,7 +92,7 @@
 .mini-chip,
 .field-card,
 .stepper-card {
-  border: 1rpx solid #dce2dd;
+  border: 1rpx solid rgba(60, 60, 67, 0.12);
   border-radius: 24rpx;
 }
 
@@ -108,45 +103,51 @@
   gap: 8rpx;
   min-width: 280rpx;
   padding: 22rpx;
-  background: #f9fbf8;
+  background: rgba(255, 255, 255, 0.88);
 }
 
 .option-chip--active {
-  border-color: #156b52;
-  background: #edf3ea;
+  border-color: #0a84ff;
+  background: #eaf2ff;
+}
+
+.option-chip--pressed,
+.mini-chip--pressed {
+  transform: scale(0.98);
+  opacity: 0.92;
 }
 
 .option-title {
-  color: #131714;
+  color: #111111;
   font-size: 28rpx;
   font-weight: 700;
 }
 
 .mini-chip {
   padding: 16rpx 22rpx;
-  background: #ffffff;
-  color: #2d3631;
+  background: rgba(255, 255, 255, 0.88);
+  color: rgba(17, 17, 17, 0.76);
   font-size: 24rpx;
   font-weight: 700;
 }
 
 .mini-chip--active {
-  border-color: #156b52;
-  background: #156b52;
-  color: #ffffff;
+  border-color: #0a84ff;
+  background: #eaf2ff;
+  color: #0a84ff;
 }
 
 .field-card,
 .stepper-card {
   padding: 22rpx;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.92);
 }
 
 .text-input,
 .text-area,
 .picker-field {
   width: 100%;
-  color: #131714;
+  color: #111111;
   font-size: 28rpx;
   line-height: 1.6;
 }
@@ -190,15 +191,15 @@
   width: 56rpx;
   height: 56rpx;
   border-radius: 999rpx;
-  background: #edf3ea;
-  color: #156b52;
+  background: #eaf2ff;
+  color: #0a84ff;
   font-size: 30rpx;
   font-weight: 700;
 }
 
 .stepper-value {
   min-width: 48rpx;
-  color: #131714;
+  color: #111111;
   font-size: 30rpx;
   font-weight: 700;
   text-align: center;
@@ -214,9 +215,9 @@
   bottom: 0;
   left: 0;
   padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
-  background: rgba(244, 247, 242, 0.96);
-  border-top: 1rpx solid rgba(184, 193, 187, 0.6);
-  backdrop-filter: blur(12rpx);
+  background: rgba(245, 245, 247, 0.94);
+  border-top: 1rpx solid rgba(60, 60, 67, 0.1);
+  backdrop-filter: blur(16rpx);
 }
 
 .submit-btn {
@@ -225,7 +226,7 @@
   justify-content: center;
   min-height: 96rpx;
   border-radius: 999rpx;
-  background: #156b52;
+  background: #0a84ff;
   color: #ffffff;
   font-size: 30rpx;
   font-weight: 700;

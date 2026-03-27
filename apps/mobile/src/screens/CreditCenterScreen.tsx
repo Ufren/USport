@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -13,6 +13,7 @@ import {
 import {
   getErrorMessage,
   usportColors,
+  usportMotion,
   usportRadius,
   usportSpacing,
   usportTypography,
@@ -24,10 +25,14 @@ import { SectionHeader } from "../components/common/SectionHeader";
 import { governanceApi } from "../services/governance";
 
 const reasonOptions = [
-  { value: "host_no_show", label: "主办方失约" },
+  { value: "host_no_show", label: "主办方爽约" },
   { value: "spam_invite", label: "骚扰邀约" },
-  { value: "unsafe_behavior", label: "不安全行为" },
+  { value: "unsafe_behavior", label: "存在安全风险" },
 ] as const;
+
+const reportReasonMap = new Map<string, string>(
+  reasonOptions.map((item) => [item.value, item.label]),
+);
 
 export default function CreditCenterScreen() {
   const [loading, setLoading] = useState(true);
@@ -38,6 +43,18 @@ export default function CreditCenterScreen() {
   const [reasonCode, setReasonCode] =
     useState<(typeof reasonOptions)[number]["value"]>("host_no_show");
   const [description, setDescription] = useState("");
+
+  const recentStats = useMemo(() => {
+    if (!summary) {
+      return [];
+    }
+
+    return [
+      `稳定记录 ${summary.positiveCount}`,
+      `风险记录 ${summary.riskCount}`,
+      `履约率 ${summary.completionRate}`,
+    ];
+  }, [summary]);
 
   const loadPage = async (isRefresh = false) => {
     if (isRefresh) {
@@ -54,7 +71,7 @@ export default function CreditCenterScreen() {
       setSummary(nextSummary);
       setReports(nextReports);
     } catch (error: unknown) {
-      Alert.alert("加载失败", getErrorMessage(error, "暂时无法获取信用信息"));
+      Alert.alert("加载失败", getErrorMessage(error, "暂时无法同步信用信息"));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -66,13 +83,18 @@ export default function CreditCenterScreen() {
   }, []);
 
   const handleSubmit = async () => {
+    if (!description.trim()) {
+      Alert.alert("请补充说明", "请简要说明现场情况，方便平台更快判断。");
+      return;
+    }
+
     setSubmitting(true);
     try {
       await governanceApi.createReport({
         targetType: "activity",
         targetId: 1001,
         reasonCode,
-        description,
+        description: description.trim(),
       });
       setDescription("");
       Alert.alert("提交成功", "举报已进入处理队列，我们会尽快完成审核。");
@@ -88,7 +110,7 @@ export default function CreditCenterScreen() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator color={usportColors.brandPrimary} />
-        <Text style={styles.loadingText}>正在同步信用工作区...</Text>
+        <Text style={styles.loadingText}>正在同步信用中心...</Text>
       </View>
     );
   }
@@ -105,45 +127,52 @@ export default function CreditCenterScreen() {
         />
       }
     >
-      <View style={styles.hero}>
-        <Text style={styles.eyebrow}>USport / 信用与履约</Text>
-        <Text style={styles.title}>把履约、风险和举报处理收在一个工作区</Text>
+      <View style={styles.heroCard}>
+        <Text style={styles.eyebrow}>USport / 信用与治理</Text>
+        <Text style={styles.title}>
+          把履约、风险和举报处理放在同一条清晰链路里。
+        </Text>
         <Text style={styles.subtitle}>
-          信用分不会只影响展示，它会真实作用于推荐、邀约通过率和活动曝光。
+          信用分会影响推荐曝光、邀约通过率和组局效率，所以它必须透明、克制、可解释。
         </Text>
       </View>
 
       {summary ? (
         <View style={styles.scoreCard}>
-          <Text style={styles.scoreValue}>{summary.score}</Text>
-          <Text style={styles.scoreLevel}>{summary.levelLabel}</Text>
+          <View style={styles.scoreTop}>
+            <View>
+              <Text style={styles.scoreCaption}>当前信用分</Text>
+              <Text style={styles.scoreValue}>{summary.score}</Text>
+            </View>
+            <View style={styles.levelBadge}>
+              <Text style={styles.levelBadgeText}>{summary.levelLabel}</Text>
+            </View>
+          </View>
           <Text style={styles.scoreHint}>{summary.improvementSuggestion}</Text>
           <View style={styles.metricRow}>
-            <Text style={styles.metricText}>
-              稳定记录 {summary.positiveCount}
-            </Text>
-            <Text style={styles.metricText}>风险记录 {summary.riskCount}</Text>
-            <Text style={styles.metricText}>
-              履约率 {summary.completionRate}
-            </Text>
+            {recentStats.map((item) => (
+              <View key={item} style={styles.metricChip}>
+                <Text style={styles.metricChipText}>{item}</Text>
+              </View>
+            ))}
           </View>
         </View>
       ) : null}
 
       <View style={styles.section}>
         <SectionHeader
-          title="最近信用记录"
-          subtitle="让用户能看清信用变化来自什么行为，而不是只看到一个分数。"
+          title="最近记录"
+          subtitle="让用户知道信用变化来自哪些行为，避免平台黑箱感。"
         />
-        <View style={styles.cardList}>
+        <View style={styles.stack}>
           {summary?.recentRecords.length ? (
             summary.recentRecords.map((item) => (
-              <View key={item.id} style={styles.recordCard}>
-                <View style={styles.recordTop}>
-                  <Text style={styles.recordLabel}>{item.label}</Text>
+              <View key={item.id} style={styles.panel}>
+                <View style={styles.rowBetween}>
+                  <Text style={styles.panelTitle}>{item.label}</Text>
                   <Text
                     style={[
-                      styles.recordDelta,
+                      styles.deltaText,
                       item.delta >= 0
                         ? styles.deltaPositive
                         : styles.deltaNegative,
@@ -152,15 +181,13 @@ export default function CreditCenterScreen() {
                     {item.delta >= 0 ? `+${item.delta}` : item.delta}
                   </Text>
                 </View>
-                <Text style={styles.recordDescription}>{item.description}</Text>
-                <Text style={styles.recordTime}>{item.createdAt}</Text>
+                <Text style={styles.panelCopy}>{item.description}</Text>
+                <Text style={styles.panelMeta}>{item.createdAt}</Text>
               </View>
             ))
           ) : (
-            <View style={styles.recordCard}>
-              <Text style={styles.recordDescription}>
-                当前还没有信用变动记录。
-              </Text>
+            <View style={styles.panel}>
+              <Text style={styles.panelCopy}>当前还没有信用变化记录。</Text>
             </View>
           )}
         </View>
@@ -169,16 +196,20 @@ export default function CreditCenterScreen() {
       <View style={styles.section}>
         <SectionHeader
           title="提交举报"
-          subtitle="先提供一个最小可运营的举报入口，后续再接后台审核和处罚流。"
+          subtitle="入口尽量简单，但语义和后续反馈要足够明确。"
         />
-        <View style={styles.formCard}>
-          <View style={styles.reasonRow}>
+        <View style={styles.panel}>
+          <View style={styles.metricRow}>
             {reasonOptions.map((item) => {
               const active = item.value === reasonCode;
               return (
                 <Pressable
                   key={item.value}
-                  style={[styles.reasonChip, active && styles.reasonChipActive]}
+                  style={({ pressed }) => [
+                    styles.reasonChip,
+                    active && styles.reasonChipActive,
+                    pressed && styles.reasonChipPressed,
+                  ]}
                   onPress={() => setReasonCode(item.value)}
                 >
                   <Text
@@ -198,19 +229,20 @@ export default function CreditCenterScreen() {
             value={description}
             onChangeText={setDescription}
             multiline
-            placeholder="补充现场情况、时间点和你观察到的问题。"
+            placeholder="补充现场情况、时间点，以及你观察到的具体问题。"
             placeholderTextColor={usportColors.textTertiary}
           />
           <Pressable
-            style={[
-              styles.submitButton,
-              submitting && styles.submitButtonDisabled,
+            style={({ pressed }) => [
+              styles.primaryButton,
+              submitting && styles.primaryButtonDisabled,
+              pressed && styles.primaryButtonPressed,
             ]}
             onPress={() => void handleSubmit()}
             disabled={submitting}
           >
-            <Text style={styles.submitButtonText}>
-              {submitting ? "提交中..." : "提交举报"}
+            <Text style={styles.primaryButtonText}>
+              {submitting ? "正在提交..." : "提交举报"}
             </Text>
           </Pressable>
         </View>
@@ -219,23 +251,25 @@ export default function CreditCenterScreen() {
       <View style={styles.section}>
         <SectionHeader
           title="我的举报"
-          subtitle="让举报人知道自己的工单没有石沉大海。"
+          subtitle="让用户清楚知道自己的工单没有沉默失踪。"
         />
-        <View style={styles.cardList}>
+        <View style={styles.stack}>
           {reports.length ? (
             reports.map((item) => (
-              <View key={item.id} style={styles.reportCard}>
-                <View style={styles.recordTop}>
-                  <Text style={styles.recordLabel}>{item.reasonCode}</Text>
+              <View key={item.id} style={styles.panel}>
+                <View style={styles.rowBetween}>
+                  <Text style={styles.panelTitle}>
+                    {reportReasonMap.get(item.reasonCode) ?? item.reasonCode}
+                  </Text>
                   <Text style={styles.reportStatus}>{item.statusLabel}</Text>
                 </View>
-                <Text style={styles.recordDescription}>{item.description}</Text>
-                <Text style={styles.recordTime}>{item.createdAtLabel}</Text>
+                <Text style={styles.panelCopy}>{item.description}</Text>
+                <Text style={styles.panelMeta}>{item.createdAtLabel}</Text>
               </View>
             ))
           ) : (
-            <View style={styles.reportCard}>
-              <Text style={styles.recordDescription}>你还没有提交过举报。</Text>
+            <View style={styles.panel}>
+              <Text style={styles.panelCopy}>你还没有提交过举报。</Text>
             </View>
           )}
         </View>
@@ -262,11 +296,24 @@ const styles = StyleSheet.create({
     color: usportColors.textSecondary,
     fontSize: usportTypography.body,
   },
-  hero: { gap: usportSpacing.md },
+  heroCard: {
+    gap: usportSpacing.md,
+    padding: usportSpacing.xl,
+    borderRadius: usportRadius.lg,
+    borderWidth: 1,
+    borderColor: usportColors.border,
+    backgroundColor: usportColors.cardBackground,
+    shadowColor: usportColors.shadowStrong,
+    shadowOpacity: 0.12,
+    shadowRadius: 22,
+    shadowOffset: { width: 0, height: 14 },
+    elevation: 4,
+  },
   eyebrow: {
     color: usportColors.brandPrimary,
     fontSize: usportTypography.caption,
     fontWeight: "700",
+    letterSpacing: 0.4,
   },
   title: {
     color: usportColors.textPrimary,
@@ -280,124 +327,160 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   scoreCard: {
-    backgroundColor: usportColors.cardBackground,
+    gap: usportSpacing.md,
+    padding: usportSpacing.xl,
     borderRadius: usportRadius.lg,
     borderWidth: 1,
     borderColor: usportColors.border,
-    padding: usportSpacing.xl,
+    backgroundColor: usportColors.cardBackgroundStrong,
+  },
+  scoreTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     gap: usportSpacing.md,
+  },
+  scoreCaption: {
+    color: usportColors.textTertiary,
+    fontSize: usportTypography.caption,
+    fontWeight: "700",
   },
   scoreValue: {
     color: usportColors.textPrimary,
-    fontSize: 44,
+    fontSize: 46,
     fontWeight: "800",
+    marginTop: usportSpacing.xs,
   },
-  scoreLevel: {
+  levelBadge: {
+    paddingHorizontal: usportSpacing.md,
+    paddingVertical: usportSpacing.sm,
+    borderRadius: usportRadius.pill,
+    backgroundColor: usportColors.brandSecondary,
+  },
+  levelBadgeText: {
     color: usportColors.brandPrimary,
-    fontSize: usportTypography.title,
+    fontSize: usportTypography.bodySm,
     fontWeight: "700",
   },
   scoreHint: {
     color: usportColors.textSecondary,
     fontSize: usportTypography.bodySm,
-    lineHeight: 20,
+    lineHeight: 22,
   },
-  metricRow: { gap: usportSpacing.xs },
-  metricText: {
-    color: usportColors.textTertiary,
+  metricRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: usportSpacing.sm,
+  },
+  metricChip: {
+    paddingHorizontal: usportSpacing.md,
+    paddingVertical: usportSpacing.sm,
+    borderRadius: usportRadius.pill,
+    backgroundColor: usportColors.mutedBackground,
+  },
+  metricChipText: {
+    color: usportColors.textSecondary,
     fontSize: usportTypography.caption,
+    fontWeight: "700",
   },
   section: { gap: usportSpacing.lg },
-  cardList: { gap: usportSpacing.md },
-  recordCard: {
-    backgroundColor: usportColors.cardBackground,
+  stack: { gap: usportSpacing.md },
+  panel: {
+    gap: usportSpacing.sm,
+    padding: usportSpacing.xl,
     borderRadius: usportRadius.md,
     borderWidth: 1,
     borderColor: usportColors.border,
-    padding: usportSpacing.xl,
-    gap: usportSpacing.sm,
-  },
-  reportCard: {
     backgroundColor: usportColors.cardBackground,
-    borderRadius: usportRadius.md,
-    borderWidth: 1,
-    borderColor: usportColors.border,
-    padding: usportSpacing.xl,
-    gap: usportSpacing.sm,
   },
-  recordTop: {
+  rowBetween: {
     flexDirection: "row",
     justifyContent: "space-between",
     gap: usportSpacing.md,
   },
-  recordLabel: {
+  panelTitle: {
+    flex: 1,
     color: usportColors.textPrimary,
     fontSize: usportTypography.title,
     fontWeight: "700",
   },
-  recordDelta: { fontSize: usportTypography.bodySm, fontWeight: "700" },
-  deltaPositive: { color: usportColors.success },
-  deltaNegative: { color: usportColors.danger },
-  recordDescription: {
+  deltaText: {
+    fontSize: usportTypography.bodySm,
+    fontWeight: "700",
+  },
+  deltaPositive: {
+    color: usportColors.success,
+  },
+  deltaNegative: {
+    color: usportColors.danger,
+  },
+  panelCopy: {
     color: usportColors.textSecondary,
     fontSize: usportTypography.bodySm,
-    lineHeight: 20,
+    lineHeight: 22,
   },
-  recordTime: {
+  panelMeta: {
     color: usportColors.textTertiary,
     fontSize: usportTypography.caption,
+  },
+  reasonChip: {
+    paddingHorizontal: usportSpacing.md,
+    paddingVertical: usportSpacing.sm,
+    borderRadius: usportRadius.pill,
+    borderWidth: 1,
+    borderColor: usportColors.border,
+    backgroundColor: usportColors.cardBackgroundStrong,
+  },
+  reasonChipActive: {
+    borderColor: usportColors.brandPrimary,
+    backgroundColor: usportColors.brandSecondary,
+  },
+  reasonChipPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+    opacity: 0.9,
+  },
+  reasonText: {
+    color: usportColors.textSecondary,
+    fontSize: usportTypography.bodySm,
+    fontWeight: "700",
+  },
+  reasonTextActive: {
+    color: usportColors.brandPrimary,
+  },
+  textarea: {
+    minHeight: 116,
+    paddingHorizontal: usportSpacing.lg,
+    paddingVertical: usportSpacing.lg,
+    borderRadius: usportRadius.md,
+    borderWidth: 1,
+    borderColor: usportColors.border,
+    backgroundColor: usportColors.pageBackgroundElevated,
+    color: usportColors.textPrimary,
+    textAlignVertical: "top",
+    fontSize: usportTypography.body,
+  },
+  primaryButton: {
+    minHeight: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: usportRadius.pill,
+    backgroundColor: usportColors.brandPrimary,
+  },
+  primaryButtonPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+    backgroundColor: usportColors.brandPrimaryPressed,
+  },
+  primaryButtonDisabled: {
+    opacity: 0.7,
+  },
+  primaryButtonText: {
+    color: usportColors.textInverse,
+    fontSize: usportTypography.body,
+    fontWeight: "700",
   },
   reportStatus: {
     color: usportColors.brandPrimary,
     fontSize: usportTypography.caption,
-    fontWeight: "700",
-  },
-  formCard: {
-    backgroundColor: usportColors.cardBackground,
-    borderRadius: usportRadius.md,
-    borderWidth: 1,
-    borderColor: usportColors.border,
-    padding: usportSpacing.xl,
-    gap: usportSpacing.lg,
-  },
-  reasonRow: { flexDirection: "row", flexWrap: "wrap", gap: usportSpacing.sm },
-  reasonChip: {
-    borderRadius: usportRadius.pill,
-    borderWidth: 1,
-    borderColor: usportColors.border,
-    paddingHorizontal: usportSpacing.md,
-    paddingVertical: usportSpacing.sm,
-  },
-  reasonChipActive: {
-    backgroundColor: usportColors.brandSecondary,
-    borderColor: usportColors.brandSecondary,
-  },
-  reasonText: {
-    color: usportColors.textSecondary,
-    fontSize: usportTypography.caption,
-    fontWeight: "700",
-  },
-  reasonTextActive: { color: usportColors.textPrimary },
-  textarea: {
-    minHeight: 108,
-    borderRadius: usportRadius.md,
-    borderWidth: 1,
-    borderColor: usportColors.border,
-    padding: usportSpacing.lg,
-    color: usportColors.textPrimary,
-    textAlignVertical: "top",
-  },
-  submitButton: {
-    minHeight: 48,
-    borderRadius: usportRadius.pill,
-    backgroundColor: usportColors.brandPrimary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  submitButtonDisabled: { opacity: 0.7 },
-  submitButtonText: {
-    color: usportColors.textInverse,
-    fontSize: usportTypography.body,
     fontWeight: "700",
   },
 });

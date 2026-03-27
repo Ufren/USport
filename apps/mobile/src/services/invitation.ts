@@ -1,4 +1,8 @@
-import type { InvitationItem, MessagePreview } from "@usport/shared";
+import type {
+  InboxWorkspace,
+  InvitationItem,
+  MessagePreview,
+} from "@usport/shared";
 
 import { httpClient } from "../utils/http";
 
@@ -9,6 +13,10 @@ export const invitationApi = {
 
   async messages(): Promise<MessagePreview[]> {
     return httpClient.get<MessagePreview[]>("/messages");
+  },
+
+  async workspace(): Promise<InboxWorkspace> {
+    return httpClient.get<InboxWorkspace>("/messages/workspace");
   },
 
   async respond(

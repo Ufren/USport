@@ -7,6 +7,20 @@ type AdminDashboardSummary = {
   activeMembers: number;
 };
 
+type AdminActivityItem = {
+  id: number;
+  title: string;
+  isOfficial: boolean;
+  hostName: string;
+  sportLabel: string;
+  status: string;
+  statusLabel: string;
+  startTimeLabel: string;
+  venueName: string;
+  district: string;
+  participantHint: string;
+};
+
 type AdminReportItem = {
   id: number;
   reporterUserId: number;
@@ -30,6 +44,7 @@ type AdminMembershipOrderItem = {
   status: string;
   statusLabel: string;
   createdAt: string;
+  canRefund?: boolean;
 };
 
 type AdminAuditLogItem = {
@@ -40,6 +55,34 @@ type AdminAuditLogItem = {
   targetId: number;
   detail: string;
   createdAt: string;
+};
+
+type AdminOfficialActivityItem = {
+  id: number;
+  title: string;
+  sportLabel: string;
+  startTimeLabel: string;
+  venueName: string;
+  district: string;
+  participantHint: string;
+};
+
+type CreateOfficialActivityRequest = {
+  sportCode: string;
+  title: string;
+  description: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  deadlineTime: string;
+  district: string;
+  venueName: string;
+  capacity: number;
+  waitlistCapacity: number;
+  feeType: string;
+  feeAmount: string;
+  joinRule: string;
+  visibility: string;
 };
 
 type ApiResponse<T> = {
@@ -65,9 +108,48 @@ const refreshDashboardButton = document.querySelector<HTMLButtonElement>(
 const reportFilter = document.querySelector<HTMLSelectElement>("#reportFilter");
 const statusText = document.querySelector<HTMLParagraphElement>("#statusText");
 const dashboardGrid = document.querySelector<HTMLDivElement>("#dashboardGrid");
+const activityList = document.querySelector<HTMLDivElement>("#activityList");
 const reportList = document.querySelector<HTMLDivElement>("#reportList");
 const orderList = document.querySelector<HTMLDivElement>("#orderList");
 const auditList = document.querySelector<HTMLDivElement>("#auditList");
+const officialSportCode =
+  document.querySelector<HTMLSelectElement>("#officialSportCode");
+const officialTitle =
+  document.querySelector<HTMLInputElement>("#officialTitle");
+const officialDescription = document.querySelector<HTMLTextAreaElement>(
+  "#officialDescription",
+);
+const officialDate = document.querySelector<HTMLInputElement>("#officialDate");
+const officialStartTime =
+  document.querySelector<HTMLInputElement>("#officialStartTime");
+const officialEndTime =
+  document.querySelector<HTMLInputElement>("#officialEndTime");
+const officialDeadlineTime = document.querySelector<HTMLInputElement>(
+  "#officialDeadlineTime",
+);
+const officialDistrict =
+  document.querySelector<HTMLInputElement>("#officialDistrict");
+const officialVenueName =
+  document.querySelector<HTMLInputElement>("#officialVenueName");
+const officialCapacity =
+  document.querySelector<HTMLInputElement>("#officialCapacity");
+const officialWaitlistCapacity = document.querySelector<HTMLInputElement>(
+  "#officialWaitlistCapacity",
+);
+const officialFeeType =
+  document.querySelector<HTMLSelectElement>("#officialFeeType");
+const officialFeeAmount =
+  document.querySelector<HTMLInputElement>("#officialFeeAmount");
+const officialJoinRule =
+  document.querySelector<HTMLSelectElement>("#officialJoinRule");
+const officialVisibility = document.querySelector<HTMLSelectElement>(
+  "#officialVisibility",
+);
+const officialCreateButton = document.querySelector<HTMLButtonElement>(
+  "#officialCreateButton",
+);
+const officialResult =
+  document.querySelector<HTMLParagraphElement>("#officialResult");
 
 function ensureElement<T extends Element>(
   element: T | null,
@@ -91,9 +173,39 @@ const ui = {
   reportFilter: ensureElement(reportFilter, "#reportFilter"),
   statusText: ensureElement(statusText, "#statusText"),
   dashboardGrid: ensureElement(dashboardGrid, "#dashboardGrid"),
+  activityList: ensureElement(activityList, "#activityList"),
   reportList: ensureElement(reportList, "#reportList"),
   orderList: ensureElement(orderList, "#orderList"),
   auditList: ensureElement(auditList, "#auditList"),
+  officialSportCode: ensureElement(officialSportCode, "#officialSportCode"),
+  officialTitle: ensureElement(officialTitle, "#officialTitle"),
+  officialDescription: ensureElement(
+    officialDescription,
+    "#officialDescription",
+  ),
+  officialDate: ensureElement(officialDate, "#officialDate"),
+  officialStartTime: ensureElement(officialStartTime, "#officialStartTime"),
+  officialEndTime: ensureElement(officialEndTime, "#officialEndTime"),
+  officialDeadlineTime: ensureElement(
+    officialDeadlineTime,
+    "#officialDeadlineTime",
+  ),
+  officialDistrict: ensureElement(officialDistrict, "#officialDistrict"),
+  officialVenueName: ensureElement(officialVenueName, "#officialVenueName"),
+  officialCapacity: ensureElement(officialCapacity, "#officialCapacity"),
+  officialWaitlistCapacity: ensureElement(
+    officialWaitlistCapacity,
+    "#officialWaitlistCapacity",
+  ),
+  officialFeeType: ensureElement(officialFeeType, "#officialFeeType"),
+  officialFeeAmount: ensureElement(officialFeeAmount, "#officialFeeAmount"),
+  officialJoinRule: ensureElement(officialJoinRule, "#officialJoinRule"),
+  officialVisibility: ensureElement(officialVisibility, "#officialVisibility"),
+  officialCreateButton: ensureElement(
+    officialCreateButton,
+    "#officialCreateButton",
+  ),
+  officialResult: ensureElement(officialResult, "#officialResult"),
 };
 
 function loadConfig() {
@@ -103,6 +215,9 @@ function loadConfig() {
     localStorage.getItem(storageKeys.token) ?? "usport-admin-dev";
   ui.adminOperatorInput.value =
     localStorage.getItem(storageKeys.operator) ?? "ops.luna";
+  if (!ui.officialDate.value) {
+    ui.officialDate.value = new Date().toISOString().slice(0, 10);
+  }
 }
 
 function saveConfig() {
@@ -140,6 +255,61 @@ function setStatus(message: string, isError = false) {
   ui.statusText.style.color = isError ? "#b93a32" : "#66716a";
 }
 
+function setOfficialResult(message: string, isError = false) {
+  ui.officialResult.textContent = message;
+  ui.officialResult.style.color = isError ? "#b93a32" : "#66716a";
+}
+
+function buildOfficialActivityRequest(): CreateOfficialActivityRequest {
+  return {
+    sportCode: ui.officialSportCode.value,
+    title: ui.officialTitle.value.trim(),
+    description: ui.officialDescription.value.trim(),
+    date: ui.officialDate.value,
+    startTime: ui.officialStartTime.value,
+    endTime: ui.officialEndTime.value,
+    deadlineTime: ui.officialDeadlineTime.value,
+    district: ui.officialDistrict.value.trim(),
+    venueName: ui.officialVenueName.value.trim(),
+    capacity: Number(ui.officialCapacity.value || 0),
+    waitlistCapacity: Number(ui.officialWaitlistCapacity.value || 0),
+    feeType: ui.officialFeeType.value,
+    feeAmount: ui.officialFeeAmount.value.trim(),
+    joinRule: ui.officialJoinRule.value,
+    visibility: ui.officialVisibility.value,
+  };
+}
+
+async function submitOfficialActivity() {
+  ui.officialCreateButton.disabled = true;
+  ui.officialCreateButton.textContent = "发布中...";
+  setOfficialResult("正在创建官方活动...");
+
+  try {
+    const payload = buildOfficialActivityRequest();
+    const item = await fetchApi<AdminOfficialActivityItem>(
+      "/admin/activities",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
+    );
+
+    setOfficialResult(
+      `已发布：${item.title} / ${item.startTimeLabel} / ${item.participantHint}`,
+    );
+    setStatus("后台数据同步完成");
+    await refreshAll();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "官方活动创建失败";
+    setOfficialResult(message, true);
+    setStatus(message, true);
+  } finally {
+    ui.officialCreateButton.disabled = false;
+    ui.officialCreateButton.textContent = "发布官方活动";
+  }
+}
+
 function renderEmpty(container: HTMLElement, message: string) {
   container.innerHTML = `<div class="empty">${message}</div>`;
 }
@@ -166,6 +336,33 @@ function renderDashboard(summary: AdminDashboardSummary) {
     .join("");
 }
 
+function renderActivities(items: AdminActivityItem[]) {
+  if (!items.length) {
+    renderEmpty(ui.activityList, "暂无活动记录。");
+    return;
+  }
+
+  ui.activityList.innerHTML = items
+    .map(
+      (item) => `
+        <article class="order-card">
+          <div class="card-top">
+            <div>
+              <h4>${item.isOfficial ? "官方" : "用户"}活动 #${item.id}</h4>
+              <p class="meta">${item.sportLabel} / ${item.district} / ${item.venueName}</p>
+            </div>
+            <span class="${badgeClass(item.status)}">${item.statusLabel}</span>
+          </div>
+          <p class="card-copy">${item.title}</p>
+          <p class="meta">主办方：${item.hostName}</p>
+          <p class="meta">${item.startTimeLabel}</p>
+          <p class="meta">${item.participantHint}</p>
+        </article>
+      `,
+    )
+    .join("");
+}
+
 function badgeClass(status: string) {
   if (status === "resolved_valid") {
     return "badge badge-danger";
@@ -174,6 +371,21 @@ function badgeClass(status: string) {
     return "badge badge-warning";
   }
   return "badge";
+}
+
+function formatOrderStatusLabel(status: string) {
+  switch (status) {
+    case "paid":
+      return "已支付";
+    case "refunded":
+      return "已退款";
+    case "failed":
+      return "支付失败";
+    case "closed":
+      return "已关闭";
+    default:
+      return "待支付";
+  }
 }
 
 function renderReports(items: AdminReportItem[]) {
@@ -191,7 +403,7 @@ function renderReports(items: AdminReportItem[]) {
               <h4>举报 #${item.id} · ${item.reasonCode}</h4>
               <p class="meta">举报人：${item.reporterName || `用户 ${item.reporterUserId}`} · 对象：${item.targetType} / ${item.targetId}</p>
             </div>
-            <span class="${badgeClass(item.status)}">${item.statusLabel}</span>
+            <span class="${badgeClass(item.status)}">${formatOrderStatusLabel(item.status)}</span>
           </div>
           <p class="card-copy">${item.description || "未填写补充说明"}</p>
           <p class="meta">创建时间：${item.createdAtLabel}</p>
@@ -296,21 +508,84 @@ function renderAuditLogs(items: AdminAuditLogItem[]) {
     .join("");
 }
 
+void renderOrders;
+
+function renderOrdersClean(items: AdminMembershipOrderItem[]) {
+  if (!items.length) {
+    renderEmpty(ui.orderList, "暂无会员订单。");
+    return;
+  }
+
+  ui.orderList.innerHTML = items
+    .map(
+      (item) => `
+        <article class="order-card" data-order-id="${item.id}">
+          <div class="card-top">
+            <div>
+              <h4>订单 #${item.id}</h4>
+              <p class="meta">用户 ${item.userId} / 套餐 ${item.planCode}</p>
+            </div>
+            <span class="${badgeClass(item.status)}">${item.statusLabel}</span>
+          </div>
+          <p class="card-copy">${item.amountLabel}</p>
+          <p class="meta">${item.createdAt}</p>
+          ${
+            (item.canRefund ?? item.status === "paid")
+              ? '<button class="decision-button js-refund">发起退款</button>'
+              : ""
+          }
+        </article>
+      `,
+    )
+    .join("");
+
+  ui.orderList.querySelectorAll<HTMLElement>(".order-card").forEach((card) => {
+    const button = card.querySelector<HTMLButtonElement>(".js-refund");
+    if (!button) {
+      return;
+    }
+
+    button.addEventListener("click", async () => {
+      const orderId = Number(card.dataset.orderId);
+      button.disabled = true;
+      button.textContent = "退款中...";
+      try {
+        await fetchApi(`/admin/membership/orders/${orderId}/refund`, {
+          method: "POST",
+        });
+        setStatus(`会员订单 #${orderId} 已完成退款`);
+        await refreshAll();
+      } catch (error) {
+        setStatus(
+          error instanceof Error ? error.message : "会员订单退款失败",
+          true,
+        );
+      } finally {
+        button.disabled = false;
+        button.textContent = "发起退款";
+      }
+    });
+  });
+}
+
 async function refreshAll() {
   setStatus("正在同步后台数据...");
   try {
-    const [dashboard, reports, orders, auditLogs] = await Promise.all([
-      fetchApi<AdminDashboardSummary>("/admin/dashboard"),
-      fetchApi<AdminReportItem[]>(
-        `/admin/reports${ui.reportFilter.value ? `?status=${ui.reportFilter.value}` : ""}`,
-      ),
-      fetchApi<AdminMembershipOrderItem[]>("/admin/membership/orders"),
-      fetchApi<AdminAuditLogItem[]>("/admin/audit-logs"),
-    ]);
+    const [dashboard, activities, reports, orders, auditLogs] =
+      await Promise.all([
+        fetchApi<AdminDashboardSummary>("/admin/dashboard"),
+        fetchApi<AdminActivityItem[]>("/admin/activities"),
+        fetchApi<AdminReportItem[]>(
+          `/admin/reports${ui.reportFilter.value ? `?status=${ui.reportFilter.value}` : ""}`,
+        ),
+        fetchApi<AdminMembershipOrderItem[]>("/admin/membership/orders"),
+        fetchApi<AdminAuditLogItem[]>("/admin/audit-logs"),
+      ]);
 
     renderDashboard(dashboard);
+    renderActivities(activities);
     renderReports(reports);
-    renderOrders(orders);
+    renderOrdersClean(orders);
     renderAuditLogs(auditLogs);
     setStatus("后台数据同步完成");
   } catch (error) {
@@ -325,5 +600,9 @@ loadConfig();
 ui.reloadButton.addEventListener("click", () => void refreshAll());
 ui.refreshDashboardButton.addEventListener("click", () => void refreshAll());
 ui.reportFilter.addEventListener("change", () => void refreshAll());
+ui.officialCreateButton.addEventListener(
+  "click",
+  () => void submitOfficialActivity(),
+);
 
 void refreshAll();

@@ -55,12 +55,141 @@
 
         <section>
           <div class="section-head">
+            <h3>官方活动发布</h3>
+          </div>
+          <div class="card-list">
+            <article class="report-card">
+              <div class="decision-grid two-column-form">
+                <label class="field">
+                  <span>运动类型</span>
+                  <select id="officialSportCode" class="select">
+                    <option value="badminton">羽毛球</option>
+                    <option value="basketball">篮球</option>
+                    <option value="tennis">网球</option>
+                    <option value="running">跑步</option>
+                    <option value="fitness">健身</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>活动标题</span>
+                  <input
+                    id="officialTitle"
+                    type="text"
+                    placeholder="例如：官方周末羽球成局"
+                  />
+                </label>
+                <label class="field field-span-2">
+                  <span>活动描述</span>
+                  <textarea
+                    id="officialDescription"
+                    placeholder="补充人群、节奏、注意事项"
+                  ></textarea>
+                </label>
+                <label class="field">
+                  <span>活动日期</span>
+                  <input id="officialDate" type="date" />
+                </label>
+                <label class="field">
+                  <span>开始时间</span>
+                  <input id="officialStartTime" type="time" value="19:00" />
+                </label>
+                <label class="field">
+                  <span>结束时间</span>
+                  <input id="officialEndTime" type="time" value="21:00" />
+                </label>
+                <label class="field">
+                  <span>报名截止</span>
+                  <input id="officialDeadlineTime" type="time" value="17:30" />
+                </label>
+                <label class="field">
+                  <span>区域</span>
+                  <input
+                    id="officialDistrict"
+                    type="text"
+                    placeholder="徐汇区"
+                  />
+                </label>
+                <label class="field">
+                  <span>场馆名称</span>
+                  <input
+                    id="officialVenueName"
+                    type="text"
+                    placeholder="USport 官方合作馆"
+                  />
+                </label>
+                <label class="field">
+                  <span>正式名额</span>
+                  <input
+                    id="officialCapacity"
+                    type="number"
+                    min="2"
+                    value="12"
+                  />
+                </label>
+                <label class="field">
+                  <span>候补名额</span>
+                  <input
+                    id="officialWaitlistCapacity"
+                    type="number"
+                    min="0"
+                    value="4"
+                  />
+                </label>
+                <label class="field">
+                  <span>费用类型</span>
+                  <select id="officialFeeType" class="select">
+                    <option value="aa">AA</option>
+                    <option value="fixed_price">固定价</option>
+                    <option value="free">免费</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>费用金额</span>
+                  <input id="officialFeeAmount" type="text" value="39" />
+                </label>
+                <label class="field">
+                  <span>加入规则</span>
+                  <select id="officialJoinRule" class="select">
+                    <option value="direct">直接加入</option>
+                    <option value="approval_required">需要审核</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>可见范围</span>
+                  <select id="officialVisibility" class="select">
+                    <option value="public">公开</option>
+                    <option value="invite_only">仅邀请</option>
+                  </select>
+                </label>
+                <button
+                  id="officialCreateButton"
+                  class="decision-button field-span-2"
+                >
+                  发布官方活动
+                </button>
+                <p id="officialResult" class="status-text field-span-2">
+                  等待发布
+                </p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-head">
             <h3>核心指标</h3>
             <button id="refreshDashboardButton" class="ghost-button">
               刷新
             </button>
           </div>
           <div id="dashboardGrid" class="metric-grid"></div>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <h3>活动管理</h3>
+          </div>
+          <div id="activityList" class="card-list"></div>
         </section>
 
         <section>

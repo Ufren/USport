@@ -11,17 +11,18 @@
   flex-direction: column;
   gap: 16rpx;
   padding: 28rpx;
-  border-radius: 28rpx;
-  border: 1rpx solid #dce2dd;
-  background: #ffffff;
+  border-radius: 32rpx;
+  border: 1rpx solid rgba(60, 60, 67, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 18rpx 44rpx rgba(15, 23, 42, 0.08);
 }
 
 .hero-card {
-  background: linear-gradient(180deg, #edf3ea 0%, #ffffff 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 248, 255, 0.94) 100%);
 }
 
 .hero-eyebrow {
-  color: #156b52;
+  color: #0a84ff;
   font-size: 22rpx;
   font-weight: 700;
 }
@@ -30,7 +31,7 @@
 .toolbar-title,
 .empty-title,
 .activity-title {
-  color: #131714;
+  color: #111111;
   font-weight: 800;
 }
 
@@ -45,9 +46,9 @@
 .activity-subtitle,
 .meta-text,
 .footer-hint {
-  color: #66726c;
+  color: rgba(17, 17, 17, 0.68);
   font-size: 24rpx;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 .filter-row,
@@ -67,17 +68,23 @@
 .filter-chip {
   padding: 16rpx 24rpx;
   border-radius: 999rpx;
-  border: 1rpx solid #dce2dd;
-  background: #ffffff;
-  color: #2d3631;
+  border: 1rpx solid rgba(60, 60, 67, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  color: rgba(17, 17, 17, 0.74);
   font-size: 24rpx;
   font-weight: 700;
 }
 
 .filter-chip--active {
-  border-color: #156b52;
-  background: #156b52;
-  color: #ffffff;
+  border-color: #0a84ff;
+  background: #eaf2ff;
+  color: #0a84ff;
+}
+
+.filter-chip--pressed,
+.activity-card--pressed {
+  transform: scale(0.985);
+  opacity: 0.94;
 }
 
 .toolbar-btn,
@@ -93,14 +100,14 @@
 
 .toolbar-btn,
 .empty-btn {
-  background: #156b52;
+  background: #0a84ff;
   color: #ffffff;
 }
 
 .ghost-btn {
-  border: 1rpx solid #dce2dd;
-  background: #ffffff;
-  color: #131714;
+  border: 1rpx solid rgba(60, 60, 67, 0.12);
+  background: rgba(255, 255, 255, 0.92);
+  color: #111111;
 }
 
 .activity-list,
@@ -117,11 +124,21 @@
   gap: 8rpx;
 }
 
+.official-badge {
+  align-self: flex-start;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: #eaf2ff;
+  color: #0a84ff;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
 .status-badge {
   padding: 8rpx 18rpx;
   border-radius: 999rpx;
-  background: #edf3ea;
-  color: #156b52;
+  background: rgba(10, 132, 255, 0.1);
+  color: #0a84ff;
   font-size: 20rpx;
   font-weight: 700;
 }

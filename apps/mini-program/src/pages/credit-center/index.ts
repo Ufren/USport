@@ -4,9 +4,9 @@ import { governanceApi } from "../../services/governance";
 import { showError, showSuccess } from "../../utils/helpers";
 
 const reasonOptions = [
-  { value: "host_no_show", label: "主办方失约" },
+  { value: "host_no_show", label: "主办方爽约" },
   { value: "spam_invite", label: "骚扰邀约" },
-  { value: "unsafe_behavior", label: "不安全行为" },
+  { value: "unsafe_behavior", label: "存在安全风险" },
 ] as const;
 
 Page({
@@ -60,12 +60,17 @@ Page({
   },
 
   async onSubmitReport() {
+    if (!this.data.description.trim()) {
+      showError("请先补充举报说明");
+      return;
+    }
+
     try {
       await governanceApi.createReport({
         targetType: "activity",
         targetId: 1001,
         reasonCode: this.data.selectedReason,
-        description: this.data.description,
+        description: this.data.description.trim(),
       });
       showSuccess("举报已提交");
       this.setData({ description: "" });

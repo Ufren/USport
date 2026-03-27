@@ -14,6 +14,7 @@ Page({
     summary: null as SubscriptionSummary | null,
     orders: [] as MembershipOrderItem[],
     purchasingCode: "",
+    payingOrderId: 0,
   },
 
   onLoad() {
@@ -53,13 +54,47 @@ Page({
 
     this.setData({ purchasingCode: planCode });
     try {
-      await membershipApi.createOrder({ planCode });
-      showSuccess("会员已开通");
+      const order = await membershipApi.createOrder({ planCode });
+      showSuccess("会员订单已创建");
+      wx.showModal({
+        title: "立即支付",
+        content: "是否现在完成模拟支付，立即开通会员权益？",
+        confirmText: "立即支付",
+        success: (res) => {
+          if (res.confirm) {
+            void this.payOrder(order.id);
+          }
+        },
+      });
       await this.loadPage();
     } catch (error: unknown) {
-      showError(error instanceof Error ? error.message : "会员开通失败");
+      showError(error instanceof Error ? error.message : "创建会员订单失败");
     } finally {
       this.setData({ purchasingCode: "" });
+    }
+  },
+
+  async onPayOrder(
+    e: WechatMiniprogram.CustomEvent<Record<string, never>, { id?: string }>,
+  ) {
+    const orderId = Number(e.currentTarget.dataset.id ?? 0);
+    if (!orderId) {
+      return;
+    }
+
+    await this.payOrder(orderId);
+  },
+
+  async payOrder(orderId: number) {
+    this.setData({ payingOrderId: orderId });
+    try {
+      await membershipApi.mockPayOrder(orderId);
+      showSuccess("会员权益已生效");
+      await this.loadPage();
+    } catch (error: unknown) {
+      showError(error instanceof Error ? error.message : "会员支付失败");
+    } finally {
+      this.setData({ payingOrderId: 0 });
     }
   },
 });

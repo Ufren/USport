@@ -13,6 +13,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   getErrorMessage,
   usportColors,
+  usportMotion,
   usportRadius,
   usportSpacing,
   usportTypography,
@@ -25,6 +26,11 @@ import { activityApi } from "../services/activity";
 
 type Props = NativeStackScreenProps<RootStackParamList, "MyActivities">;
 type RoleFilter = "all" | "host" | "participant";
+type ActivityAction =
+  | "cancel-registration"
+  | "cancel-activity"
+  | "check-in"
+  | "finish";
 
 const roleOptions: Array<{ value: RoleFilter; label: string }> = [
   { value: "all", label: "全部" },
@@ -32,22 +38,93 @@ const roleOptions: Array<{ value: RoleFilter; label: string }> = [
   { value: "participant", label: "我报名的" },
 ];
 
+function getRoleSummary(role: RoleFilter): string {
+  if (role === "host") {
+    return "集中查看你发起的活动，继续拉人、签到和完赛收口会更顺手。";
+  }
+
+  if (role === "participant") {
+    return "统一管理你的报名、候补和即将出发的活动。";
+  }
+
+  return "把你发起和参与的活动收进同一个工作区里。";
+}
+
+function getStatusLabel(item: MyActivityItem): string {
+  if (item.role === "host") {
+    return item.canFinish ? "待完赛" : "主办中";
+  }
+
+  switch (item.registrationStatus) {
+    case "waitlisted":
+      return "候补中";
+    case "checked_in":
+      return "已签到";
+    case "finished":
+      return "已完赛";
+    default:
+      return "已报名";
+  }
+}
+
+function getActionConfig(item: MyActivityItem): {
+  action: ActivityAction;
+  label: string;
+  success: string;
+  title: string;
+  message: string;
+} | null {
+  if (item.canFinish) {
+    return {
+      action: "finish",
+      label: "完赛收口",
+      success: "活动已完赛",
+      title: "完赛确认",
+      message: `确认将“${item.title}”标记为已完赛吗？系统会同步更新参与者状态。`,
+    };
+  }
+
+  if (item.canCheckIn) {
+    return {
+      action: "check-in",
+      label: "立即签到",
+      success: "签到成功",
+      title: "活动签到",
+      message: `确认现在为“${item.title}”完成签到吗？签到后会进入履约状态。`,
+    };
+  }
+
+  if (item.canManage) {
+    return {
+      action: "cancel-activity",
+      label: "取消活动",
+      success: "活动已取消",
+      title: "取消活动",
+      message: `确认取消“${item.title}”吗？已报名和候补用户都会收到取消结果。`,
+    };
+  }
+
+  if (item.canCancel) {
+    return {
+      action: "cancel-registration",
+      label: "退出活动",
+      success: "已退出活动",
+      title: "退出活动",
+      message: `确认退出“${item.title}”吗？释放出的名额会自动补给候补用户。`,
+    };
+  }
+
+  return null;
+}
+
 export default function MyActivitiesScreen({ navigation }: Props) {
   const [role, setRole] = useState<RoleFilter>("all");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [items, setItems] = useState<MyActivityItem[]>([]);
-  const [cancellingId, setCancellingId] = useState<number | null>(null);
+  const [actingId, setActingId] = useState<number | null>(null);
 
-  const roleSummary = useMemo(() => {
-    if (role === "host") {
-      return "集中查看你发起的活动，方便继续拉人和成局。";
-    }
-    if (role === "participant") {
-      return "统一管理你的报名、候补和即将出发的活动。";
-    }
-    return "把你发起和参与的活动收进同一个工作区。";
-  }, [role]);
+  const roleSummary = useMemo(() => getRoleSummary(role), [role]);
 
   const loadItems = async (nextRole: RoleFilter = role, isRefresh = false) => {
     if (isRefresh) {
@@ -71,35 +148,49 @@ export default function MyActivitiesScreen({ navigation }: Props) {
     void loadItems(role);
   }, [role]);
 
-  const handleCancel = (activity: MyActivityItem) => {
-    const isHostAction = activity.canManage;
-    const dialogTitle = isHostAction ? "取消活动" : "退出活动";
-    const dialogMessage = isHostAction
-      ? `确定取消「${activity.title}」吗？已报名和候补用户都会同步收到取消结果。`
-      : `确定退出「${activity.title}」吗？退出后你的报名名额会被释放。`;
+  const runAction = async (item: MyActivityItem, action: ActivityAction) => {
+    switch (action) {
+      case "cancel-activity":
+        await activityApi.cancelActivity(item.id);
+        break;
+      case "cancel-registration":
+        await activityApi.cancelRegistration(item.id);
+        break;
+      case "check-in":
+        await activityApi.checkIn(item.id);
+        break;
+      case "finish":
+        await activityApi.finish(item.id);
+        break;
+    }
+  };
 
-    Alert.alert(dialogTitle, dialogMessage, [
-      { text: "保留", style: "cancel" },
+  const handleAction = (item: MyActivityItem) => {
+    const actionConfig = getActionConfig(item);
+    if (!actionConfig) {
+      return;
+    }
+
+    Alert.alert(actionConfig.title, actionConfig.message, [
+      { text: "再想想", style: "cancel" },
       {
-        text: isHostAction ? "取消活动" : "退出",
-        style: "destructive",
+        text: actionConfig.label,
+        style:
+          actionConfig.action === "cancel-activity" ||
+          actionConfig.action === "cancel-registration"
+            ? "destructive"
+            : "default",
         onPress: async () => {
-          setCancellingId(activity.id);
+          setActingId(item.id);
           try {
-            // 这里统一收口主办方和参与者动作，避免页面层分散维护两套状态流。
-            if (isHostAction) {
-              await activityApi.cancelActivity(activity.id);
-            } else {
-              await activityApi.cancelRegistration(activity.id);
-            }
+            // 生命周期动作统一走活动服务层，页面只负责触发和反馈。
+            await runAction(item, actionConfig.action);
             await loadItems(role, true);
+            Alert.alert("操作成功", actionConfig.success);
           } catch (error: unknown) {
-            Alert.alert(
-              isHostAction ? "取消失败" : "退出失败",
-              getErrorMessage(error, "请稍后再试"),
-            );
+            Alert.alert("操作失败", getErrorMessage(error, "请稍后再试"));
           } finally {
-            setCancellingId(null);
+            setActingId(null);
           }
         },
       },
@@ -118,9 +209,11 @@ export default function MyActivitiesScreen({ navigation }: Props) {
         />
       }
     >
-      <View style={styles.hero}>
+      <View style={styles.heroCard}>
         <Text style={styles.eyebrow}>USport / 我的活动</Text>
-        <Text style={styles.title}>把发起、报名和候补都收在一个地方。</Text>
+        <Text style={styles.title}>
+          把发起、报名、签到和完赛收进一个工作区。
+        </Text>
         <Text style={styles.subtitle}>{roleSummary}</Text>
       </View>
 
@@ -130,7 +223,11 @@ export default function MyActivitiesScreen({ navigation }: Props) {
           return (
             <Pressable
               key={option.value}
-              style={[styles.filterChip, active && styles.filterChipActive]}
+              style={({ pressed }) => [
+                styles.filterChip,
+                active && styles.filterChipActive,
+                pressed && styles.filterChipPressed,
+              ]}
               onPress={() => setRole(option.value)}
             >
               <Text
@@ -146,7 +243,7 @@ export default function MyActivitiesScreen({ navigation }: Props) {
       <View style={styles.panel}>
         <SectionHeader
           title="活动清单"
-          subtitle="按角色聚合后，更适合后续继续做履约提醒和复约运营。"
+          subtitle="把活动状态和履约动作收在同一处，后面更适合做信用沉淀。"
         />
 
         {loading ? (
@@ -161,7 +258,10 @@ export default function MyActivitiesScreen({ navigation }: Props) {
               你可以先去发现页报名一场活动，或者直接发起自己的新活动。
             </Text>
             <Pressable
-              style={styles.primaryButton}
+              style={({ pressed }) => [
+                styles.primaryButton,
+                pressed && styles.primaryButtonPressed,
+              ]}
               onPress={() => navigation.navigate("CreateActivity")}
             >
               <Text style={styles.primaryButtonText}>发起新活动</Text>
@@ -170,17 +270,15 @@ export default function MyActivitiesScreen({ navigation }: Props) {
         ) : (
           <View style={styles.list}>
             {items.map((item) => {
-              const statusLabel =
-                item.role === "host"
-                  ? "主办方"
-                  : item.registrationStatus === "waitlisted"
-                    ? "候补中"
-                    : "已报名";
+              const actionConfig = getActionConfig(item);
 
               return (
                 <Pressable
                   key={`${item.role}-${item.id}`}
-                  style={styles.card}
+                  style={({ pressed }) => [
+                    styles.card,
+                    pressed && styles.cardPressed,
+                  ]}
                   onPress={() =>
                     navigation.navigate("ActivityDetail", {
                       id: String(item.id),
@@ -189,11 +287,18 @@ export default function MyActivitiesScreen({ navigation }: Props) {
                 >
                   <View style={styles.cardHeader}>
                     <View style={styles.cardTitleWrap}>
+                      {item.isOfficial ? (
+                        <View style={styles.officialBadge}>
+                          <Text style={styles.officialBadgeText}>官方活动</Text>
+                        </View>
+                      ) : null}
                       <Text style={styles.cardTitle}>{item.title}</Text>
                       <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
                     </View>
                     <View style={styles.badge}>
-                      <Text style={styles.badgeText}>{statusLabel}</Text>
+                      <Text style={styles.badgeText}>
+                        {getStatusLabel(item)}
+                      </Text>
                     </View>
                   </View>
 
@@ -211,18 +316,20 @@ export default function MyActivitiesScreen({ navigation }: Props) {
                     <Text style={styles.footerHint}>
                       {item.attendanceLabel}
                     </Text>
-                    {item.canManage || item.canCancel ? (
+                    {actionConfig ? (
                       <Pressable
-                        style={styles.ghostButton}
-                        onPress={() => handleCancel(item)}
-                        disabled={cancellingId === item.id}
+                        style={({ pressed }) => [
+                          styles.ghostButton,
+                          actingId === item.id && styles.ghostButtonDisabled,
+                          pressed && styles.ghostButtonPressed,
+                        ]}
+                        onPress={() => handleAction(item)}
+                        disabled={actingId === item.id}
                       >
                         <Text style={styles.ghostButtonText}>
-                          {cancellingId === item.id
+                          {actingId === item.id
                             ? "处理中..."
-                            : item.canManage
-                              ? "取消活动"
-                              : "退出活动"}
+                            : actionConfig.label}
                         </Text>
                       </Pressable>
                     ) : null}
@@ -238,22 +345,30 @@ export default function MyActivitiesScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: usportColors.pageBackground,
-  },
+  container: { flex: 1, backgroundColor: usportColors.pageBackground },
   content: {
     padding: usportSpacing.xl,
     paddingBottom: usportSpacing["4xl"],
     gap: usportSpacing.xl,
   },
-  hero: {
+  heroCard: {
     gap: usportSpacing.md,
+    padding: usportSpacing.xl,
+    borderRadius: usportRadius.lg,
+    borderWidth: 1,
+    borderColor: usportColors.border,
+    backgroundColor: usportColors.cardBackground,
+    shadowColor: usportColors.shadowStrong,
+    shadowOpacity: 0.12,
+    shadowRadius: 22,
+    shadowOffset: { width: 0, height: 14 },
+    elevation: 4,
   },
   eyebrow: {
     color: usportColors.brandPrimary,
     fontSize: usportTypography.caption,
     fontWeight: "700",
+    letterSpacing: 0.4,
   },
   title: {
     color: usportColors.textPrimary,
@@ -272,17 +387,21 @@ const styles = StyleSheet.create({
   },
   filterChip: {
     flex: 1,
-    minHeight: 44,
+    minHeight: 46,
     borderRadius: usportRadius.pill,
     borderWidth: 1,
     borderColor: usportColors.border,
-    backgroundColor: usportColors.cardBackground,
+    backgroundColor: usportColors.cardBackgroundStrong,
     alignItems: "center",
     justifyContent: "center",
   },
   filterChipActive: {
+    borderColor: usportColors.brandPrimary,
     backgroundColor: usportColors.brandSecondary,
-    borderColor: usportColors.brandSecondary,
+  },
+  filterChipPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+    opacity: 0.92,
   },
   filterText: {
     color: usportColors.textSecondary,
@@ -290,11 +409,9 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   filterTextActive: {
-    color: usportColors.textPrimary,
+    color: usportColors.brandPrimary,
   },
-  panel: {
-    gap: usportSpacing.lg,
-  },
+  panel: { gap: usportSpacing.lg },
   loadingCard: {
     backgroundColor: usportColors.cardBackground,
     borderRadius: usportRadius.md,
@@ -325,95 +442,120 @@ const styles = StyleSheet.create({
   emptyText: {
     color: usportColors.textSecondary,
     fontSize: usportTypography.bodySm,
-    lineHeight: 20,
+    lineHeight: 22,
   },
-  primaryButton: {
-    alignSelf: "flex-start",
-    minHeight: 44,
-    paddingHorizontal: usportSpacing.xl,
-    borderRadius: usportRadius.pill,
-    backgroundColor: usportColors.brandPrimary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  primaryButtonText: {
-    color: usportColors.textInverse,
-    fontSize: usportTypography.bodySm,
-    fontWeight: "700",
-  },
-  list: {
-    gap: usportSpacing.md,
-  },
+  list: { gap: usportSpacing.md },
   card: {
     backgroundColor: usportColors.cardBackground,
-    borderRadius: usportRadius.md,
+    borderRadius: usportRadius.lg,
     borderWidth: 1,
     borderColor: usportColors.border,
     padding: usportSpacing.xl,
-    gap: usportSpacing.lg,
+    gap: usportSpacing.md,
+    shadowColor: usportColors.shadow,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 1,
+    shadowRadius: 24,
+    elevation: 4,
+  },
+  cardPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+    opacity: 0.96,
   },
   cardHeader: {
     flexDirection: "row",
     gap: usportSpacing.md,
-    alignItems: "flex-start",
     justifyContent: "space-between",
+    alignItems: "flex-start",
   },
-  cardTitleWrap: {
-    flex: 1,
-    gap: usportSpacing.xs,
+  cardTitleWrap: { flex: 1, gap: usportSpacing.xs },
+  officialBadge: {
+    alignSelf: "flex-start",
+    borderRadius: usportRadius.pill,
+    paddingHorizontal: usportSpacing.md,
+    paddingVertical: usportSpacing.xs,
+    backgroundColor: usportColors.brandSecondary,
+  },
+  officialBadgeText: {
+    color: usportColors.brandPrimary,
+    fontSize: usportTypography.caption,
+    fontWeight: "800",
   },
   cardTitle: {
     color: usportColors.textPrimary,
     fontSize: usportTypography.title,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   cardSubtitle: {
     color: usportColors.textSecondary,
     fontSize: usportTypography.bodySm,
-    lineHeight: 20,
+    lineHeight: 22,
   },
   badge: {
     borderRadius: usportRadius.pill,
-    backgroundColor: usportColors.mutedBackground,
     paddingHorizontal: usportSpacing.md,
     paddingVertical: usportSpacing.xs,
+    backgroundColor: usportColors.mutedBackground,
   },
   badgeText: {
     color: usportColors.textSecondary,
     fontSize: usportTypography.caption,
     fontWeight: "700",
   },
-  metaBlock: {
-    gap: usportSpacing.sm,
-  },
+  metaBlock: { gap: usportSpacing.xs },
   metaText: {
-    color: usportColors.textTertiary,
+    color: usportColors.textSecondary,
     fontSize: usportTypography.bodySm,
+    lineHeight: 20,
   },
   cardFooter: {
     flexDirection: "row",
     gap: usportSpacing.md,
-    alignItems: "center",
     justifyContent: "space-between",
+    alignItems: "center",
   },
   footerHint: {
     flex: 1,
-    color: usportColors.textSecondary,
+    color: usportColors.textTertiary,
     fontSize: usportTypography.caption,
     lineHeight: 18,
   },
   ghostButton: {
-    minHeight: 40,
+    minHeight: 42,
     paddingHorizontal: usportSpacing.lg,
     borderRadius: usportRadius.pill,
     borderWidth: 1,
     borderColor: usportColors.borderStrong,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: usportColors.cardBackgroundStrong,
+  },
+  ghostButtonPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+    opacity: 0.88,
+  },
+  ghostButtonDisabled: {
+    opacity: 0.6,
   },
   ghostButtonText: {
     color: usportColors.textPrimary,
     fontSize: usportTypography.bodySm,
+    fontWeight: "700",
+  },
+  primaryButton: {
+    minHeight: 48,
+    borderRadius: usportRadius.pill,
+    backgroundColor: usportColors.brandPrimary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  primaryButtonPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+    backgroundColor: usportColors.brandPrimaryPressed,
+  },
+  primaryButtonText: {
+    color: usportColors.textInverse,
+    fontSize: usportTypography.body,
     fontWeight: "700",
   },
 });

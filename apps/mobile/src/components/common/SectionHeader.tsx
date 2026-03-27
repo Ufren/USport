@@ -18,16 +18,17 @@ export function SectionHeader({ title, subtitle }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    gap: usportSpacing.sm,
+    gap: usportSpacing.xs,
   },
   title: {
     color: usportColors.textPrimary,
     fontSize: usportTypography.h3,
-    fontWeight: "700",
+    fontWeight: "800",
+    lineHeight: 26,
   },
   subtitle: {
     color: usportColors.textTertiary,
     fontSize: usportTypography.bodySm,
-    lineHeight: 20,
+    lineHeight: 21,
   },
 });

@@ -1,4 +1,4 @@
-﻿import type {
+import type {
   ActivitySignupStatus,
   ExperienceActivityDetail,
 } from "@usport/shared";
@@ -12,7 +12,7 @@ import {
 } from "../../features/activity-flow/storage";
 import { showError, showSuccess } from "../../utils/helpers";
 import { getUserInfo } from "../../utils/storage";
-import { buildActivityDetailPageState } from "./presenter";
+import { buildActivityDetailPageState } from "../activity-detail/presenter";
 
 Page({
   data: {

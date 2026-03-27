@@ -216,6 +216,19 @@ button {
   margin-top: 16px;
 }
 
+.two-column-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field-span-2 {
+  grid-column: span 2;
+}
+
+.field textarea {
+  min-height: 104px;
+  resize: vertical;
+}
+
 .empty {
   padding: 28px;
   border: 1px dashed var(--line);
@@ -237,5 +250,9 @@ button {
 
   .decision-grid {
     grid-template-columns: 1fr;
+  }
+
+  .field-span-2 {
+    grid-column: span 1;
   }
 }

@@ -1,5 +1,3 @@
-//go:build ignore
-
 package service
 
 import (
@@ -14,17 +12,21 @@ import (
 )
 
 var (
-	ErrAdminReportNotFound      = errors.New("举报工单不存在")
-	ErrAdminDecisionInvalid     = errors.New("后台处理结论不合法")
-	ErrAdminOperatorNameInvalid = errors.New("后台操作人不能为空")
+	ErrAdminReportNotFound           = errors.New("举报工单不存在")
+	ErrAdminDecisionInvalid          = errors.New("后台处理结论不合法")
+	ErrAdminOperatorNameInvalid      = errors.New("后台操作人不能为空")
+	ErrAdminMembershipOrderNotFound  = errors.New("会员订单不存在")
+	ErrAdminMembershipOrderNotRefund = errors.New("当前订单状态不支持退款")
 )
 
 type AdminService interface {
 	GetDashboard(ctx context.Context) (*dto.AdminDashboardSummary, error)
+	ListActivities(ctx context.Context) ([]dto.AdminActivityItem, error)
 	ListReports(ctx context.Context, status string) ([]dto.AdminReportItem, error)
 	CreateOfficialActivity(ctx context.Context, operator string, req dto.CreateActivityRequest) (*dto.AdminOfficialActivityItem, error)
 	DecideReport(ctx context.Context, operator string, reportID uint, req dto.AdminReportDecisionRequest) (*dto.AdminReportItem, error)
 	ListMembershipOrders(ctx context.Context) ([]dto.AdminMembershipOrderItem, error)
+	RefundMembershipOrder(ctx context.Context, operator string, orderID uint) (*dto.AdminMembershipOrderItem, error)
 	ListAuditLogs(ctx context.Context) ([]dto.AdminAuditLogItem, error)
 }
 
@@ -58,6 +60,29 @@ func (s *adminService) GetDashboard(ctx context.Context) (*dto.AdminDashboardSum
 		ActiveMembers:       counters.ActiveMembers,
 	})
 	return &result, nil
+}
+
+func (s *adminService) ListActivities(ctx context.Context) ([]dto.AdminActivityItem, error) {
+	items, err := s.adminRepo.ListActivities(ctx, 50)
+	if err != nil {
+		return nil, err
+	}
+
+	ids := make([]uint, 0, len(items))
+	for _, item := range items {
+		ids = append(ids, item.ID)
+	}
+
+	counts, err := s.activityRepo.CountParticipants(ctx, ids)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]dto.AdminActivityItem, 0, len(items))
+	for _, item := range items {
+		result = append(result, assembler.ToAdminActivityItem(item, counts[item.ID]))
+	}
+	return result, nil
 }
 
 func (s *adminService) ListReports(ctx context.Context, status string) ([]dto.AdminReportItem, error) {
@@ -142,7 +167,6 @@ func (s *adminService) DecideReport(
 		return nil, err
 	}
 
-	// 只有对用户本身的有效举报才直接扣分，避免在活动举报场景下误伤无关参与者。
 	if nextStatus == model.ReportStatusResolvedValid && reportItem.TargetType == "user" {
 		if err := s.adminRepo.AddCreditRecord(ctx, &model.CreditRecord{
 			UserID:      reportItem.TargetID,
@@ -180,6 +204,45 @@ func (s *adminService) ListMembershipOrders(ctx context.Context) ([]dto.AdminMem
 		result = append(result, assembler.ToAdminMembershipOrderItem(item))
 	}
 	return result, nil
+}
+
+func (s *adminService) RefundMembershipOrder(
+	ctx context.Context,
+	operator string,
+	orderID uint,
+) (*dto.AdminMembershipOrderItem, error) {
+	operator = strings.TrimSpace(operator)
+	if operator == "" {
+		return nil, ErrAdminOperatorNameInvalid
+	}
+
+	order, err := s.adminRepo.FindMembershipOrderByID(ctx, orderID)
+	if err != nil {
+		return nil, err
+	}
+	if order == nil {
+		return nil, ErrAdminMembershipOrderNotFound
+	}
+	if order.Status != model.OrderStatusPaid {
+		return nil, ErrAdminMembershipOrderNotRefund
+	}
+
+	if err := s.adminRepo.UpdateMembershipOrderStatus(ctx, orderID, model.OrderStatusRefunded); err != nil {
+		return nil, err
+	}
+	if err := s.adminRepo.CreateAuditLog(ctx, &model.AdminAuditLog{
+		Operator:   operator,
+		ActionCode: "membership_order_refunded",
+		TargetType: "membership_order",
+		TargetID:   orderID,
+		Detail:     order.PlanCode,
+	}); err != nil {
+		return nil, err
+	}
+
+	order.Status = model.OrderStatusRefunded
+	result := assembler.ToAdminMembershipOrderItem(*order)
+	return &result, nil
 }
 
 func (s *adminService) ListAuditLogs(ctx context.Context) ([]dto.AdminAuditLogItem, error) {

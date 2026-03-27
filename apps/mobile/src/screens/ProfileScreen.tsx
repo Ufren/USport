@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import {
   Alert,
   Pressable,
@@ -15,6 +15,7 @@ import {
   profileHighlights,
   profileMenuItems,
   usportColors,
+  usportMotion,
   usportRadius,
   usportSpacing,
   usportTypography,
@@ -51,7 +52,7 @@ export default function ProfileScreen() {
   if (!isLoggedIn) {
     return (
       <View style={styles.guestContainer}>
-        <Text style={styles.guestBrand}>USport</Text>
+        <Text style={styles.guestBrand}>USport / 个人中心</Text>
         <Text style={styles.guestTitle}>
           登录后，运动局和搭子关系才会真正沉淀下来。
         </Text>
@@ -59,7 +60,10 @@ export default function ProfileScreen() {
           你可以先浏览发现页；登录后，我们会记录到场、复约、消息和信用表现。
         </Text>
         <Pressable
-          style={styles.loginButton}
+          style={({ pressed }) => [
+            styles.loginButton,
+            pressed && styles.loginButtonPressed,
+          ]}
           onPress={() => navigation.navigate("Login")}
         >
           <Text style={styles.loginButtonText}>去登录</Text>
@@ -135,13 +139,22 @@ export default function ProfileScreen() {
       </View>
 
       <Pressable
-        style={styles.primaryButton}
+        style={({ pressed }) => [
+          styles.primaryButton,
+          pressed && styles.primaryButtonPressed,
+        ]}
         onPress={() => navigation.navigate("CreateActivity")}
       >
         <Text style={styles.primaryButtonText}>发起新活动</Text>
       </Pressable>
 
-      <Pressable style={styles.logoutButton} onPress={handleLogout}>
+      <Pressable
+        style={({ pressed }) => [
+          styles.logoutButton,
+          pressed && styles.logoutButtonPressed,
+        ]}
+        onPress={handleLogout}
+      >
         <Text style={styles.logoutText}>退出登录</Text>
       </Pressable>
     </ScrollView>
@@ -159,21 +172,32 @@ const styles = StyleSheet.create({
     paddingBottom: usportSpacing["4xl"],
   },
   header: {
-    backgroundColor: usportColors.cardBackground,
-    borderRadius: usportRadius.lg,
+    backgroundColor: usportColors.cardBackgroundStrong,
+    borderRadius: usportRadius.xl,
     borderWidth: 1,
     borderColor: usportColors.border,
-    padding: usportSpacing.xl,
+    padding: usportSpacing["2xl"],
     flexDirection: "row",
     gap: usportSpacing.lg,
+    alignItems: "center",
+    shadowColor: usportColors.shadowStrong,
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 1,
+    shadowRadius: 28,
+    elevation: 8,
   },
   avatar: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: usportColors.brandPrimary,
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: usportColors.shadowStrong,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 1,
+    shadowRadius: 18,
+    elevation: 6,
   },
   avatarText: {
     color: usportColors.textInverse,
@@ -182,11 +206,11 @@ const styles = StyleSheet.create({
   },
   headerBody: {
     flex: 1,
-    gap: usportSpacing.sm,
+    gap: usportSpacing.xs,
   },
   nickname: {
     color: usportColors.textPrimary,
-    fontSize: usportTypography.h2,
+    fontSize: usportTypography.h1,
     fontWeight: "800",
   },
   handle: {
@@ -204,11 +228,16 @@ const styles = StyleSheet.create({
   },
   highlightCard: {
     backgroundColor: usportColors.cardBackground,
-    borderRadius: usportRadius.md,
+    borderRadius: usportRadius.lg,
     borderWidth: 1,
     borderColor: usportColors.border,
     padding: usportSpacing.xl,
     gap: usportSpacing.sm,
+    shadowColor: usportColors.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 20,
+    elevation: 3,
   },
   highlightValue: {
     color: usportColors.textPrimary,
@@ -234,26 +263,41 @@ const styles = StyleSheet.create({
   primaryButton: {
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 52,
+    minHeight: 54,
     borderRadius: usportRadius.pill,
     backgroundColor: usportColors.brandPrimary,
+    shadowColor: usportColors.shadowStrong,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 1,
+    shadowRadius: 20,
+    elevation: 6,
+  },
+  primaryButtonPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+    backgroundColor: usportColors.brandPrimaryPressed,
   },
   primaryButtonText: {
     color: usportColors.textInverse,
     fontSize: usportTypography.body,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   logoutButton: {
     alignItems: "center",
     justifyContent: "center",
     minHeight: 52,
     borderRadius: usportRadius.pill,
-    backgroundColor: usportColors.danger,
+    backgroundColor: usportColors.cardBackground,
+    borderWidth: 1,
+    borderColor: usportColors.border,
+  },
+  logoutButtonPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+    opacity: 0.95,
   },
   logoutText: {
-    color: usportColors.textInverse,
+    color: usportColors.danger,
     fontSize: usportTypography.body,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   guestContainer: {
     flex: 1,
@@ -263,16 +307,16 @@ const styles = StyleSheet.create({
     gap: usportSpacing.lg,
   },
   guestBrand: {
-    color: usportColors.brandPrimary,
+    color: usportColors.textTertiary,
     fontSize: usportTypography.caption,
     fontWeight: "700",
-    letterSpacing: 0.4,
+    letterSpacing: 0.5,
   },
   guestTitle: {
     color: usportColors.textPrimary,
-    fontSize: usportTypography.h2,
+    fontSize: usportTypography.h1,
     fontWeight: "800",
-    lineHeight: 32,
+    lineHeight: 36,
   },
   guestText: {
     color: usportColors.textSecondary,
@@ -284,11 +328,17 @@ const styles = StyleSheet.create({
     backgroundColor: usportColors.brandPrimary,
     borderRadius: usportRadius.pill,
     paddingHorizontal: usportSpacing.xl,
-    paddingVertical: usportSpacing.md,
+    minHeight: 48,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loginButtonPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+    backgroundColor: usportColors.brandPrimaryPressed,
   },
   loginButtonText: {
     color: usportColors.textInverse,
     fontSize: usportTypography.body,
-    fontWeight: "700",
+    fontWeight: "800",
   },
 });

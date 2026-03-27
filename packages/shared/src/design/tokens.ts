@@ -1,28 +1,32 @@
 ﻿import type { ActivityStatus } from "../types";
 
 export const usportColors = {
-  brandPrimary: "#156B52",
-  brandPrimaryPressed: "#0F5A45",
-  brandSecondary: "#B6F36A",
-  brandAccent: "#FF7A1A",
-  pageBackground: "#F4F7F2",
-  cardBackground: "#FFFFFF",
-  mutedBackground: "#EAF0E8",
-  border: "#DCE2DD",
-  borderStrong: "#B8C1BB",
-  textPrimary: "#131714",
-  textSecondary: "#2D3631",
-  textTertiary: "#66726C",
+  brandPrimary: "#0A84FF",
+  brandPrimaryPressed: "#0066CC",
+  brandSecondary: "#EAF2FF",
+  brandAccent: "#34C759",
+  pageBackground: "#F5F5F7",
+  pageBackgroundElevated: "#FBFBFD",
+  cardBackground: "rgba(255, 255, 255, 0.88)",
+  cardBackgroundStrong: "#FFFFFF",
+  mutedBackground: "#EEF0F4",
+  border: "rgba(60, 60, 67, 0.12)",
+  borderStrong: "rgba(60, 60, 67, 0.18)",
+  divider: "rgba(60, 60, 67, 0.08)",
+  textPrimary: "#111111",
+  textSecondary: "rgba(17, 17, 17, 0.74)",
+  textTertiary: "rgba(17, 17, 17, 0.48)",
   textInverse: "#FFFFFF",
-  success: "#1F9D61",
-  successSoft: "#E8F7EF",
-  warning: "#E6A019",
-  warningSoft: "#FFF4D8",
-  danger: "#D64545",
-  dangerSoft: "#FDEDED",
-  info: "#2F7EF7",
-  shadow: "rgba(19, 23, 20, 0.10)",
-  shadowStrong: "rgba(19, 23, 20, 0.16)",
+  success: "#34C759",
+  successSoft: "#EAF8EF",
+  warning: "#FF9F0A",
+  warningSoft: "#FFF5E6",
+  danger: "#FF3B30",
+  dangerSoft: "#FEEDEC",
+  info: "#0A84FF",
+  overlay: "rgba(17, 17, 17, 0.06)",
+  shadow: "rgba(15, 23, 42, 0.08)",
+  shadowStrong: "rgba(15, 23, 42, 0.14)",
 } as const;
 
 export const usportSpacing = {
@@ -37,21 +41,28 @@ export const usportSpacing = {
 } as const;
 
 export const usportRadius = {
-  sm: 10,
-  md: 14,
-  lg: 20,
+  sm: 12,
+  md: 18,
+  lg: 28,
+  xl: 36,
   pill: 999,
 } as const;
 
 export const usportTypography = {
-  hero: 32,
-  h1: 28,
+  hero: 34,
+  h1: 30,
   h2: 24,
   h3: 20,
   title: 18,
   body: 16,
   bodySm: 14,
   caption: 12,
+} as const;
+
+export const usportMotion = {
+  pressScale: 0.985,
+  durationFast: 120,
+  durationBase: 180,
 } as const;
 
 const activityStatusMeta: Record<

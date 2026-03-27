@@ -2,6 +2,7 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
   usportColors,
+  usportMotion,
   usportRadius,
   usportSpacing,
   usportTypography,
@@ -15,7 +16,13 @@ type Props = {
 
 export function ProfileMenuRow({ item, onPress }: Props) {
   return (
-    <Pressable style={styles.container} onPress={onPress}>
+    <Pressable
+      style={({ pressed }) => [
+        styles.container,
+        pressed && styles.containerPressed,
+      ]}
+      onPress={onPress}
+    >
       <View style={styles.content}>
         <View style={styles.titleRow}>
           <Text style={styles.title}>{item.title}</Text>
@@ -40,14 +47,23 @@ const styles = StyleSheet.create({
     gap: usportSpacing.md,
     paddingVertical: usportSpacing.lg,
     paddingHorizontal: usportSpacing.xl,
-    borderRadius: usportRadius.md,
+    borderRadius: usportRadius.lg,
     backgroundColor: usportColors.cardBackground,
     borderWidth: 1,
     borderColor: usportColors.border,
+    shadowColor: usportColors.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 20,
+    elevation: 3,
+  },
+  containerPressed: {
+    transform: [{ scale: usportMotion.pressScale }],
+    opacity: 0.95,
   },
   content: {
     flex: 1,
-    gap: usportSpacing.sm,
+    gap: usportSpacing.xs,
   },
   titleRow: {
     flexDirection: "row",
@@ -57,18 +73,20 @@ const styles = StyleSheet.create({
   title: {
     color: usportColors.textPrimary,
     fontSize: usportTypography.title,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   badge: {
     backgroundColor: usportColors.warningSoft,
     borderRadius: usportRadius.pill,
     paddingHorizontal: usportSpacing.sm,
-    paddingVertical: 2,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: usportColors.border,
   },
   badgeText: {
     color: usportColors.warning,
     fontSize: usportTypography.caption,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   description: {
     color: usportColors.textTertiary,
